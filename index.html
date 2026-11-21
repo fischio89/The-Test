@@ -443,6 +443,18 @@ function holdBtn(el, set) {
 holdBtn($('#jump'), v => jumpHeld = v);
 holdBtn($('#use'), v => useHeld = v);
 addEventListener('contextmenu', e => e.preventDefault());
+// forza lo schermo intero al primo tocco/click ovunque (e lo ripristina se viene chiuso)
+const isFS = () => document.fullscreenElement || document.webkitFullscreenElement;
+const forceFS = () => {
+  if (isFS()) return;
+  const d = document.documentElement, req = d.requestFullscreen || d.webkitRequestFullscreen;
+  if (!req) return;
+  try {
+    const p = req.call(d, { navigationUI: 'hide' });
+    p?.then?.(() => screen.orientation?.lock?.('landscape')).catch?.(() => { });
+  } catch (e) { }
+};
+['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, forceFS, { capture: true, passive: true }));
 const usePressed = () => keys.has('KeyE') || useHeld;
 function setPrompt(txt) {
   const p = $('#prompt'), u = $('#use');
