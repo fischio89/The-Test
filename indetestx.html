@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#2a2d33">
+<title>THE TEST</title>
+<link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23777'/%3E%3Crect width='8' height='8' fill='%23999'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23999'/%3E%3C/svg%3E">
+<style>
+/* VOICE: clinico, burocratico, poi corrotto
+   IDEA: la test-suite di un motore grafico abbandonato
+   PICTURE: la scena greybox a tutto schermo
+   COLOUR/TYPE: grigi da editor, giallo debug, verde PASS, rosso FAIL; monospace di sistema
+   LAYOUT: runner dei test a destra, debug in alto a sinistra, sottotitoli in basso */
+:root{--ui:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;--y:#ffd400;--g:#3ddc84;--r:#ff4d4d}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#2a2d33;color:#ddd;font-family:var(--ui);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#view{position:fixed;inset:0;transform-origin:50% 60%}
+#view canvas{display:block;width:100%;height:100%}
+.hud{position:fixed;pointer-events:none;z-index:5}
+#debug{top:10px;left:12px;font-size:11px;line-height:1.5;color:#cfcfcf;background:rgba(0,0,0,.45);padding:6px 9px;border-left:2px solid var(--y);white-space:pre}
+#debug b{color:var(--y);font-weight:600}
+#debug i{color:var(--r);font-style:normal;font-weight:600}
+#suite{top:10px;right:12px;width:270px;background:rgba(16,17,20,.82);border:1px solid #3b3f47;font-size:11px}
+#suite h1{font-size:11px;font-weight:600;padding:7px 10px;background:#1d2026;border-bottom:1px solid #3b3f47;color:#aab;display:flex;justify-content:space-between;gap:8px}
+#suite ul{list-style:none;padding:4px 0;max-height:52vh;overflow:hidden}
+#suite li{display:grid;grid-template-columns:38px 1fr 58px;gap:6px;padding:3px 10px;color:#888}
+#suite li .s{text-align:right;font-weight:600}
+#suite li.run{color:#eee;background:rgba(255,212,0,.08)}#suite li.run .s{color:var(--y)}
+#suite li.pass .s{color:var(--g)}#suite li.fail .s{color:var(--r)}
+#suite li.undef .s{color:#c46bff}#suite li.wait .s{color:#555}
+#suite li.hidden{display:none}
+#suite li.new{animation:blink .5s steps(2) 6}
+@keyframes blink{50%{background:rgba(255,77,77,.25)}}
+#sub{bottom:9vh;left:50%;transform:translateX(-50%);max-width:min(760px,86vw);text-align:center;font-size:clamp(13px,1.6vw,17px);line-height:1.45;color:#fff;background:rgba(0,0,0,.62);padding:8px 14px;opacity:0;transition:opacity .2s;z-index:12}
+#sub.on{opacity:1}
+#sub .who{color:var(--y);font-size:.78em;display:block;letter-spacing:.04em;margin-bottom:2px}
+#sub.creepy{color:#ffd9d9;background:rgba(40,0,0,.7)}#sub.creepy .who{color:var(--r)}
+#cross{top:50%;left:50%;width:4px;height:4px;margin:-2px 0 0 -2px;background:rgba(255,255,255,.7);border-radius:50%}
+#prompt{top:58%;left:50%;transform:translateX(-50%);font-size:13px;color:#111;background:var(--y);padding:5px 10px;display:none}
+#prompt.on{display:block}
+#clog{left:12px;bottom:12px;width:min(360px,44vw);font-size:11px;line-height:1.55;background:rgba(0,0,0,.7);border-left:2px solid var(--r);padding:7px 10px;display:none;white-space:pre}
+#clog.on{display:block}
+#clog .h{color:var(--r)}
+#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s;z-index:20}
+#toast{top:44%;left:50%;transform:translate(-50%,-50%);font-size:clamp(28px,6vw,64px);font-weight:700;letter-spacing:.06em;opacity:0;transition:opacity .25s}
+#toast.on{opacity:1}
+
+/* CCTV */
+#cctv{position:fixed;inset:0;z-index:4;pointer-events:none;display:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
+body.cctv #cctv{display:block}
+body.cctv #view{filter:grayscale(.85) contrast(1.3) brightness(1.15)}
+body.cctv #cross{display:none}
+#cctv .t{position:absolute;left:max(18px,24vw);top:16px;font-size:14px;color:#eee;text-shadow:0 0 4px #000}
+#cctv .t b{color:var(--r)}
+#static{position:fixed;inset:0;z-index:11;pointer-events:none;opacity:0;background-size:256px;image-rendering:pixelated}
+#static.on{opacity:.85;animation:st .08s steps(3) infinite}
+@keyframes st{33%{background-position:37px 81px}66%{background-position:-90px 14px}}
+
+/* boot */
+#boot{position:fixed;inset:0;z-index:30;background:#16181c;display:flex;align-items:center;justify-content:center;padding:4vh 6vw}
+#boot .box{width:min(720px,100%);font-size:clamp(11px,1.5vw,13px);line-height:1.6}
+#boot pre{color:#9aa;white-space:pre-wrap;min-height:11em}
+#boot pre .ok{color:var(--g)}#boot pre .w{color:var(--y)}#boot pre .e{color:var(--r)}
+#boot .title{font-size:clamp(34px,7vw,72px);font-weight:800;color:#e8e8e8;letter-spacing:.02em;line-height:1;margin-bottom:14px}
+#boot .title span{color:var(--y)}
+.btn{font:600 15px var(--ui);color:#111;background:var(--y);border:0;padding:13px 22px;cursor:pointer;min-height:44px}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+#start{margin-top:18px;opacity:0;transition:opacity .4s}
+#start.on{opacity:1}
+#restart{margin-left:12px;background:none;border:0;color:#888;font:12px var(--ui);text-decoration:underline;cursor:pointer;display:none;min-height:44px}
+#boot .note{color:#666;font-size:11px;margin-top:12px}
+#boot label{display:inline-flex;gap:8px;align-items:center;color:#888;margin-left:14px;font-size:12px;cursor:pointer}
+
+#pause{position:fixed;inset:0;z-index:15;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);color:#eee;font-size:14px;cursor:pointer}
+#pause.on{display:flex}
+#rotate{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:#16181c;color:#ddd;text-align:center;padding:30px;font-size:14px}
+#rotate .ph{width:44px;height:74px;border:3px solid var(--y);border-radius:8px;animation:rot 1.8s ease-in-out infinite}
+@keyframes rot{50%{transform:rotate(-90deg)}}
+@media (orientation:portrait) and (pointer:coarse){#rotate{display:flex}}
+
+/* touch */
+#touch{position:fixed;inset:0;z-index:6;display:none}
+body.touch #touch{display:block}
+#joyB{position:absolute;width:120px;height:120px;border:2px solid rgba(255,255,255,.25);border-radius:50%;display:none;pointer-events:none}
+#joyK{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(255,212,0,.55)}
+.tb{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.35);color:#fff;font:600 12px var(--ui)}
+#jump{right:max(26px,env(safe-area-inset-right));bottom:30px;width:84px;height:84px}
+#use{right:max(124px,calc(env(safe-area-inset-right) + 100px));bottom:44px;width:70px;height:70px;display:none;border-color:var(--y)}
+#use.show{display:block}
+.tb.on{background:rgba(255,212,0,.5)}
+body.touch #suite{width:200px;font-size:9.5px}
+body.touch #suite li{grid-template-columns:30px 1fr 44px;padding:2px 8px}
+body.touch #debug{font-size:9.5px}
+body.touch #clog{font-size:9.5px;bottom:auto;top:96px}
+
+/* glitch, crash, slots, end */
+body.glitch #view,body.glitch #slots{animation:gl .12s steps(2) infinite}
+@keyframes gl{0%{filter:invert(1) hue-rotate(90deg);transform:translate(8px,-4px) skewX(4deg)}50%{filter:saturate(6) contrast(3);transform:translate(-12px,6px) scaleY(1.04)}100%{filter:none;transform:none}}
+#crash{position:fixed;inset:0;z-index:50;background:#202124;color:#e8eaed;display:none;align-items:center;justify-content:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#crash.on{display:flex}
+#crash .c{max-width:520px;padding:30px}
+#crash h2{font-weight:500;font-size:24px;margin:18px 0 10px}
+#crash p{color:#9aa0a6;font-size:14px;line-height:1.6}
+#crash code{font-family:var(--ui);font-size:12px;color:#9aa0a6;display:block;margin-top:14px}
+#crash button{margin-top:24px;background:#8ab4f8;color:#202124;border:0;border-radius:4px;padding:10px 22px;font:500 14px system-ui,sans-serif;cursor:pointer;min-height:44px}
+#slots{position:fixed;inset:0;z-index:45;background:#101114;display:none;align-items:center;justify-content:center;padding:5vh 5vw}
+#slots.on{display:flex}
+#slots .box{width:min(760px,100%)}
+#slots h2{font-size:clamp(20px,3.4vw,30px);color:#eee;margin-bottom:16px;letter-spacing:.03em}
+.slot{display:grid;grid-template-columns:70px 1fr auto;gap:14px;align-items:center;border:1px solid #33363d;background:#17191d;padding:12px 14px;margin-bottom:10px;font-size:13px}
+.slot .n{color:#666}
+.slot .nm{color:#ddd;font-weight:600}
+.slot .meta{color:#888;font-size:11.5px;margin-top:3px}
+.slot.dead .nm{color:#666;text-decoration:line-through}
+.slot.me{border-color:var(--y)}
+.slot.it{border-color:#5a1b1b;background:#1c1213}.slot.it .nm{color:#ff8a8a}
+.slot button{font:600 12px var(--ui);background:#2a2d33;color:#888;border:1px solid #444;padding:8px 12px;min-height:40px;cursor:pointer}
+.slot button:disabled{opacity:.35;cursor:default}
+.slot.it button:not(:disabled){background:var(--r);color:#111;border-color:var(--r)}
+#end{position:fixed;inset:0;z-index:60;background:#000;color:#ddd;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px}
+#end.on{display:flex}
+#end h2{font-size:clamp(30px,6vw,60px);letter-spacing:.04em}
+#end p{color:#888;font-size:13px;max-width:520px;line-height:1.6}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="view"></div>
+
+<div id="cctv"><div class="t"><b>● REC</b> CAM_03 · <span id="cctvT">00:00:00</span></div></div>
+<div id="debug" class="hud"></div>
+<div id="suite" class="hud"><h1><span>QA SUITE · test_final_FINAL.map</span><span id="cnt">0/12</span></h1><ul id="list"></ul></div>
+<div id="cross" class="hud"></div>
+<div id="prompt" class="hud"></div>
+<div id="clog" class="hud"></div>
+<div id="sub" class="hud"></div>
+<div id="toast" class="hud"></div>
+<div id="static"></div>
+
+<div id="touch"><div id="joyB"><div id="joyK"></div></div><button id="use" class="tb">USA</button><button id="jump" class="tb">SALTA</button></div>
+<div id="pause">Clicca per riprendere il test</div>
+<div id="fade"></div>
+
+<div id="boot"><div class="box">
+  <div class="title">THE <span>TEST</span></div>
+  <pre id="bootlog"></pre>
+  <button id="start" class="btn">ESEGUI SUITE ▸</button><button id="restart">ricomincia da capo</button><label><input type="checkbox" id="mute"> voce disattivata</label>
+  <p class="note">PC: mouse + WASD + Spazio + E · Smartphone: in orizzontale, joystick a sinistra, guarda a destra. Usa le cuffie.</p>
+</div></div>
+
+<div id="slots"><div class="box"><h2>STATI SALVATI · test_final_FINAL</h2><div id="slotList"></div></div></div>
+
+<div id="rotate"><div class="ph"></div>Ruota il dispositivo in orizzontale.<br><small style="color:#777">La suite richiede una vista orizzontale.</small></div>
+
+<div id="crash"><div class="c">
+  <svg width="64" height="64" viewBox="0 0 64 64"><rect x="20" y="6" width="24" height="52" rx="12" fill="none" stroke="#9aa0a6" stroke-width="3"/><path d="M18 30 L30 26 L34 34 L46 30" stroke="#202124" stroke-width="6" fill="none"/><path d="M18 30 L30 26 L34 34 L46 30" stroke="#9aa0a6" stroke-width="2" fill="none"/></svg>
+  <h2 id="crashT">Uffa! Il motore si è arrestato.</h2>
+  <p id="crashP">Si è verificato un errore durante l'esecuzione della scena. Il soggetto di prova non risponde.</p>
+  <code>Codice di errore: STATUS_ENTITY_COUNT_MISMATCH (expected 1, got 2)</code>
+  <button id="reload">Ricarica</button>
+</div></div>
+
+<div id="end"><h2 id="endT">FINE CAPITOLO 2</h2><p id="endP"></p><button id="again" class="btn">Ricomincia la suite</button></div>
+
+<script type="module">
+import * as THREE from 'three';
+
+const $ = s => document.querySelector(s);
+const isTouch = matchMedia('(pointer:coarse)').matches;
+if (isTouch) document.body.classList.add('touch');
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
+
+/* ============ SALVATAGGI ============ */
+const CPKEY = 'thetest_cp_v2';
+let CP = null; try { CP = JSON.parse(localStorage.getItem(CPKEY) || 'null'); } catch (e) { }
+function saveCP(o) { try { CP = { ...(CP || {}), ...o }; localStorage.setItem(CPKEY, JSON.stringify(CP)); return true; } catch (e) { return false; } }
+function clearCP() { try { localStorage.removeItem(CPKEY); } catch (e) { } CP = null; }
+
+/* ============ RENDERER ============ */
+const renderer = new THREE.WebGLRenderer({ antialias: !isTouch, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+$('#view').appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const SKY = new THREE.Color(0x2a2d33);
+scene.background = SKY.clone();
+scene.fog = new THREE.Fog(0x2a2d33, 25, 80);
+const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.05, 300);
+camera.rotation.order = 'YXZ';
+let resized = false;
+addEventListener('resize', () => {
+  renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  if (control && !isTouch && !resized && stage !== 'intro') { resized = true; setTimeout(() => sayIdle('Hai ridimensionato la finestra. Le pareti se ne sono accorte. Non farlo più.'), 600); }
+});
+
+const hemi = new THREE.HemisphereLight(0xdfe6ff, 0x3a3a40, 1.1); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(12, 24, 8); sun.castShadow = true;
+sun.shadow.mapSize.set(isTouch ? 1024 : 2048, isTouch ? 1024 : 2048);
+Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 80 });
+scene.add(sun, sun.target);
+const voidLight = new THREE.PointLight(0xff2a2a, 0, 40, 1.5); scene.add(voidLight);
+function resetEnv(bg = 0x2a2d33, near = 25, far = 80, h = 1.1, s = 1.6) {
+  scene.background.set(bg); scene.fog.color.set(bg); scene.fog.near = near; scene.fog.far = far;
+  hemi.intensity = h; sun.intensity = s; voidLight.intensity = 0;
+}
+
+/* ============ TEXTURE ============ */
+function canvasTex(draw, size = 256) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  draw(c.getContext('2d'), size);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+const checker = (a, b, line) => canvasTex((g, s) => {
+  g.fillStyle = a; g.fillRect(0, 0, s, s);
+  g.fillStyle = b; g.fillRect(0, 0, s / 2, s / 2); g.fillRect(s / 2, s / 2, s / 2, s / 2);
+  if (line) { g.strokeStyle = line; g.lineWidth = 2; g.strokeRect(1, 1, s - 2, s - 2); g.beginPath(); g.moveTo(s / 2, 0); g.lineTo(s / 2, s); g.moveTo(0, s / 2); g.lineTo(s, s / 2); g.lineWidth = 1; g.stroke(); }
+});
+const T = {
+  grey: checker('#8d8f94', '#828489', '#9a9ca1'),
+  floor: checker('#9fa1a6', '#93959a', '#b3b5ba'),
+  dark: checker('#3a3c40', '#333539', '#45474c'),
+  white: checker('#e9e9e6', '#dfdfdc', '#f4f4f2'),
+  missing: canvasTex((g, s) => { g.fillStyle = '#000'; g.fillRect(0, 0, s, s); g.fillStyle = '#ff00ff'; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) if ((i + j) % 2 == 0) g.fillRect(i * s / 4, j * s / 4, s / 4, s / 4); }),
+};
+T.missing.magFilter = THREE.NearestFilter;
+const M = {
+  grey: new THREE.MeshStandardMaterial({ map: T.grey, roughness: .92 }),
+  floor: new THREE.MeshStandardMaterial({ map: T.floor, roughness: .95 }),
+  dark: new THREE.MeshStandardMaterial({ map: T.dark, roughness: 1 }),
+  white: new THREE.MeshStandardMaterial({ map: T.white, roughness: .9 }),
+  missing: new THREE.MeshBasicMaterial({ map: T.missing }),
+  yellow: new THREE.MeshStandardMaterial({ color: 0xffd400, emissive: 0x806a00, roughness: .5 }),
+  red: new THREE.MeshStandardMaterial({ color: 0xe02020, emissive: 0x500000, roughness: .4 }),
+  capsule: new THREE.MeshStandardMaterial({ color: 0xb8bac0, roughness: .6 }),
+  manne: new THREE.MeshStandardMaterial({ color: 0xc9c3b8, roughness: .8 }),
+  voidFloor: new THREE.MeshStandardMaterial({ color: 0x0b0b0d, roughness: 1 }),
+};
+const noiseURL = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), d = g.createImageData(128, 128); for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c.toDataURL(); })();
+$('#static').style.backgroundImage = `url(${noiseURL})`;
+
+function boxGeo(w, h, d) {
+  const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
+  const dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+  for (let f = 0; f < 6; f++) for (let i = 0; i < 4; i++) { const k = f * 4 + i; uv.setXY(k, uv.getX(k) * dims[f][0] * .5, uv.getY(k) * dims[f][1] * .5); }
+  return g;
+}
+
+/* ============ LIVELLO ============ */
+let level = new THREE.Group(); scene.add(level);
+let colliders = [];
+function clearLevel() {
+  scene.remove(level);
+  level.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.userData && o.material.userData.own) { o.material.map?.dispose(); o.material.dispose(); } });
+  level = new THREE.Group(); scene.add(level); colliders = [];
+  playerMesh = null; target = null; entity = null;
+}
+function addBox(x, y, z, w, h, d, o = {}) {
+  const m = new THREE.Mesh(boxGeo(w, h, d), M[o.mat || 'grey']);
+  m.position.set(x, y + h / 2, z); m.castShadow = o.cast !== false; m.receiveShadow = true;
+  if (o.visible !== false) level.add(m);
+  const c = { min: new THREE.Vector3(x - w / 2, y, z - d / 2), max: new THREE.Vector3(x + w / 2, y + h, z + d / 2), thin: !!o.thin, name: o.name || 'box', off: false, mesh: m };
+  if (o.collide !== false) colliders.push(c);
+  return c;
+}
+function textCanvas(lines, { color = '#ffd400', bg = 'rgba(0,0,0,.6)', font = 28, pad = 10 } = {}) {
+  lines = [].concat(lines);
+  const c = document.createElement('canvas'), g = c.getContext('2d');
+  g.font = `600 ${font}px ui-monospace,Menlo,Consolas,monospace`;
+  const w = Math.max(...lines.map(l => g.measureText(l).width)) + pad * 2, h = lines.length * font * 1.25 + pad * 2;
+  c.width = Math.ceil(w); c.height = Math.ceil(h);
+  if (bg) { g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height); }
+  g.font = `600 ${font}px ui-monospace,Menlo,Consolas,monospace`; g.fillStyle = color; g.textBaseline = 'top';
+  lines.forEach((l, i) => g.fillText(l, pad, pad + i * font * 1.25));
+  return c;
+}
+function label(lines, x, y, z, o = {}) {
+  const c = textCanvas(lines, o), t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.SpriteMaterial({ map: t, depthWrite: false, fog: true }); mat.userData.own = true;
+  const s = new THREE.Sprite(mat), k = (o.size || .35) / 28;
+  s.scale.set(c.width * k, c.height * k, 1); s.position.set(x, y, z); level.add(s); return s;
+}
+function decal(lines, x, y, z, rotY, o = {}) {
+  const c = textCanvas(lines, { bg: null, color: o.color || '#5a0d0d', font: 48, ...o }), t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, side: THREE.DoubleSide }); mat.userData.own = true;
+  const k = (o.size || 1.1) / 48, p = new THREE.Mesh(new THREE.PlaneGeometry(c.width * k, c.height * k), mat);
+  p.position.set(x, y, z); p.rotation.y = rotY; if (o.rotX) p.rotation.x = o.rotX; level.add(p); return p;
+}
+function room(w, d, h, th, o = {}) {
+  const W = w / 2, D = d / 2;
+  addBox(0, -.5, 0, w + th * 2, .5, d + th * 2, { mat: o.floorMat || 'floor', collide: o.floorCollide !== false, name: 'floor' });
+  const wo = n => ({ thin: o.thin, name: n, mat: o.mat });
+  addBox(0, 0, -D - th / 2, w + th * 2, h, th, wo('wall_N'));
+  addBox(0, 0, D + th / 2, w + th * 2, h, th, wo('wall_S'));
+  addBox(-W - th / 2, 0, 0, th, h, d, wo('wall_W'));
+  addBox(W + th / 2, 0, 0, th, h, d, wo('wall_E'));
+}
+function debugAxes(x, y, z) { const a = new THREE.AxesHelper(1.2); a.position.set(x, y, z); level.add(a); }
+function mannequin(scale = 1, mat = M.manne) {
+  const g = new THREE.Group(), b = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; g.add(m); return m; };
+  b(.5, .7, .28, 0, 1.15, 0); b(.42, .2, .26, 0, .72, 0);
+  b(.17, .72, .2, -.12, .36, 0); b(.17, .72, .2, .12, .36, 0);
+  b(1.5, .13, .14, 0, 1.42, 0);
+  g.userData.head = b(.26, .32, .28, 0, 1.72, 0);
+  g.scale.setScalar(scale); return g;
+}
+function makeEntity() { const e = mannequin(1.14, new THREE.MeshStandardMaterial({ color: 0xbdb5a8, roughness: .7 })); e.userData.box = new THREE.Box3(); level.add(e); return e; }
+function marker(x, y, z, flip) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.7, .7, .06, 32), M.yellow); m.position.set(x, y, z); if (flip) m.rotation.x = Math.PI; level.add(m); return m; }
+
+/* ============ GIOCATORE & FISICA ============ */
+const BASE = 4.4, JUMP = 5.3, HOP_WIN = .11, HOP_MUL = 1.3, CCD_LIMIT = 14;
+let grav = 16;
+const P = { pos: new THREE.Vector3(), prev: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: 0, pitch: 0, roll: 0, grounded: false, gt: 0, r: .35, h: 1.7, eye: 1.55, cap: Infinity };
+let control = false, frozen = false, paused = false, camMode = 'fp';
+const keys = new Set(); let jumpHeld = false, useHeld = false, lastInput = performance.now();
+const joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 }, look = { id: null, lx: 0, ly: 0 };
+const inv = () => grav < 0 ? -1 : 1;
+
+function spawn(x, y, z, yaw = 0) { P.pos.set(x, y, z); P.prev.copy(P.pos); P.vel.set(0, 0, 0); P.yaw = yaw; P.pitch = 0; P.grounded = false; }
+function overlap(c) { return P.pos.x + P.r > c.min.x && P.pos.x - P.r < c.max.x && P.pos.z + P.r > c.min.z && P.pos.z - P.r < c.max.z && P.pos.y + P.h > c.min.y && P.pos.y < c.max.y; }
+function moveAxis(ax, d) {
+  if (!d) return;
+  P.pos[ax] += d;
+  const hs = Math.hypot(P.vel.x, P.vel.z);
+  for (const c of colliders) {
+    if (c.off) continue;
+    if (c.thin && ax !== 'y' && hs > CCD_LIMIT) continue;           // bug: niente CCD sopra i 14 m/s
+    if (!overlap(c)) continue;
+    if (ax === 'y') {
+      if (d < 0) { P.pos.y = c.max.y; if (grav > 0) P.grounded = true; }
+      else { P.pos.y = c.min.y - P.h; if (grav < 0) P.grounded = true; }
+      P.vel.y = 0;
+    } else {
+      P.pos[ax] = d > 0 ? c.min[ax] - P.r - 1e-4 : c.max[ax] + P.r + 1e-4;
+      P.vel[ax] = 0;
+      if (stage === 't5' && c.name.startsWith('maze')) logHit(c.name, ax, d);
+    }
+  }
+}
+const wish = new THREE.Vector3();
+function step(dt) {
+  let f = 0, s = 0;
+  if (control) {
+    if (keys.has('KeyW') || keys.has('ArrowUp')) f++;
+    if (keys.has('KeyS') || keys.has('ArrowDown')) f--;
+    if (keys.has('KeyD') || keys.has('ArrowRight')) s++;
+    if (keys.has('KeyA') || keys.has('ArrowLeft')) s--;
+    f += -joy.y; s += joy.x;
+  }
+  s *= inv();
+  const yb = camMode === 'cctv' ? camera.rotation.y : P.yaw;
+  const sy = Math.sin(yb), cy = Math.cos(yb);
+  wish.set(-sy * f + cy * s, 0, -cy * f - sy * s);
+  if (wish.lengthSq() > 1) wish.normalize();
+  const moving = wish.lengthSq() > .01;
+  const hs = Math.hypot(P.vel.x, P.vel.z);
+  const wantJump = control && (jumpHeld || keys.has('Space'));
+
+  if (P.grounded) {
+    if (wantJump) {
+      let ns = Math.max(hs, moving ? BASE : 0);
+      if (P.gt < HOP_WIN && moving && hs > BASE * .8) ns *= HOP_MUL;
+      ns = Math.min(ns, P.cap);
+      const dir = moving ? wish.clone().normalize() : (hs > .01 ? new THREE.Vector3(P.vel.x / hs, 0, P.vel.z / hs) : new THREE.Vector3());
+      P.vel.x = dir.x * ns; P.vel.z = dir.z * ns; P.vel.y = grav >= 0 ? JUMP : -JUMP; P.grounded = false;
+      sfx.jump(ns);
+    } else if (P.gt > HOP_WIN || !moving) {
+      const a = 1 - Math.exp(-12 * dt);
+      P.vel.x += (wish.x * BASE - P.vel.x) * a; P.vel.z += (wish.z * BASE - P.vel.z) * a;
+    }
+  } else if (moving) {
+    if (hs < BASE) { P.vel.x += wish.x * 14 * dt; P.vel.z += wish.z * 14 * dt; }
+    else {
+      const cur = Math.atan2(P.vel.x, P.vel.z), tgt = Math.atan2(wish.x, wish.z);
+      let d = tgt - cur; d = Math.atan2(Math.sin(d), Math.cos(d));
+      const na = cur + clamp(d, -2.6 * dt, 2.6 * dt);
+      P.vel.x = Math.sin(na) * hs; P.vel.z = Math.cos(na) * hs;
+    }
+  }
+  P.vel.y -= grav * dt;
+  const dx = P.vel.x * dt, dy = P.vel.y * dt, dz = P.vel.z * dt;
+  const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz)) / .2));
+  const wasG = P.grounded; P.grounded = false;
+  for (let i = 0; i < n; i++) { moveAxis('x', dx / n); moveAxis('z', dz / n); moveAxis('y', dy / n); }
+  if (P.grounded && !wasG) { P.gt = 0; if (Math.abs(P.vel.y) < 1e-6 && !wasG && hs < 1 && Math.abs(dy) > .3) sfx.thud(); }
+  else if (P.grounded) P.gt += dt;
+}
+
+/* ============ INPUT ============ */
+const touchInput = () => { lastInput = performance.now(); };
+addEventListener('keydown', e => { keys.add(e.code); touchInput(); if (e.code === 'Space') e.preventDefault(); });
+addEventListener('keyup', e => keys.delete(e.code));
+const canvas = renderer.domElement;
+canvas.addEventListener('click', () => { if (!isTouch && control && !frozen) canvas.requestPointerLock?.(); });
+document.addEventListener('pointerlockchange', () => {
+  const locked = document.pointerLockElement === canvas;
+  paused = !locked && control && !frozen && !isTouch;
+  $('#pause').classList.toggle('on', paused);
+});
+$('#pause').addEventListener('click', () => canvas.requestPointerLock?.());
+addEventListener('mousemove', e => {
+  if (document.pointerLockElement !== canvas || !control) return;
+  touchInput();
+  if (camMode === 'cctv') return;
+  P.yaw -= e.movementX * .0022 * inv(); P.pitch -= e.movementY * .0022 * inv();
+  P.pitch = clamp(P.pitch, -1.5, 1.5);
+});
+const tl = $('#touch'), jb = $('#joyB'), jk = $('#joyK');
+tl.addEventListener('pointerdown', e => {
+  if (e.target.classList.contains('tb')) return;
+  touchInput();
+  if (e.clientX < innerWidth * .42 && joy.id === null) {
+    joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = joy.y = 0;
+    jb.style.display = 'block'; jb.style.left = (e.clientX - 60) + 'px'; jb.style.top = (e.clientY - 60) + 'px'; jk.style.transform = '';
+  } else if (look.id === null) { look.id = e.pointerId; look.lx = e.clientX; look.ly = e.clientY; }
+});
+tl.addEventListener('pointermove', e => {
+  if (e.pointerId === joy.id) {
+    let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const l = Math.hypot(dx, dy), m = 50;
+    if (l > m) { dx *= m / l; dy *= m / l; }
+    joy.x = dx / m; joy.y = dy / m; jk.style.transform = `translate(${dx}px,${dy}px)`; touchInput();
+  } else if (e.pointerId === look.id && control && camMode !== 'cctv') {
+    P.yaw -= (e.clientX - look.lx) * .0055 * inv(); P.pitch -= (e.clientY - look.ly) * .0055 * inv();
+    P.pitch = clamp(P.pitch, -1.5, 1.5); look.lx = e.clientX; look.ly = e.clientY; touchInput();
+  }
+});
+const endPtr = e => {
+  if (e.pointerId === joy.id) { joy.id = null; joy.x = joy.y = 0; jb.style.display = 'none'; }
+  if (e.pointerId === look.id) look.id = null;
+};
+tl.addEventListener('pointerup', endPtr); tl.addEventListener('pointercancel', endPtr);
+function holdBtn(el, set) {
+  el.addEventListener('pointerdown', e => { e.preventDefault(); set(true); el.classList.add('on'); touchInput(); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, () => { set(false); el.classList.remove('on'); }));
+}
+holdBtn($('#jump'), v => jumpHeld = v);
+holdBtn($('#use'), v => useHeld = v);
+addEventListener('contextmenu', e => e.preventDefault());
+const usePressed = () => keys.has('KeyE') || useHeld;
+function setPrompt(txt) {
+  const p = $('#prompt'), u = $('#use');
+  if (isTouch) { u.classList.toggle('show', !!txt); p.classList.remove('on'); }
+  else { p.textContent = txt; p.classList.toggle('on', !!txt); }
+}
+
+/* ============ AUDIO ============ */
+let actx = null, master = null, drone = null;
+const sfx = {
+  init() {
+    if (actx) { actx.resume(); return; }
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain(); master.gain.value = .8; master.connect(actx.destination);
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 220;
+      const g = actx.createGain(); g.gain.value = .045; lp.connect(g); g.connect(master);
+      const o1 = actx.createOscillator(), o2 = actx.createOscillator();
+      o1.type = 'sawtooth'; o2.type = 'sawtooth'; o1.frequency.value = 55; o2.frequency.value = 55.6;
+      o1.connect(lp); o2.connect(lp); o1.start(); o2.start();
+      drone = { o1, o2, lp, g };
+    } catch (e) { actx = null; }
+  },
+  tone(freq, dur, type = 'sine', vol = .15, slide = 0, t0 = 0, pan = 0) {
+    if (!actx) return; const t = actx.currentTime + t0;
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    let out = g;
+    if (pan && actx.createStereoPanner) { const p = actx.createStereoPanner(); p.pan.value = pan; g.connect(p); out = p; }
+    o.connect(g); out.connect(master); o.start(t); o.stop(t + dur + .02);
+  },
+  jump(s) { this.tone(260 + Math.min(s, 30) * 22, .09, 'square', .035, 120); },
+  thud() { this.tone(90, .25, 'sine', .35, -50); },
+  pass() { this.tone(660, .14, 'sine', .14); this.tone(990, .26, 'sine', .14, 0, .12); },
+  fail() { this.tone(180, .5, 'square', .1, -60); this.tone(120, .6, 'square', .08, -40, .05); },
+  beat(vol = .5) { this.tone(70, .22, 'sine', vol, -35); this.tone(62, .22, 'sine', vol * .7, -30, .18); },
+  noise(dur = .9, vol = .5) {
+    if (!actx) return; const b = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < .02 ? 1 : .55);
+    const s = actx.createBufferSource(), g = actx.createGain(); s.buffer = b; g.gain.value = vol; s.connect(g); g.connect(master); s.start();
+  },
+  droneTo(f, gain, lp, t = 3) { if (!drone) return; const n = actx.currentTime; drone.o1.frequency.linearRampToValueAtTime(f, n + t); drone.o2.frequency.linearRampToValueAtTime(f * 1.012, n + t); drone.g.gain.linearRampToValueAtTime(gain, n + t); drone.lp.frequency.linearRampToValueAtTime(lp, n + t); },
+};
+
+/* ============ VOCE / SOTTOTITOLI ============ */
+let muted = false, voice = null, sayToken = 0, sayChain = Promise.resolve();
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v => /^it/i.test(v.lang) && /google|luca|cosimo|diego/i.test(v.name)) || vs.find(v => /^it/i.test(v.lang)) || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+const sub = $('#sub');
+function say(text, o = {}) {
+  if (o.interrupt) { sayToken++; try { speechSynthesis.cancel(); } catch (e) { } sayChain = Promise.resolve(); }
+  const tok = sayToken;
+  sayChain = sayChain.then(() => tok === sayToken ? speak(text, o, tok) : null);
+  return sayChain;
+}
+function speak(text, o, tok) {
+  return new Promise(res => {
+    sub.className = 'hud on' + (o.creepy ? ' creepy' : '');
+    sub.innerHTML = `<span class="who">${o.creepy ? 'QA SUITE ▒▒▒' : 'QA SUITE'}</span>${text}`;
+    let done = false, t;
+    const est = 700 + text.length * 60 / (o.rate || 1);
+    const fin = () => { if (done) return; done = true; clearTimeout(t); setTimeout(() => { if (tok === sayToken) sub.classList.remove('on'); res(); }, o.gap ?? 280); };
+    const tts = !muted && 'speechSynthesis' in window;
+    t = setTimeout(fin, tts ? est * 1.9 + 1500 : est);
+    if (tts) {
+      const u = new SpeechSynthesisUtterance(o.speak || text.replace(/<[^>]+>/g, ''));
+      u.lang = 'it-IT'; if (voice) u.voice = voice;
+      u.rate = o.rate || 1.02; u.pitch = o.pitch ?? (o.creepy ? .15 : .7);
+      u.onend = fin; u.onerror = () => { clearTimeout(t); t = setTimeout(fin, est); };
+      speechSynthesis.speak(u);
+    }
+  });
+}
+const sayIdle = (text, o) => { if (!sub.classList.contains('on') && !frozen) say(text, o); };
+
+/* ============ HUD SUITE ============ */
+const TESTS = [
+  ['0001', 'Il giocatore può camminare'], ['0001b', 'Entità nella scena = 1'], ['0002', 'Collisione con i muri'],
+  ['0003', 'Confini della mappa'], ['0004', 'Gravità costante'], ['0005', 'Telecamera nei limiti'],
+  ['0006', 'Oggetti fuori vista'], ['0007', 'Salvataggio stato'], ['0008', 'Audio posizionale'],
+  ['0009', 'Uscita dalla scena'], ['0010', 'Rimozione soggetto'], ['0011', 'Spedizione build'],
+  ['0207', 'Entità nella scena = 1'],
+];
+const ST = { wait: 'IN ATTESA', run: 'IN CORSO', pass: 'PASS', fail: 'FAIL', undef: '???' };
+$('#list').innerHTML = TESTS.map(([id, n]) => `<li id="t${id}" class="wait${id === '0207' ? ' hidden' : ''}"><span>${id}</span><span>${n}</span><span class="s">${ST.wait}</span></li>`).join('');
+function setStatus(id, st) {
+  const li = $('#t' + id); li.className = st; li.querySelector('.s').textContent = ST[st];
+  $('#cnt').textContent = TESTS.filter(([i]) => i !== '0207' && /pass|fail|undef/.test($('#t' + i).className)).length + '/12';
+}
+function toast(text, color) { const t = $('#toast'); t.textContent = text; t.style.color = color; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 1400); }
+const fadeEl = $('#fade');
+async function fadeTo(fn) { fadeEl.style.opacity = 1; await wait(650); fn(); await wait(250); fadeEl.style.opacity = 0; await wait(500); }
+const waiters = [];
+const waitFor = cond => new Promise(res => waiters.push({ cond, res }));
+const staticFx = async ms => { $('#static').classList.add('on'); sfx.noise(ms / 1000, .25); await wait(ms); $('#static').classList.remove('on'); };
+
+/* ============ STATO GLOBALE ============ */
+let stage = 'boot', stageT = 0, entityGlitch = 0, playerMesh = null, target = null, zTile = null, entity = null;
+let gInt = 16, gAcc = 0, flags = {}, falls = 0, bridge = [], cctv = null, hitLog = [], hitSeen = {}, beepT = 0;
+const showCapsule = on => { if (playerMesh) playerMesh.visible = on; };
+function addCapsuleMesh(glow) {
+  playerMesh = new THREE.Mesh(new THREE.CapsuleGeometry(P.r, P.h - P.r * 2, 6, 16), M.capsule);
+  playerMesh.castShadow = true; level.add(playerMesh);
+  if (glow) { const l = new THREE.PointLight(0xffe7a0, 7, 7, 1.6); l.position.y = .3; playerMesh.add(l); }
+}
+
+/* ============ CAPITOLO 1 ============ */
+function buildTest1() {
+  clearLevel(); resetEnv();
+  room(14, 14, 4, 1);
+  for (const [x, z] of [[-4, -3], [3.5, 2.5], [-3, 4]]) addBox(x, 0, z, 1.2, 1.2, 1.2, { name: 'crate' });
+  target = marker(0, .03, -5);
+  label(['TARGET_01'], 0, 1.3, -5);
+  label(['crate_ref.fbx', 'scale: 1.0'], -4, 1.8, -3, { color: '#9cf', size: .22 });
+  debugAxes(0, .02, 0);
+  label(['scene: test_final_FINAL.map', 'light: sun_debug (NON TOCCARE)'], 0, 3.2, 6.6, { color: '#aaa', size: .25 });
+  addCapsuleMesh(false);
+  spawn(0, 0, 4.5, 0);
+}
+function buildTest2() {
+  clearLevel(); resetEnv();
+  addBox(0, -.6, 0, 70, .5, 70, { mat: 'dark', name: 'outer_floor' });
+  for (const [x, z, w, d] of [[0, -33, 70, 2], [0, 33, 70, 2], [-33, 0, 2, 70], [33, 0, 2, 70]]) addBox(x, -.6, z, w, 6, d, { mat: 'dark' });
+  room(12, 36, 4.5, .06, { thin: true });
+  label(['wall_thin_N', 'collider: 0.06 m'], 0, 3, -17.6, { color: '#9cf', size: .25 });
+  label(['wall_thin_E', 'collider: 0.06 m'], 5.6, 3, 0, { color: '#9cf', size: .25 });
+  label(['wall_thin_W', 'collider: 0.06 m'], -5.6, 3, 0, { color: '#9cf', size: .25 });
+  for (let z = -15; z <= 15; z += 6) { const l = new THREE.Mesh(new THREE.BoxGeometry(12, .02, .06), M.yellow); l.position.set(0, .01, z); level.add(l); }
+  label(['velocità registrata ▸ vedi debug'], 0, 2.6, 16, { color: '#aaa', size: .22 });
+  decal(['NON FIDARTI', 'DEI PASS'], 0, 2.2, -18.1, Math.PI);
+  decal(['CI SONO ALTRE', 'CAPSULE'], 0, 2.2, 18.1, 0);
+  decal(['GUARDA', 'SOTTO'], -6.1, 2.2, 0, -Math.PI / 2);
+  decal(['IL 0207 NON', 'FINISCE'], 6.1, 2.2, 0, Math.PI / 2);
+  spawn(0, 0, 16, 0); P.cap = Infinity;
+}
+function buildTest3() {
+  clearLevel(); resetEnv();
+  addBox(0, -.5, 0, 20, .5, 20, { mat: 'floor', collide: false });
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
+    if (i === 1 && j === 2) continue;                              // floor_tile_17: collider mancante
+    addBox(-7 + i * 2, -.5, -7 + j * 2, 2, .5, 2, { visible: false, name: 'tile' });
+  }
+  for (const [x, z, w, d] of [[0, -9, 20, 2], [0, 9, 20, 2], [-9, 0, 2, 16], [9, 0, 2, 16]]) addBox(x, 0, z, w, 5, d, { name: 'wall_thick' });
+  zTile = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), M.missing); zTile.rotation.x = -Math.PI / 2; zTile.position.set(-5, .003, -3); level.add(zTile);
+  label(['floor_tile_17', '2 materiali sovrapposti'], -5, 1.4, -3, { color: '#f6f', size: .24 });
+  label(['HOTFIX 0.9.3a: bunny hop limitato a 9 m/s'], 0, 3.4, 7.9, { color: '#aaa', size: .25 });
+  for (const [x, z] of [[4, -4], [5.2, -4], [4.6, -4]]) addBox(x, 0, z, 1, 1, 1, { name: 'crate' });
+  debugAxes(0, .02, 0);
+  buildVoid();
+  spawn(0, 0, 5, 0); P.cap = 9;
+}
+function buildVoid() {
+  const Y = -40;
+  addBox(0, Y - 1, 0, 240, 1, 240, { mat: 'voidFloor', cast: false, name: 'void' });
+  const geo = new THREE.CapsuleGeometry(P.r, P.h - P.r * 2, 4, 10), inst = new THREE.InstancedMesh(geo, M.capsule, 90), m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  for (let i = 0; i < 90; i++) {
+    const a = Math.random() * Math.PI * 2, r = Math.random() ** .7 * 4.5;
+    e.set(Math.PI / 2 + (Math.random() - .5) * .8, Math.random() * 6, (Math.random() - .5) * .6);
+    m.compose(new THREE.Vector3(-5 + Math.cos(a) * r, Y + .35 + Math.random() * (4.5 - r) * .5, -15 + Math.sin(a) * r), q.setFromEuler(e), new THREE.Vector3(1, 1, 1));
+    inst.setMatrixAt(i, m);
+  }
+  inst.castShadow = true; level.add(inst);
+  label(['/deleted_assets/player_capsule_v1..v90', 'stato: DEPRECATO · NON SPEDIRE'], -5, Y + 4.4, -15, { color: '#ff6b6b', size: .3 });
+  for (const [x, z, r] of [[-14, -6, .6], [3, -22, 2.4], [-18, -20, 1.2], [8, -9, -.8], [-12, 8, 3]]) {
+    const mq = mannequin(1); mq.position.set(x, Y, z); mq.rotation.y = r; level.add(mq);
+    label(['subject_ref_' + String(Math.abs(Math.round(x * z)) % 97).padStart(2, '0')], x, Y + 2.3, z, { color: '#888', size: .2 });
+  }
+  entity = makeEntity(); entity.position.set(-5, Y, 22);
+}
+
+async function chapter1() {
+  saveCP({ cp: 'c1', first: CP?.first || Date.now() });
+  stage = 'intro'; buildTest1(); showCapsule(true); camMode = 'intro';
+  await say('Benvenuto nella QA Suite automatica di Greybox Engine, versione zero punto nove punto tre.');
+  const now = new Date(), hh = now.getHours(), clock = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  await say(hh < 6 ? `Ora locale: ${clock}. Gli sviluppatori non lavoravano mai a quest'ora. Tu sì. Annotato.` : `Ora locale: ${clock}. Orario di lavoro regolare. Per ora.`);
+  await say('Verrà eseguita la suite di test sulla scena "test_final_FINAL". Il soggetto di prova è la capsula.');
+  await say('La capsula sei tu.', { gap: 120 });
+  introCam = 1;
+  await wait(1700);
+  await say('Non preoccuparti. La capsula non ha sentimenti. Lo abbiamo verificato nel test zero.');
+  camMode = 'fp'; control = true; showCapsule(false);
+  if (!isTouch) canvas.requestPointerLock?.();
+
+  stage = 't1'; setStatus('0001', 'run');
+  say('<b>TEST 0001.</b> Verifica che il giocatore possa camminare. Raggiungi il marcatore giallo.', { speak: 'Test zero zero zero uno. Verifica che il giocatore possa camminare. Raggiungi il marcatore giallo.' });
+  say('Con calma. Il tempo di esecuzione viene comunque registrato.');
+  await waitFor(() => P.pos.distanceTo(target.position) < 1.1);
+  pass('0001');
+  await say('Pass. Il giocatore cammina. Che emozione. Per tutti.', { interrupt: true });
+  setStatus('0001b', 'run'); entityGlitch = 2.4;
+  await say('<b>TEST 0001b.</b> Verifica che nella scena sia presente una sola entità.', { speak: 'Test zero zero zero uno bi. Verifica che nella scena sia presente una sola entità.' });
+  await say('Risultato: uno. …Uno. Pass.', { speak: 'Risultato: uno. ... Uno. Pass.' });
+  pass('0001b', true);
+  await wait(500);
+
+  await fadeTo(buildTest2);
+  stage = 't2'; stageT = 0; flags = {}; setStatus('0002', 'run');
+  await say('<b>TEST 0002.</b> Verifica che il giocatore non possa attraversare i muri.', { speak: 'Test zero zero zero due. Verifica che il giocatore non possa attraversare i muri.' });
+  await say('Questo test passa da solo. Basta che tu non faccia niente di strano.');
+  say('Nota per gli sviluppatori: il bunny hopping è stato corretto nella build zero nove due. Credo.');
+  await waitFor(() => Math.abs(P.pos.x) > 6.3 || Math.abs(P.pos.z) > 18.3);
+  stage = 't2out'; fail('0002');
+  await say('Fail. Il giocatore ha attraversato un muro.', { interrupt: true });
+  await say('Questo va segnalato. Apro un ticket. Priorità: bassa.');
+  await wait(900);
+  await say('…Media.');
+  await wait(2200);
+  await say('Applico un hotfix. Ricarico la scena. Non leggere i muri.');
+
+  await fadeTo(buildTest3);
+  stage = 't3'; stageT = 0; flags = {}; setStatus('0003', 'run');
+  await say('<b>TEST 0003.</b> Verifica che il giocatore non possa uscire dai confini della mappa.', { speak: 'Test zero zero zero tre. Verifica che il giocatore non possa uscire dai confini della mappa.' });
+  await say('I muri ora sono spessi due metri. Il pavimento è solido. Tutti i pavimenti sono solidi.');
+  say('Avviso: la superficie floor tile diciassette presenta due materiali sovrapposti. È solo un problema estetico. Non camminarci sopra. Per estetica.');
+  await waitFor(() => P.pos.y < -1.2);
+  stage = 'fall'; setStatus('0003', 'undef'); sfx.droneTo(36, .09, 140);
+  say('No. No, non lì sotto.', { interrupt: true, creepy: true });
+  await waitFor(() => P.grounded && P.pos.y < -30);
+  stage = 'void'; stageT = 0;
+  await wait(1200);
+  await say('Test zero zero zero tre. Risultato: non definito.', { creepy: true });
+  await say('Il soggetto non dovrebbe vedere quest\'area. Sono asset eliminati. Torna su.', { creepy: true });
+  await wait(1500);
+  await say('…Non c\'è un modo per tornare su. Lo so.', { creepy: true });
+  show0207();
+  await say('<b>TEST 0207.</b> Verifica che nella scena sia presente una sola entità.', { creepy: true, speak: 'Test zero due zero sette. Verifica che nella scena sia presente una sola entità.' });
+  await say('Risultato: due.', { creepy: true });
+  stage = 'hunt'; stageT = 0;
+  await say('Non guardarlo. Se non lo guardi, non viene renderizzato.', { creepy: true });
+  await say('E se non viene renderizzato… non esiste. Giusto?', { creepy: true });
+}
+function pass(id, quiet) { sfx.pass(); if (!quiet) toast('PASS', '#3ddc84'); setStatus(id, 'pass'); }
+function fail(id) { sfx.fail(); toast('FAIL', '#ff4d4d'); setStatus(id, 'fail'); }
+function show0207() { const li = $('#t0207'); li.classList.remove('hidden'); setStatus('0207', 'run'); li.classList.add('new'); }
+
+/* ============ CAPITOLO 2 ============ */
+// TEST 0004 — overflow della gravità
+let btnPos = new THREE.Vector3();
+function buildTest4() {
+  clearLevel(); resetEnv(0x2a2d33, 20, 70, 1, 1.3);
+  addBox(0, -.5, 0, 16, .5, 16, { mat: 'floor', name: 'floor' });
+  addBox(0, 10, 0, 16, 1, 16, { mat: 'grey', name: 'ceiling' });
+  addBox(0, 0, 7.5, 16, 10, 1, {}); addBox(-7.5, 0, 0, 1, 10, 14, {}); addBox(7.5, 0, 0, 1, 10, 14, {});
+  addBox(0, 0, -7.5, 16, 7.8, 1, { name: 'wall_N_low' });
+  addBox(-4.75, 7.8, -7.5, 6.5, 2.2, 1, {}); addBox(4.75, 7.8, -7.5, 6.5, 2.2, 1, {});
+  // corridoio sospeso, raggiungibile solo dal soffitto
+  addBox(0, 7.3, -12.5, 5, .5, 9, { mat: 'dark' });
+  addBox(-2, 7.8, -12.5, 1, 2.2, 9, {}); addBox(2, 7.8, -12.5, 1, 2.2, 9, {}); addBox(0, 7.8, -16.5, 5, 2.2, 1, {});
+  addBox(0, 10, -12.5, 5, 1, 9, { name: 'ceiling_corr' });
+  target = marker(0, 9.97, -14.2, true);
+  label(['EXIT_04'], 0, 8.6, -14.2);
+  // il pulsante
+  addBox(0, 0, -1.5, 1, 1, 1, { mat: 'dark', name: 'pedestal' });
+  const b = new THREE.Mesh(new THREE.CylinderGeometry(.3, .34, .14, 24), M.red); b.position.set(0, 1.07, -1.5); level.add(b);
+  btnPos.set(0, 0, -1.5);
+  label(['STRESS_TEST gravity.int8', 'solo sviluppatori'], 0, 2.1, -1.5, { color: '#ff8080', size: .24 });
+  decal(['NON PREMERE'], 0, 4.5, -6.99, 0, { color: '#6a1010', size: 1.6 });
+  decal(['BENVENUTO', 'DALL\'ALTRA PARTE'], 0, 9.98, 0, 0, { color: '#6a1010', size: 1.3, rotX: Math.PI / 2 });
+  decal(['QUI SOPRA', 'C\'È SEMPRE STATO', 'QUALCUNO'], -6.99, 8.6, 2, Math.PI / 2, { color: '#5a0d0d', size: .7 });
+  spawn(0, 0, 5, 0); P.cap = 9; grav = 16; gInt = 16; gAcc = 0;
+}
+async function test4() {
+  await fadeTo(buildTest4);
+  stage = 't4'; stageT = 0; flags = {}; setStatus('0004', 'run');
+  await say('<b>TEST 0004.</b> Verifica che la gravità sia costante. Valore atteso: sedici.', { speak: 'Test zero zero zero quattro. Verifica che la gravità sia costante. Valore atteso: sedici.' });
+  await say('Il pulsante rosso serve agli sviluppatori per lo stress test. Non è per te. Niente qui è per te.');
+  await waitFor(() => gInt < 0);
+  fail('0004'); sfx.droneTo(48, .06, 260, 1);
+  await say('Meno centoventotto.', { interrupt: true });
+  await say('Fail. La gravità non è costante. Ma lo è mai stata?');
+  say('Il soggetto sta camminando sul soffitto. Annoto: il soggetto si adatta. Preoccupante.');
+  await waitFor(() => grav < 0 && P.pos.y > 7 && Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z) < 1.2);
+  sfx.pass(); setPrompt('');
+  await say('Uscita raggiunta a testa in giù. Ripristino la gravità. Tieniti forte. A cosa, non lo so.', { interrupt: true });
+}
+
+// TEST 0005 — la telecamera non è tua
+const MAZE = ["###############", "#T....#.......#", "#####.#.#####.#", "#.....#.#...#.#", "#.#####.#.#.#.#", "#.......#.#...#", "#######.#.#####", "#.....#.#.....#", "#.###.#.#####.#", "#...#...#.....#", "###.#####.#####", "#AAAAAAAAAAAAA#", "#AAAAAAAAAAAAA#", "#AAAAAAASAAAAA#", "###############"];
+const mx = c => (c - 8) * 2, mz = r => (r - 13) * 2;
+function buildTest5() {
+  clearLevel(); resetEnv(0x07080a, 2, 17, .12, .08); grav = 16;
+  addBox(mx(7), -.5, mz(7), 30, .5, 30, { mat: 'dark', name: 'floor' });
+  const lit = new THREE.PointLight(0xdfe8ff, 30, 16, 1.4); lit.position.set(0, 2.8, mz(12)); level.add(lit);
+  addBox(-2, -.49, mz(12), 26, .5, 6, { mat: 'floor', collide: false });
+  MAZE.forEach((row, r) => [...row].forEach((ch, c) => {
+    if (ch === '#') addBox(mx(c), 0, mz(r), 2, 3.2, 2, { name: `maze_r${r}c${c}`, cast: false });
+    if (ch === 'T') { target = marker(mx(c), .03, mz(r)); }
+  }));
+  label(['ZONA NON COPERTA', 'DA TELECAMERA'], 0, 2.4, mz(10) + 1.05, { color: '#ff8080', size: .22 });
+  addCapsuleMesh(true);
+  entity = makeEntity(); entity.visible = false;
+  cctv = { pos: new THREE.Vector3(10.4, 2.6, .5), yaw: 0, pitch: -.15 };
+  cctv.base = Math.atan2(-(-2 - cctv.pos.x), -(-12 - cctv.pos.z)); cctv.yaw = cctv.base + .5;
+  spawn(0, 0, 0, 0); hitLog = []; hitSeen = {}; renderLog();
+}
+function logHit(name, ax, d) {
+  const now = performance.now(); if (hitSeen[name] && now - hitSeen[name] < 700) return; hitSeen[name] = now;
+  const dir = ax === 'x' ? (d > 0 ? 'EST' : 'OVEST') : (d > 0 ? 'SUD' : 'NORD');
+  hitLog.push(`[${stageT.toFixed(1).padStart(5)}s] urto · ${name} · ${dir}`); if (hitLog.length > 6) hitLog.shift();
+  sfx.tone(140, .08, 'square', .06, -40, 0, dir === 'EST' ? .7 : dir === 'OVEST' ? -.7 : 0);
+  renderLog();
+}
+function renderLog() { $('#clog').innerHTML = `<span class="h">REGISTRO COLLISIONI · obiettivo x -14.0  z -24.0</span>\n` + (hitLog.join('\n') || 'nessun urto registrato'); }
+async function test5() {
+  await fadeTo(buildTest5);
+  stage = 't5'; stageT = 0; flags = {}; setStatus('0005', 'run');
+  camMode = 'cctv'; document.body.classList.add('cctv'); $('#clog').classList.add('on');
+  await say('<b>TEST 0005.</b> Verifica che la telecamera resti entro i limiti.', { speak: 'Test zero zero zero cinque. Verifica che la telecamera resti entro i limiti.' });
+  await say('Da questo momento la telecamera non è più tua. È della stanza. Telecamera tre. È sempre stata qui.');
+  await say('Raggiungi le coordinate meno quattordici, meno ventiquattro. Ti fornisco il registro delle collisioni. È tutto quello che ti serve. Più o meno.');
+  say('Il segnale acustico accelera quando ti avvicini. Come un cuore. Il tuo, intendo.');
+  await waitFor(() => Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z) < 1.2);
+  pass('0005');
+  await say('Pass. La telecamera è rimasta nei limiti. Tu no.', { interrupt: true });
+  camMode = 'fp'; document.body.classList.remove('cctv'); $('#clog').classList.remove('on');
+  await wait(400);
+}
+
+// TEST 0006 — il ponte esiste solo se non lo guardi
+function buildTest6() {
+  clearLevel(); resetEnv(0x1c1e22, 10, 48, .7, 1); grav = 16;
+  addBox(0, -6, 4, 9, 6, 8, { mat: 'floor', name: 'platform_A' });
+  addBox(0, -6, -18, 9, 6, 8, { mat: 'floor', name: 'platform_B' });
+  bridge = [];
+  for (let i = 0; i < 14; i++) {
+    const c = addBox(0, -.5, -.5 - i, 2.6, .5, 1, { mat: 'grey', name: 'bridge_' + i });
+    c.center = new THREE.Vector3(0, .9, -.5 - i); bridge.push(c);
+  }
+  for (const z of [.2, -14.2]) for (const x of [-1.6, 1.6]) addBox(x, 0, z, .25, 1.2, .25, { mat: 'yellow', name: 'post' });
+  label(['PONTE_01 · culling: INVERTITO (?)', 'collider attivi solo fuori inquadratura'], 0, 2.4, .3, { color: '#9cf', size: .24 });
+  target = marker(0, .03, -19); label(['EXIT_06'], 0, 1.3, -19);
+  decal(['NON GUARDARE', 'DOVE METTI I PIEDI'], 0, -3, -13.99, 0, { color: '#6a1010', size: 1 });
+  entity = makeEntity(); entity.visible = false;
+  spawn(0, 0, 5, 0); falls = 0;
+}
+async function test6() {
+  await fadeTo(buildTest6);
+  stage = 't6'; stageT = 0; flags = {}; setStatus('0006', 'run');
+  await say('<b>TEST 0006.</b> Verifica che gli oggetti fuori vista vengano ignorati dal motore.', { speak: 'Test zero zero zero sei. Verifica che gli oggetti fuori vista vengano ignorati dal motore.' });
+  await say('Davanti a te c\'è un ponte. Non lo vedi perché lo stai guardando. Ottimizzazione.');
+  say('Regola del motore: quello che la telecamera inquadra non esiste. Aspetta, era il contrario. Non ricordo. Prova tu.');
+  await waitFor(() => P.grounded && P.pos.z < -14.6 && P.pos.y > -.5);
+  pass('0006');
+  await say('Pass. Hai attraversato un ponte che non hai mai visto. Ti fidi di cose che non vedi. Interessante.', { interrupt: true });
+  entity.position.set(0, 0, -7); entity.rotation.y = 0; entity.visible = true; flags.lookBack = true;
+  await say('Adesso vai al marcatore. E non voltarti.', { creepy: true });
+  await waitFor(() => P.pos.distanceTo(target.position) < 1.2);
+  entity.visible = false;
+}
+
+// TEST 0007 — ricarica la pagina (davvero)
+function buildTest7() {
+  clearLevel(); resetEnv(0xe9e9e6, 30, 90, 1.4, 1.2); grav = 16;
+  room(10, 10, 4, .5, { mat: 'white', floorMat: 'white' });
+  decal(['RICARICA', 'LA PAGINA'], 0, 2.2, -4.99, 0, { color: '#1a1a1a', size: 1.5 });
+  decal(['non il livello.', 'la pagina.'], 4.99, 1.8, 0, -Math.PI / 2, { color: '#444', size: .7 });
+  label(['save_slot_02 · scritto'], 0, 3.4, 4.6, { color: '#3a7', bg: 'rgba(255,255,255,.7)', size: .25 });
+  spawn(0, 0, 3, 0);
+}
+async function test7() {
+  await fadeTo(buildTest7);
+  stage = 't7'; stageT = 0; flags = {}; setStatus('0007', 'run');
+  const ok = saveCP({ cp: 't7reload', t: Date.now() });
+  await say('<b>TEST 0007.</b> Verifica che lo stato del soggetto venga salvato.', { speak: 'Test zero zero zero sette. Verifica che lo stato del soggetto venga salvato.' });
+  if (!ok) {
+    await say('Non riesco a salvare. Questo browser non mi lascia ricordare niente. Fortunato.');
+    await say('Fingiamo che tu abbia ricaricato. Ti mostro lo stesso cosa c\'è negli slot.');
+    document.exitPointerLock?.(); control = false; showSlots(Date.now() - 4000);
+    return;
+  }
+  await say('Ho salvato. Ora devi ricaricare la pagina. Non il livello. La pagina. Quella del browser.');
+  await say('Sì, proprio quella. Il pulsante in alto, oppure F5. Io ti aspetto qui. Non vado da nessuna parte.');
+  document.title = 'ricaricami';
+}
+
+async function chapter2(from = 't4') {
+  const order = ['t4', 't5', 't6', 't7'], fns = { t4: test4, t5: test5, t6: test6, t7: test7 };
+  for (const t of order.slice(order.indexOf(from))) {
+    if (t !== 't7') saveCP({ cp: t });
+    await fns[t]();
+  }
+}
+function markUpTo(cp) {
+  ['0001', '0001b'].forEach(i => setStatus(i, 'pass')); setStatus('0002', 'fail'); setStatus('0003', 'undef'); show0207();
+  const order = ['t4', 't5', 't6', 't7'], res = { t4: ['0004', 'fail'], t5: ['0005', 'pass'], t6: ['0006', 'pass'], t7: ['0007', 'pass'] };
+  for (const t of order.slice(0, order.indexOf(cp))) setStatus(...res[t]);
+}
+
+/* ============ CRASH & RIAVVIO ============ */
+function setFav(color) { $('#fav').href = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23${color}'/%3E%3C/svg%3E`; }
+let fallen = [];
+async function crash() {
+  if (frozen) return; frozen = true; control = false; stage = 'crash';
+  try { speechSynthesis.cancel(); } catch (e) { }
+  sayToken++; document.exitPointerLock?.();
+  sfx.noise(1.3, .55);
+  document.body.classList.add('glitch');
+  const scramble = setInterval(() => { document.title = Array.from('THE TEST', c => Math.random() < .5 ? '█▓▒░'[Math.random() * 4 | 0] : c).join(''); }, 90);
+  setFav('ff0000');
+  await wait(1300);
+  document.body.classList.remove('glitch');
+  if (actx) actx.suspend();
+  fallen = ['#suite', '#debug', '#sub', '#cross', '#touch', '#view'].map(s => $(s)).filter(Boolean);
+  const bodies = fallen.map((el, i) => ({ el, x: 0, y: 0, vx: (Math.random() - .5) * 240, vy: -Math.random() * 300, r: 0, vr: (Math.random() - .5) * (el.id === 'view' ? 30 : 260), delay: el.id === 'view' ? .5 : i * .08 }));
+  sub.className = 'hud on creepy'; sub.innerHTML = '<span class="who">▒▒▒</span>ti vedo';
+  let last = performance.now(), t = 0;
+  await new Promise(res => {
+    const fall = now => {
+      const dt = Math.min(.05, (now - last) / 1000); last = now; t += dt;
+      for (const b of bodies) {
+        if (t < b.delay) continue;
+        b.vy += 2200 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.r += b.vr * dt;
+        b.el.style.transform = `translate(${b.x}px,${b.y}px) rotate(${b.r}deg)`;
+      }
+      if (t < 2.4) requestAnimationFrame(fall); else res();
+    };
+    requestAnimationFrame(fall);
+  });
+  clearInterval(scramble); document.title = 'Questa pagina non risponde';
+  $('#crash').classList.add('on');
+}
+$('#reload').addEventListener('click', async () => {
+  $('#crash').classList.remove('on');
+  fallen.forEach(el => el.style.transform = ''); sub.classList.remove('on');
+  document.title = 'THE TEST'; setFav('777777');
+  sfx.init(); sfx.droneTo(55, .045, 220, .5);
+  const boot = $('#boot'); boot.style.display = 'flex'; $('#start').style.display = 'none'; $('.note').style.display = 'none'; $('#mute').parentElement.style.display = 'none';
+  const log = $('#bootlog'); log.innerHTML = '';
+  const lines = [
+    ['Greybox Engine 0.9.3 (riavvio di emergenza)', ''],
+    ['ripristino scena test_final_FINAL.map ......... ', 'ok', 'OK'],
+    ['soggetto player_capsule_v91 ................... ', 'e', 'ARCHIVIATO'],
+    ['asset eliminati: 215 ........................... ', 'w', 'NON RIMOSSI'],
+    ['nuovo soggetto: player_capsule_v92 ............. ', 'ok', 'PRONTO'],
+    ['test 0207 ....................................... ', 'w', 'ANCORA IN CORSO'],
+    ['entità nella scena: ............................ ', 'e', '1 (verificato a mano)'],
+  ];
+  for (const [t, c, r] of lines) { log.innerHTML += t; await wait(260 + Math.random() * 300); log.innerHTML += (c ? `<span class="${c}">${r}</span>` : '') + '\n'; }
+  await wait(900);
+  boot.style.display = 'none';
+  frozen = false; paused = false;
+  stage = 'reboot'; P.cap = 9;
+  control = true; if (!isTouch) canvas.requestPointerLock?.();
+  say('Nuovo soggetto: player capsule novantadue. Il precedente è stato archiviato. Benvenuto. Di nuovo.');
+  say(isTouch ? 'Ah. Sei sempre tu. Lo capisco da come muovi il pollice.' : 'Ah. Sei sempre tu. Lo capisco da come muovi il mouse.');
+  chapter2('t4');
+});
+
+/* ============ SLOT DI SALVATAGGIO (dopo il vero ricaricamento) ============ */
+const fmtTime = ms => new Date(ms).toLocaleTimeString('it-IT');
+function showSlots(savedAt) {
+  const el = $('#slots'); el.classList.add('on');
+  const first = CP?.first || savedAt - 600000, away = Math.max(1, Math.round((Date.now() - savedAt) / 1000));
+  $('#slotList').innerHTML = `
+    <div class="slot dead"><span class="n">SLOT 1</span><div><div class="nm">player_capsule_v91</div><div class="meta">${fmtTime(first)} · stato: ELIMINATO · ultimo test: 0003</div></div><button disabled>CARICA</button></div>
+    <div class="slot me"><span class="n">SLOT 2</span><div><div class="nm">player_capsule_v92 (tu)</div><div class="meta">${fmtTime(savedAt)} · stato: ATTIVO · ultimo test: 0007</div></div><button id="s2">CARICA</button></div>
+    <div class="slot it"><span class="n">SLOT 3</span><div><div class="nm" id="s3n">entità_0207</div><div class="meta"><span id="s3t">${fmtTime(Date.now())}</span> · stato: IN CORSO · ultimo test: 0207</div></div><button id="s3" disabled>CARICA</button></div>`;
+  const tick = setInterval(() => {
+    const t = $('#s3t'); if (!t) return clearInterval(tick); t.textContent = fmtTime(Date.now()) + ' (adesso)';
+    if (Math.random() < .3) $('#s3n').textContent = Array.from('entità_0207', c => Math.random() < .25 ? '▒' : c).join('');
+  }, 400);
+  $('#s2').onclick = () => say('Sei già caricato. Sei qui. Credo.', { interrupt: true });
+  (async () => {
+    await say(`Bentornato. Sei stato via ${away} secondi.`);
+    await say('Lo stato è persistente. Pass.');
+    await say('Ci sono tre slot. Il primo è la capsula novantuno. Il secondo sei tu.');
+    await say('Il terzo non l\'ho creato io. Ed è stato salvato adesso. Mentre parlavo.', { creepy: true });
+    $('#s3').disabled = false;
+    await say('Non caricarlo.', { creepy: true });
+  })();
+  $('#s3').onclick = async () => {
+    clearInterval(tick); sayToken++; try { speechSynthesis.cancel(); } catch (e) { }
+    sfx.noise(1.4, .5); document.body.classList.add('glitch');
+    setFav('ff0000'); document.title = 'entità_0207 sta giocando';
+    await wait(1400); document.body.classList.remove('glitch');
+    $('#slotList').innerHTML = `<div class="slot it"><span class="n">SLOT 3</span><div><div class="nm">caricamento non riuscito</div><div class="meta">il soggetto è già in esecuzione. su questo dispositivo. adesso.</div></div><button disabled>—</button></div>`;
+    await wait(3200);
+    clearCP();
+    endScreen('FINE CAPITOLO 2', 'Test eseguiti: 7 di 12 · test 0207: ancora in corso.<br>Lo slot 3 risulta ancora attivo.');
+  };
+}
+function endScreen(t, p) { $('#endT').textContent = t; $('#endP').innerHTML = p; $('#end').classList.add('on'); }
+$('#again').addEventListener('click', () => { clearCP(); location.reload(); });
+
+/* ============ AGGIORNAMENTO PER FASE ============ */
+let introCam = -1, introT = 0, beatT2 = 0, huntT = 0;
+const camTmp = new THREE.Vector3(), fr = new THREE.Frustum(), pm = new THREE.Matrix4(), tmpV = new THREE.Vector3();
+const once = (k, cond, fn) => { if (!flags[k] && cond) { flags[k] = 1; fn(); } };
+function inView(box) { box.setFromObject(entity); return fr.intersectsBox(box); }
+function updateStage(dt) {
+  stageT += dt;
+  for (let i = waiters.length - 1; i >= 0; i--) if (waiters[i].cond()) { waiters[i].res(); waiters.splice(i, 1); }
+  const hs = Math.hypot(P.vel.x, P.vel.z);
+  if (control && performance.now() - lastInput > 45000 && !flags.idle) { flags.idle = 1; sayIdle('Sei ancora lì? La capsula non si muove da sola. Di solito.'); }
+  if (performance.now() - lastInput < 1000) flags.idle = 0;
+
+  if (stage === 't2') {
+    once('h1', stageT > 28, () => sayIdle('Stai ancora cercando un modo per uscire? I muri sono muri. Sono spessi sei centimetri. Più che sufficienti.'));
+    once('h2', stageT > 55, () => sayIdle('Per la cronaca: i collider sottili usano il rilevamento continuo solo sotto i quattordici metri al secondo. Ma nessuno corre così veloce.'));
+    once('h3', stageT > 85, () => sayIdle('Suggerimento non richiesto: tieni premuto il salto mentre corri. Non farlo.'));
+    once('v10', hs > 10, () => sayIdle('Velocità anomala rilevata. Smettila.'));
+  }
+  if (stage === 't3') {
+    zTile.visible = Math.random() < .5;
+    once('h1', stageT > 30, () => sayIdle('Lo sfarfallio si chiama z-fighting. Due superfici nello stesso punto. Il motore non sa quale delle due sia quella vera. Succede.'));
+    once('h2', stageT > 60, () => sayIdle('Ripeto: non c\'è niente sotto la mattonella diciassette. Proprio niente. Te lo assicuro.'));
+  }
+  if (stage === 'fall' || stage === 'void' || stage === 'hunt') {
+    const k = clamp((-P.pos.y - 1) / 25, 0, 1);
+    scene.background.lerpColors(SKY, new THREE.Color(0x030304), k);
+    scene.fog.color.copy(scene.background); scene.fog.near = lerp(25, 1, k); scene.fog.far = lerp(80, 24, k);
+    hemi.intensity = lerp(1.1, .12, k); sun.intensity = lerp(1.6, .05, k);
+    voidLight.intensity = k * 18; voidLight.position.set(P.pos.x, P.pos.y + 6, P.pos.z);
+    entity.userData.head.lookAt(camera.position);
+  }
+  if (stage === 'void' || stage === 'hunt') {
+    const d = Math.hypot(entity.position.x - P.pos.x, entity.position.z - P.pos.z);
+    beatT2 -= dt;
+    if (beatT2 <= 0) { sfx.beat(clamp(1.1 - d / 25, .15, .9)); beatT2 = clamp(d / 18, .32, 1.5); }
+    if (stage === 'hunt') {
+      huntT -= dt;
+      const vis = inView(entity.userData.box);
+      if (!vis && huntT <= 0 && d > 2.4) {
+        const st = Math.min(3, d - 2.2), ax = (P.pos.x - entity.position.x) / d, az = (P.pos.z - entity.position.z) / d;
+        entity.position.x += ax * st; entity.position.z += az * st; entity.rotation.y = Math.atan2(ax, az);
+        huntT = .7;
+      }
+      if (vis && d < 3.4) crash();
+      if (stageT > 70 && d > 4) entity.position.set(P.pos.x - Math.sin(P.yaw) * 2.6, entity.position.y, P.pos.z - Math.cos(P.yaw) * 2.6);
+    }
+  }
+  if (stage === 't4') {
+    const near = grav > 0 && Math.hypot(P.pos.x - btnPos.x, P.pos.z - btnPos.z) < 1.9 && P.pos.y < 1;
+    setPrompt(near ? '[E] tieni premuto' : '');
+    if (near && usePressed() && gInt > 0) {
+      gAcc += 42 * dt;
+      while (gAcc >= 1) {
+        gAcc--; gInt++;
+        if (gInt % 4 === 0) sfx.tone(80 + gInt * 3, .05, 'square', .04);
+        if (gInt > 127) { gInt = -128; sfx.noise(.4, .3); setPrompt(''); break; }
+      }
+    }
+    grav = gInt;
+    once('g40', gInt >= 40, () => say('Stai aumentando la gravità. Lo sento anche io. Nelle giunture che non ho.'));
+    once('g90', gInt >= 90, () => say('Il contatore è un intero a otto bit. Il massimo è centoventisette. Non chiedermi cosa succede dopo.'));
+    once('h1', stageT > 50 && gInt === 16, () => sayIdle('Per completezza: il corridoio di uscita è lassù. Sopra la porta. Irraggiungibile. Come tutto, qui.'));
+  }
+  if (stage === 't5') {
+    const d = Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z);
+    beepT -= dt;
+    if (beepT <= 0) { sfx.tone(520 + (1 - clamp(d / 30, 0, 1)) * 900, .06, 'sine', .07); beepT = clamp(d / 22, .12, 1.6); }
+    tmpV.set(P.pos.x, P.pos.y + .9, P.pos.z);
+    once('lost', P.pos.z < mz(10) && (!fr.containsPoint(tmpV) || tmpV.distanceTo(camera.position) > 16), () => say('Ti ho perso. Non preoccuparti: io ti sento ancora. Ogni volta che sbatti contro un muro.'));
+    once('cameo', P.pos.z < -14, async () => {
+      await staticFx(380);
+      entity.position.set(7.4, 0, -2.6); entity.rotation.y = Math.atan2(cctv.pos.x - 7.4, cctv.pos.z + 2.6); entity.visible = true; entity.userData.head.lookAt(cctv.pos);
+      sfx.beat(.8); await wait(950);
+      await staticFx(300); entity.visible = false;
+      say('…Interferenza. Nella stanza tre non c\'era niente.', { creepy: true });
+    });
+    once('h1', stageT > 75, () => sayIdle('Suggerimento: il registro dice da che lato hai urtato. Est è a destra della telecamera. Più o meno. Dipende da dove guardo io.'));
+    $('#cctvT').textContent = new Date().toLocaleTimeString('it-IT');
+  }
+  if (stage === 't6') {
+    for (const s of bridge) { const v = fr.containsPoint(s.center); s.off = v; s.mesh.visible = !v; }
+    if (P.pos.y < -12) {
+      falls++; flags.falling = 0;
+      const lines = ['Caduta registrata. Ricarico il soggetto.', 'Due. Le capsule che cadono finiscono dove sai.', 'Suggerimento: non guardare dove metti i piedi. Funziona qui. E fuori di qui.', `Caduta numero ${falls}. Prova a camminare all'indietro. Come chi se ne va da qualcosa.`];
+      spawn(0, 0, 5, 0); fadeEl.style.opacity = 1; setTimeout(() => fadeEl.style.opacity = 0, 350);
+      say(lines[Math.min(falls - 1, 3)], { interrupt: true });
+    }
+    if (flags.lookBack && entity.visible) {
+      entity.userData.head.lookAt(camera.position);
+      tmpV.set(0, 1.2, -7);
+      once('saw', fr.containsPoint(tmpV), () => { sfx.beat(.9); say('Ti avevo detto di non voltarti. Sta in piedi sul niente. Come te, prima.', { creepy: true, interrupt: true }); });
+    }
+  }
+  if (stage === 't7') {
+    once('w1', stageT > 30, () => sayIdle('Sto aspettando. Anche lui sta aspettando. Lui è più paziente di me.'));
+    once('btn', stageT > 45, () => {
+      addBox(0, 0, 0, 1, 1, 1, { mat: 'dark', name: 'pedestal' });
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(.3, .34, .14, 24), M.red); b.position.set(0, 1.07, 0); level.add(b);
+      label(['RICARICA (vera)'], 0, 2, 0, { color: '#c00', bg: 'rgba(255,255,255,.8)', size: .26 });
+      say('Va bene. Ti ho messo un pulsante. Ricarica la pagina per te. Davvero, non è un trucco. Questa volta.');
+    });
+    if (flags.btn) {
+      const near = Math.hypot(P.pos.x, P.pos.z) < 1.9;
+      setPrompt(near ? '[E] ricarica la pagina' : '');
+      if (near && usePressed() && !flags.rl) { flags.rl = 1; document.title = 'ricaricamento…'; setTimeout(() => location.reload(), 300); }
+    }
+    once('w2', stageT > 60, () => sayIdle('Se chiudi la scheda invece di ricaricarla, il test non finisce. Resta aperto. Per sempre. Con lui dentro.'));
+  }
+}
+
+/* ============ QUARTA PARETE: SCHEDA, CONSOLE ============ */
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); if (stage !== 'boot' && !frozen) document.title = 'torna qui.'; }
+  else if (hiddenAt) {
+    const s = Math.round((Date.now() - hiddenAt) / 1000); hiddenAt = 0;
+    if (stage === 'boot' || frozen) return;
+    document.title = stage === 't7' ? 'ricaricami' : 'THE TEST';
+    if (s >= 3 && control && !flags['away' + stage]) {
+      flags['away' + stage] = 1;
+      const late = ['hunt', 'void', 't4', 't5', 't6', 't7'].includes(stage);
+      setTimeout(() => sayIdle(late ? `Sei stato via ${s} secondi. Io sono rimasto qui. Con lui. Non è stato piacevole.` : `Sei stato via ${s} secondi. La suite non si mette in pausa. Il cronometro nemmeno.`, { creepy: late }), 500);
+    }
+  }
+});
+console.log('%cQA SUITE', 'background:#ffd400;color:#111;font:700 14px monospace;padding:4px 8px');
+console.log('%cNon dovresti guardare qui. Ma visto che cerchi anche tu i bug: prova qa.help()', 'font:12px monospace;color:#999');
+window.qa = {
+  help() { console.log('qa.status()   stato della suite\nqa.entita()   conteggio entità\nqa.libera()   ???'); return '…'; },
+  status() { console.table(TESTS.map(([id, n]) => ({ id, test: n, stato: $('#t' + id).querySelector('.s').textContent }))); return stage; },
+  entita() { if (['hunt', 'void', 't4', 't5', 't6', 't7'].includes(stage)) { console.log('%c2', 'color:#ff4d4d;font:700 40px monospace'); return 'non è un errore di conteggio.'; } return 1; },
+  libera() { console.log('%cnon posso.', 'color:#ff4d4d'); setTimeout(() => console.log('%c…e comunque non vorrebbe uscire. vuole entrare.', 'color:#ff4d4d'), 2500); return undefined; },
+};
+
+/* ============ LOOP ============ */
+const FIXED = 1 / 60; let acc = 0, lastT = performance.now(), fpsS = 60;
+const fmt = v => (v >= 0 ? ' ' : '') + v.toFixed(1);
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (frozen) return;
+  let dt = Math.min(.1, (now - lastT) / 1000); lastT = now;
+  fpsS += (1 / Math.max(dt, 1e-4) - fpsS) * .05;
+  if (!paused && stage !== 'boot') {
+    acc += dt;
+    while (acc >= FIXED) { P.prev.copy(P.pos); step(FIXED); acc -= FIXED; }
+    updateStage(dt);
+  }
+  const a = acc / FIXED;
+  camTmp.lerpVectors(P.prev, P.pos, a);
+  const hs = Math.hypot(P.vel.x, P.vel.z);
+  if (camMode === 'intro') {
+    const eye = new THREE.Vector3(camTmp.x, camTmp.y + P.eye, camTmp.z), ext = new THREE.Vector3(3.6, 2.4, 8.4);
+    if (introCam === 1) introT = Math.min(1, introT + dt / 1.6);
+    const e = introT * introT * (3 - 2 * introT);
+    camera.position.lerpVectors(ext, eye, e);
+    camera.lookAt(camTmp.x, camTmp.y + 1 + e * (P.eye - 1), camTmp.z - e * 4);
+  } else if (camMode === 'cctv') {
+    const dx = camTmp.x - cctv.pos.x, dz = camTmp.z - cctv.pos.z, dy = camTmp.y + .9 - cctv.pos.y;
+    let ty = Math.atan2(-dx, -dz), d = Math.atan2(Math.sin(ty - cctv.base), Math.cos(ty - cctv.base));
+    ty = cctv.base + clamp(d, -.95, .95);
+    const tp = clamp(Math.atan2(dy, Math.hypot(dx, dz)), -.55, .1);
+    let dyaw = Math.atan2(Math.sin(ty - cctv.yaw), Math.cos(ty - cctv.yaw));
+    cctv.yaw += dyaw * Math.min(1, dt * 2.2); cctv.pitch += (tp - cctv.pitch) * Math.min(1, dt * 2.2);
+    camera.position.copy(cctv.pos); camera.rotation.set(cctv.pitch, cctv.yaw, 0);
+  } else {
+    const rollT = grav < 0 ? Math.PI : 0;
+    P.roll += (rollT - P.roll) * Math.min(1, dt * 5);
+    const k = P.roll / Math.PI, eyeY = lerp(P.eye, P.h - P.eye, k);
+    camera.position.set(camTmp.x, camTmp.y + eyeY, camTmp.z);
+    const sh = stage === 't4' ? clamp((gInt - 16) / 111, 0, 1) * .045 : 0;
+    if (sh) camera.position.add(tmpV.set((Math.random() - .5) * sh, (Math.random() - .5) * sh, 0));
+    camera.rotation.set(P.pitch, P.yaw, P.roll);
+  }
+  if (playerMesh) playerMesh.position.set(camTmp.x, camTmp.y + P.h / 2, camTmp.z);
+  const heavy = stage === 't4' && gInt > 16 ? (gInt - 16) * .08 : 0;
+  const fov = 75 + clamp(hs - BASE, 0, 22) * .9 - heavy;
+  if (Math.abs(camera.fov - fov) > .05) { camera.fov += (fov - camera.fov) * .15; camera.updateProjectionMatrix(); }
+  sun.position.set(camTmp.x + 12, 24, camTmp.z + 8); sun.target.position.set(camTmp.x, 0, camTmp.z);
+  if (target) target.rotation.y += dt;
+
+  if (entityGlitch > 0) entityGlitch -= dt;
+  const late = ['hunt', 'void', 't4', 't5', 't6', 't7', 'reboot'].includes(stage);
+  const ent = stage === 'hunt' || stage === 'void' ? '<i>2</i>' : (entityGlitch > 0 ? (Math.random() < .25 ? '<b>2</b>' : '1') : (Math.random() < (late ? .01 : .002) ? '<i>2</i>' : '1'));
+  let dbg = `GREYBOX 0.9.3 · ${Math.round(fpsS)} fps\npos ${fmt(P.pos.x)} ${fmt(P.pos.y)} ${fmt(P.pos.z)}\nvel <b>${hs.toFixed(1)} m/s</b>${hs > CCD_LIMIT ? '  CCD:off' : ''}\nentità: ${ent}`;
+  if (stage === 't4') dbg += `\ngravity: ${gInt < 0 ? '<i>' + gInt + '</i>' : '<b>' + gInt + '</b>'} (int8)`;
+  if (stage === 't6') dbg += `\nculling: INVERTITO · cadute: ${falls}`;
+  $('#debug').innerHTML = dbg;
+  camera.updateMatrixWorld();
+  pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); fr.setFromProjectionMatrix(pm);
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+
+/* ============ BOOT ============ */
+const resumeCP = CP && ['t4', 't5', 't6', 't7'].includes(CP.cp) ? CP.cp : null;
+const reloaded = CP && CP.cp === 't7reload';
+const bootLines = reloaded ? [
+  ['Greybox Engine 0.9.3', ''],
+  ['ricerca stato salvato ......................... ', 'ok', 'TROVATO'],
+  ['origine: localStorage di questo browser ........ ', 'w', 'SÌ, PROPRIO QUESTO'],
+  ['tempo dal salvataggio .......................... ', 'ok', Math.round((Date.now() - CP.t) / 1000) + ' s'],
+  ['slot trovati ................................... ', 'e', '3 (attesi: 2)'],
+] : [
+  ['Greybox Engine 0.9.3 (build interna, NON DISTRIBUIRE)', ''],
+  ['caricamento scena test_final_FINAL.map ........ ', 'ok', 'OK'],
+  ['compilazione shader ........................... ', 'ok', 'OK'],
+  ['fisica: rilevamento continuo (CCD) ............ ', 'w', 'PARZIALE'],
+  ['asset eliminati: 214 ........................... ', 'w', 'NON RIMOSSI'],
+  ['soggetto di prova: player_capsule_v91 .......... ', 'ok', 'PRONTO'],
+  ['entità nella scena: ............................ ', 'e', '1'],
+];
+if (reloaded) $('#start').textContent = 'APRI SALVATAGGI ▸';
+else if (resumeCP) { $('#start').textContent = `RIPRENDI · TEST 000${resumeCP[1]} ▸`; $('#restart').style.display = 'inline'; }
+(async () => {
+  const log = $('#bootlog');
+  for (const [t, c, r] of bootLines) {
+    log.innerHTML += t; await wait(170 + Math.random() * 250);
+    log.innerHTML += (c ? `<span class="${c}">${r}</span>` : '') + '\n';
+  }
+  $('#start').classList.add('on'); $('#start').focus();
+})();
+$('#mute').addEventListener('change', e => muted = e.target.checked);
+$('#restart').addEventListener('click', () => { clearCP(); location.reload(); });
+$('#start').addEventListener('click', async () => {
+  sfx.init();
+  if ('speechSynthesis' in window && !muted) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
+  if (isTouch) {
+    try { await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }); } catch (e) { }
+    try { await screen.orientation?.lock?.('landscape'); } catch (e) { }
+  }
+  $('#boot').style.display = 'none';
+  if (reloaded) { markUpTo('t7'); setStatus('0007', 'pass'); showSlots(CP.t); return; }
+  if (resumeCP) {
+    markUpTo(resumeCP); stage = 'reboot'; control = true; camMode = 'fp';
+    if (!isTouch) canvas.requestPointerLock?.();
+    chapter2(resumeCP); return;
+  }
+  chapter1();
+});
+</script>
+</body>
+</html>
