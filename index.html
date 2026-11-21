@@ -128,7 +128,7 @@ body.glitch #view,body.glitch #slots{animation:gl .12s steps(2) infinite}
 <body>
 <div id="view"></div>
 
-<div id="cctv"><div class="t"><b>● REC</b> CAM_03 · <span id="cctvT">00:00:00</span></div></div>
+<div id="cctv"><div class="t"><b>● REC</b> <span id="camN">CAM_01</span> · <span id="cctvT">00:00:00</span></div></div>
 <div id="debug" class="hud"></div>
 <div id="suite" class="hud"><h1><span>QA SUITE · test_final_FINAL.map</span><span id="cnt">0/12</span></h1><ul id="list"></ul></div>
 <div id="cross" class="hud"></div>
@@ -355,7 +355,8 @@ function step(dt) {
     f += -joy.y; s += joy.x;
   }
   s *= inv();
-  const yb = camMode === 'cctv' ? camera.rotation.y : P.yaw;
+  if (camMode === 'cctv' && Math.abs(f) + Math.abs(s) < .15) cctv.ctrl = cctv.cams[cctv.cur].base;   // direzione stabile: cambia solo a input rilasciato
+  const yb = camMode === 'cctv' ? cctv.ctrl : P.yaw;
   const sy = Math.sin(yb), cy = Math.cos(yb);
   wish.set(-sy * f + cy * s, 0, -cy * f - sy * s);
   if (wish.lengthSq() > 1) wish.normalize();
@@ -740,20 +741,36 @@ async function test4() {
 // TEST 0005 — la telecamera non è tua
 const MAZE = ["###############", "#T....#.......#", "#####.#.#####.#", "#.....#.#...#.#", "#.#####.#.#.#.#", "#.......#.#...#", "#######.#.#####", "#.....#.#.....#", "#.###.#.#####.#", "#...#...#.....#", "###.#####.#####", "#AAAAAAAAAAAAA#", "#AAAAAAAAAAAAA#", "#AAAAAAASAAAAA#", "###############"];
 const mx = c => (c - 8) * 2, mz = r => (r - 13) * 2;
+const WALL5 = 2.4;
+const CAMS5 = [   // impianto di sorveglianza: una telecamera per zona, montata in alto
+  { name: 'CAM_01', pos: [-1, 10, 6], look: [-1, -2] },
+  { name: 'CAM_02', pos: [-1, 13, 0], look: [-1, -9] },
+  { name: 'CAM_03', pos: [15, 11, -28], look: [6, -19] },
+  { name: 'CAM_04', pos: [-19, 11, -10], look: [-9, -19] },
+];
+function camZone(x, z) {
+  const r = Math.round(z / 2) + 13, c = Math.round(x / 2) + 8;
+  return r >= 11 ? 0 : r >= 7 ? 1 : c >= 7 ? 2 : 3;
+}
 function buildTest5() {
-  clearLevel(); resetEnv(0x07080a, 2, 17, .12, .08); grav = 16;
+  clearLevel(); resetEnv(0x07080a, 10, 42, .38, .35); grav = 16;
   addBox(mx(7), -.5, mz(7), 30, .5, 30, { mat: 'dark', name: 'floor' });
   const lit = new THREE.PointLight(0xdfe8ff, 30, 16, 1.4); lit.position.set(0, 2.8, mz(12)); level.add(lit);
   addBox(-2, -.49, mz(12), 26, .5, 6, { mat: 'floor', collide: false });
   MAZE.forEach((row, r) => [...row].forEach((ch, c) => {
-    if (ch === '#') addBox(mx(c), 0, mz(r), 2, 3.2, 2, { name: `maze_r${r}c${c}`, cast: false });
+    if (ch === '#') addBox(mx(c), 0, mz(r), 2, WALL5, 2, { name: `maze_r${r}c${c}`, cast: false });
     if (ch === 'T') { target = marker(mx(c), .03, mz(r)); }
   }));
-  label(['ZONA NON COPERTA', 'DA TELECAMERA'], 0, 2.4, mz(10) + 1.05, { color: '#ff8080', size: .22 });
+  label(['EXIT_05'], target.position.x, 1.3, target.position.z);
   addCapsuleMesh(true);
+  playerMesh.children[0].intensity = 14; playerMesh.children[0].distance = 9;
   entity = makeEntity(); entity.visible = false;
-  cctv = { pos: new THREE.Vector3(10.4, 2.6, .5), yaw: 0, pitch: -.15 };
-  cctv.base = Math.atan2(-(-2 - cctv.pos.x), -(-12 - cctv.pos.z)); cctv.yaw = cctv.base + .5;
+  const cams = CAMS5.map(k => {
+    const pos = new THREE.Vector3(...k.pos);
+    return { ...k, pos, base: Math.atan2(-(k.look[0] - pos.x), -(k.look[1] - pos.z)) };
+  });
+  cctv = { cams, cur: 0, pend: 0, pendT: 0, ctrl: cams[0].base, yaw: cams[0].base, pitch: -.8, get pos() { return this.cams[this.cur].pos; } };
+  $('#camN').textContent = cams[0].name;
   spawn(0, 0, 0, 0); hitLog = []; hitSeen = {}; renderLog();
 }
 function logHit(name, ax, d) {
@@ -769,8 +786,8 @@ async function test5() {
   stage = 't5'; stageT = 0; flags = {}; setStatus('0005', 'run');
   camMode = 'cctv'; document.body.classList.add('cctv'); $('#clog').classList.add('on');
   await say('<b>TEST 0005.</b> Verifica che la telecamera resti entro i limiti.', { speak: 'Test zero zero zero cinque. Verifica che la telecamera resti entro i limiti.' });
-  await say('Da questo momento la telecamera non è più tua. È della stanza. Telecamera tre. È sempre stata qui.');
-  await say('Raggiungi le coordinate meno quattordici, meno ventiquattro. Ti fornisco il registro delle collisioni. È tutto quello che ti serve. Più o meno.');
+  await say('Da questo momento la telecamera non è più tua. È dell\'impianto. Quattro telecamere. Sono sempre state qui.');
+  await say('Raggiungi le coordinate meno quattordici, meno ventiquattro. Quando cambio telecamera, i comandi restano com\'erano finché non ti fermi. Per gentilezza.');
   say('Il segnale acustico accelera quando ti avvicini. Come un cuore. Il tuo, intendo.');
   await waitFor(() => Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z) < 1.2);
   pass('0005');
@@ -1012,16 +1029,35 @@ function updateStage(dt) {
     const d = Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z);
     beepT -= dt;
     if (beepT <= 0) { sfx.tone(520 + (1 - clamp(d / 30, 0, 1)) * 900, .06, 'sine', .07); beepT = clamp(d / 22, .12, 1.6); }
-    tmpV.set(P.pos.x, P.pos.y + .9, P.pos.z);
-    once('lost', P.pos.z < mz(10) && (!fr.containsPoint(tmpV) || tmpV.distanceTo(camera.position) > 16), () => say('Ti ho perso. Non preoccuparti: io ti sento ancora. Ogni volta che sbatti contro un muro.'));
+    const zn = camZone(P.pos.x, P.pos.z);
+    if (zn !== cctv.cur) {
+      if (zn !== cctv.pend) { cctv.pend = zn; cctv.pendT = 0; }
+      cctv.pendT += dt;
+      if (cctv.pendT > .2) {
+        cctv.cur = zn; const k = cctv.cams[zn];
+        const dx = P.pos.x - k.pos.x, dz = P.pos.z - k.pos.z;
+        cctv.yaw = Math.atan2(-dx, -dz); cctv.pitch = Math.atan2(P.pos.y + .9 - k.pos.y, Math.hypot(dx, dz));
+        $('#camN').textContent = k.name; staticFx(140); sfx.tone(1800, .03, 'square', .05);
+        once('lost', true, () => say('Cambio telecamera. Non preoccuparti: ti seguo. Ti seguo sempre.'));
+      }
+    } else cctv.pend = zn;
     once('cameo', P.pos.z < -14, async () => {
-      await staticFx(380);
-      entity.position.set(7.4, 0, -2.6); entity.rotation.y = Math.atan2(cctv.pos.x - 7.4, cctv.pos.z + 2.6); entity.visible = true; entity.userData.head.lookAt(cctv.pos);
-      sfx.beat(.8); await wait(950);
+      await wait(600);
+      // l'entità compare in un corridoio inquadrato, a qualche metro dal soggetto
+      let spot = null;
+      MAZE.forEach((row, r) => [...row].forEach((ch, c) => {
+        if (spot || ch === '#') return;
+        tmpV.set(mx(c), 1, mz(r)); const d = Math.hypot(tmpV.x - P.pos.x, tmpV.z - P.pos.z);
+        if (d > 3.5 && d < 8 && fr.containsPoint(tmpV)) spot = tmpV.clone();
+      }));
+      if (!spot || stage !== 't5') return;
+      await staticFx(260);
+      entity.position.set(spot.x, 0, spot.z); entity.rotation.y = Math.atan2(cctv.pos.x - spot.x, cctv.pos.z - spot.z); entity.visible = true; entity.userData.head.lookAt(cctv.pos);
+      sfx.beat(.8); await wait(1100);
       await staticFx(300); entity.visible = false;
-      say('…Interferenza. Nella stanza tre non c\'era niente.', { creepy: true });
+      say('…Interferenza. In quel corridoio non c\'era niente.', { creepy: true });
     });
-    once('h1', stageT > 75, () => sayIdle('Suggerimento: il registro dice da che lato hai urtato. Est è a destra della telecamera. Più o meno. Dipende da dove guardo io.'));
+    once('h1', stageT > 75, () => sayIdle('Suggerimento: segui il segnale acustico. E se ti perdi, il registro dice da che lato hai urtato.'));
     $('#cctvT').textContent = new Date().toLocaleTimeString('it-IT');
   }
   if (stage === 't6') {
@@ -1102,10 +1138,10 @@ function frame(now) {
     camera.position.lerpVectors(ext, eye, e);
     camera.lookAt(camTmp.x, camTmp.y + 1 + e * (P.eye - 1), camTmp.z - e * 4);
   } else if (camMode === 'cctv') {
-    const dx = camTmp.x - cctv.pos.x, dz = camTmp.z - cctv.pos.z, dy = camTmp.y + .9 - cctv.pos.y;
-    let ty = Math.atan2(-dx, -dz), d = Math.atan2(Math.sin(ty - cctv.base), Math.cos(ty - cctv.base));
-    ty = cctv.base + clamp(d, -.95, .95);
-    const tp = clamp(Math.atan2(dy, Math.hypot(dx, dz)), -.55, .1);
+    const k = cctv.cams[cctv.cur], dx = camTmp.x - k.pos.x, dz = camTmp.z - k.pos.z, dy = camTmp.y + .9 - k.pos.y;
+    let ty = Math.atan2(-dx, -dz), d = Math.atan2(Math.sin(ty - k.base), Math.cos(ty - k.base));
+    ty = k.base + clamp(d, -1.1, 1.1);
+    const tp = clamp(Math.atan2(dy, Math.hypot(dx, dz)), -1.35, -.2);
     let dyaw = Math.atan2(Math.sin(ty - cctv.yaw), Math.cos(ty - cctv.yaw));
     cctv.yaw += dyaw * Math.min(1, dt * 2.2); cctv.pitch += (tp - cctv.pitch) * Math.min(1, dt * 2.2);
     camera.position.copy(cctv.pos); camera.rotation.set(cctv.pitch, cctv.yaw, 0);
