@@ -1852,6 +1852,7 @@ function openRadio() {
   const dial = W.body.querySelector('#rdial');
   const set = f => {
     W.freq = clamp(Math.round(f * 10) / 10, 88, 108);
+    const near = STATIONS.find(s => Math.abs(s.f - W.freq) <= .5); if (near) W.freq = near.f; // aggancio: col dito non serve precisione
     W.body.querySelector('#rf').textContent = W.freq.toFixed(1); W.body.querySelector('#rneedle').style.left = ((W.freq - 88) / 20 * 100) + '%';
     const st = STATIONS.find(s => Math.abs(s.f - W.freq) <= .2), d = Math.min(...STATIONS.map(s => Math.abs(s.f - W.freq)));
     if (noise.g) noise.g.gain.value = st ? .006 : clamp(.05 - .02 / (d + .3), .015, .05);
@@ -2200,7 +2201,7 @@ async function L7() {
 /* ---- lezione 7: il ritocco ---- */
 async function L8() {
   setLesson(8); allow = []; if (!wins.photo) openPhotos();
-  await doTask({ goal: 'Apra «matrimonio.jpg»', say: `Ce n'è una che non abbiamo guardato. Il matrimonio.`, only: [() => wins.photo && wins.photo.body.querySelector('.ph[data-id="matrimonio.jpg"]')], done: 'photo:matrimonio.jpg', again: `Il matrimonio.` });
+  await doTask({ goal: 'Apra «matrimonio.jpg»', say: `Ce n'è una che non abbiamo guardato. Il matrimonio.`, only: [() => wins.photo ? wins.photo.body.querySelector('.ph[data-id="matrimonio.jpg"]') : $('#ic_photo')], done: 'photo:matrimonio.jpg', again: `Il matrimonio.` });
   await line(`Com'era giovane. Com'era giovane, lei.`, { mood: 'wife' });
   await doTask({ goal: 'Prema «Ritocca»', say: `Questa è la lezione più importante. Si chiama: ritoccare. Prema «Ritocca».`, only: ['#vret'], done: 'open:retouch', again: `«Ritocca», sotto la foto.` });
   wins.view && wins.view.close();
@@ -2223,7 +2224,7 @@ async function L8() {
   const pm = PH.find(p => p.id === 'matrimonio.jpg'); if (pm) pm.c = W.composite();
   const po = PH.find(p => p.id === 'oggi'); if (po) { const np = makePhoto('room', 'her', po.date, po.n); po.c = np.c; }
   W.close(); renderGal(); S.retouched = 1; save();
-  await doTask({ goal: 'Riapra la foto di oggi', say: `Adesso riapra la foto di oggi.`, only: [() => wins.photo && wins.photo.body.querySelector('.ph[data-id="oggi"]')], done: () => seen.has('photo:oggi') && wins.view && wins.view.el.querySelector('.tt').textContent.startsWith('oggi'), again: `La foto di oggi.` });
+  await doTask({ goal: 'Riapra la foto di oggi', say: `Adesso riapra la foto di oggi.`, only: [() => wins.photo ? wins.photo.body.querySelector('.ph[data-id="oggi"]') : $('#ic_photo')], done: () => seen.has('photo:oggi') && wins.view && wins.view.el.querySelector('.tt').textContent.startsWith('oggi'), again: `La foto di oggi.` });
   sfx.heart(.8);
   await line(`Visto? Non è andata via. L'ho solo spostata. Dietro di lei.`, { mood: 'wife' });
   await line(`Non si giri. Nella foto, intendo.`, { mood: 'blank' });
