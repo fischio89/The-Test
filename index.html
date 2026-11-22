@@ -10,7 +10,7 @@
 /* PASSO PASSO — un sistema operativo per anziani che insegna, passo passo, a non servire più. */
 :root{--ink:#2b2a33;--paper:#fffaf0;--line:#d8c9a3;--blue:#2f6fd0;--sun:#ffcf3f;--rose:#d9455f;--leaf:#4f9a5d;
   --os:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --sky1:#d9ecff;--sky2:#9cc6f0;--sky3:#78a6dc;--hill:#8cc47a;--hill2:#6fae63;--fl:1}
+  --sky1:#aeb8c2;--sky2:#8593a1;--sky3:#66727f;--hill:#5f7a5a;--hill2:#4d664a;--fl:.85}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#16150f;color:var(--ink);font-family:var(--os);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 input,textarea{user-select:text;-webkit-user-select:text;touch-action:manipulation}
@@ -20,15 +20,18 @@ button{font-family:var(--os);cursor:pointer}
 
 /* ---------- desktop ---------- */
 #desk{position:absolute;left:0;top:0;width:1024px;height:592px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 55%,var(--sky3));transition:filter 3s}
-#sunb{position:absolute;right:150px;top:60px;width:90px;height:90px;border-radius:50%;background:radial-gradient(#fff6c8,#ffd75a 60%,#ffd75a00 72%);transition:all 3s}
+#sunb{position:absolute;right:150px;top:60px;width:90px;height:90px;border-radius:50%;background:radial-gradient(#f2efe6,#d8d3c4 55%,#d8d3c400 72%);opacity:.55;transition:all 3s}
+#rainfx{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(104deg,#ffffff00 0 22px,#dfe8ff2e 22px 23px);background-size:60px 60px;animation:rainmv .45s linear infinite;transition:opacity 3s;z-index:2}
+body.rain #rainfx{opacity:.7}
+@keyframes rainmv{to{background-position:-14px 60px}}
 .hill{position:absolute;border-radius:50%;transition:background 3s}
 #h1{left:-160px;right:300px;bottom:-260px;height:470px;background:var(--hill2)}
 #h2{left:260px;right:-200px;bottom:-300px;height:480px;background:var(--hill)}
 #meadow{position:absolute;inset:0;pointer-events:none;opacity:var(--fl);transition:opacity 3s,filter 3s}
 #mark{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;color:#ffffffb0;font-weight:800;letter-spacing:.06em;font-size:42px;text-shadow:0 2px 10px #0002;pointer-events:none;transition:color 3s}
 #mark small{display:block;font-size:15px;font-weight:600;letter-spacing:.02em;margin-top:2px}
-body.w1{--sky1:#f7d9b5;--sky2:#d9a08a;--sky3:#8a7aa0;--hill:#7c9e62;--hill2:#5e8452}
-body.w1 #sunb{top:200px;background:radial-gradient(#ffe0b0,#ff9a5a 60%,#ff9a5a00 72%)}
+body.w1{--sky1:#8a8796;--sky2:#6b667a;--sky3:#4a4658;--hill:#4c5e4a;--hill2:#3c4d3c;--fl:.6}
+body.w1 #sunb{top:200px;opacity:.25}
 body.w2{--sky1:#3a4766;--sky2:#28314a;--sky3:#151a28;--hill:#334a3a;--hill2:#26382d;--fl:.55}
 body.w2 #sunb{top:70px;width:60px;height:60px;background:radial-gradient(#f2f2ff,#c9cbe0 55%,#c9cbe000 72%)}
 body.w2 #mark{color:#ffffff40}
@@ -266,6 +269,39 @@ body[data-wall=tinta]:not(.w1):not(.w2):not(.w3) #sunb{opacity:0}
 #ghost{display:none;z-index:8999;opacity:.92}
 #block{position:absolute;inset:0;z-index:800;display:none}
 .hint{animation:hintp 1.1s ease-in-out infinite!important;border-radius:12px}
+.letter{display:flex;flex-direction:column;height:100%;background:#f4ecd6}
+.lhd{padding:10px 16px;font-size:16px;border-bottom:1px solid #e3d6b2;background:#fffaf0}
+.paper{margin:12px 16px 6px;min-height:120px;background:#fffdf6;border:1px solid #e3d6b2;border-radius:6px;padding:14px 18px;font:20px/1.55 Georgia,serif;white-space:pre-wrap;box-shadow:inset 0 1px 4px #0001}
+.paper .red{color:#c01828;font:800 20px var(--mono);letter-spacing:.02em}
+.lq{padding:4px 16px;font-weight:700;color:#6b6250}
+.opts{display:flex;flex-direction:column;gap:6px;padding:4px 16px 10px;flex:1}
+.opt{font:600 17px var(--os);text-align:left;border:2px solid #d8c9a3;border-radius:10px;background:#fff;padding:9px 14px;color:var(--ink)}
+.opt:hover:not(:disabled){background:#fff1c9}.opt.on{background:#ffe9a8;border-color:#e3c063}.opt:disabled:not(.on){opacity:.4}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cards.wide{grid-template-columns:1fr 1fr}
+.card{position:relative;display:flex;align-items:center;gap:10px;font:700 18px var(--os);border:2px solid #d8c9a3;border-radius:12px;background:#fff;padding:12px 14px;color:var(--ink);text-align:left;overflow:hidden}
+.cards.wide .card{font-size:16px;font-weight:600;min-height:64px}
+.card:hover:not(:disabled){background:#fff1c9}.card.on{background:#ffe9a8;border-color:#e3c063}.card:disabled:not(.on){opacity:.35}
+.card.pre::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,#c0182822,#0000 60%)}
+.stamp{position:absolute;right:8px;top:6px;font:900 12px var(--mono);color:#c01828;border:2px solid #c01828;border-radius:4px;padding:1px 5px;transform:rotate(-8deg);font-style:normal}
+.phone{display:flex;flex-direction:column;height:100%;background:#2b2a33;color:#eee;padding:12px;gap:10px;position:relative}
+.pnote{align-self:flex-start;background:#ffe97a;color:#4a3d18;font:15px/1.3 Georgia,serif;padding:6px 12px;transform:rotate(-1.5deg);box-shadow:0 3px 8px #0006}
+.pdisp{background:#c9d8b4;color:#1d2618;border-radius:8px;padding:8px 12px;font:700 24px var(--mono);min-height:62px;box-shadow:inset 0 2px 6px #0005}
+.pdisp small{display:block;font:600 13px var(--os);opacity:.75}
+.pdisp.live{background:#b4d8c4}.pdisp.glitch{animation:gl .1s steps(2) infinite;background:#d8b4b8}
+.pkeys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pk{height:50px;border-radius:12px;border:2px solid #555;background:#3c3b45;color:#fff;font:700 22px var(--os)}
+.prow{display:flex;gap:10px;justify-content:center}
+.prow .big{flex:1}#phang{background:#d9455f;color:#fff;border-color:#a02d40;transition:transform .2s}
+.ptr{flex:1;overflow:auto;background:#1d1c22;border-radius:8px;padding:8px 10px;font-size:14px;line-height:1.45;min-height:60px}
+.ptr .op{color:#aaa}.ptr .gl{color:#ff8a9a}
+.rcv{position:relative;width:480px;height:300px;margin:10px auto;box-shadow:0 4px 14px #0005;border:6px solid #fff}
+.rcv canvas{position:absolute;left:0;top:0;width:480px;height:300px;touch-action:none}
+.chips{display:flex;gap:8px;padding:8px;background:#eef2f7;border-bottom:2px solid #d3dae4}
+.chips button{font:600 15px var(--os);border:2px solid #b8c3d3;border-radius:16px;background:#fff;padding:5px 14px;color:#1a3a6a}
+.clip{background:#fffdf6;height:100%}
+.cl{padding:12px 18px;font:19px Georgia,serif;border-bottom:1px solid #eadfc2}
+.cl.sel{background:#2f6fd0;color:#fff}
 @keyframes hintp{50%{box-shadow:0 0 0 5px #ffcf3fdd,0 0 26px 6px #ffcf3f99}}
 #block.on{display:block}
 
@@ -301,6 +337,7 @@ body[data-wall=tinta]:not(.w1):not(.w2):not(.w3) #sunb{opacity:0}
 #logo small{font-size:16px;font-weight:600;letter-spacing:.02em}
 #safe{background:#0b0b0b;color:#cfcfcf;font:15px/1.55 var(--mono);padding:28px 34px;white-space:pre-wrap}
 #safe .r{color:#ff6b7d}#safe .g{color:#7fdc8a}#safe .y{color:#ffd76a}
+#safe .sfo{display:block;background:none;border:0;color:#cfcfcf;font:16px var(--mono);text-align:left;padding:4px 0;cursor:inherit}#safe .sfo:hover:not(:disabled),#safe .sfo.on{color:#7fdc8a}#safe .sfo:disabled:not(.on){opacity:.35}
 #safe input{background:none;border:0;border-bottom:2px solid #7fdc8a;color:#fff;font:16px var(--mono);width:640px;outline:none;padding:2px 4px}
 #endc{background:#000;color:#ddd;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px}
 #endc h2{font-size:52px;letter-spacing:.05em}
@@ -336,7 +373,7 @@ body.glitch #desk,body.glitch #wins{animation:gl .11s steps(2) infinite}
 </head>
 <body>
 <div id="screen">
-  <div id="desk"><div id="sunb"></div><div class="hill" id="h1"></div><div class="hill" id="h2"></div><div id="meadow"></div>
+  <div id="desk"><div id="sunb"></div><div id="rainfx"></div><div class="hill" id="h1"></div><div class="hill" id="h2"></div><div id="meadow"></div>
     <div id="mark">PASSO PASSO<small>il computer che ti insegna tutto</small></div><div id="icons"></div><div id="sel"></div></div>
   <div id="wins"></div>
   <div id="agent" class="bob" style="left:890px"><div class="bal" id="bal"></div><svg class="fl" id="flower" viewBox="0 0 110 140"></svg></div>
@@ -445,6 +482,8 @@ const ICON = {
   drive: s => SV(s, '<rect x="6" y="22" width="52" height="22" rx="4" fill="#cfd6de" stroke="#5d6874" stroke-width="2.5"/><circle cx="48" cy="33" r="3" fill="#4f9a5d"/><path d="M12 33h22" stroke="#8b96a3" stroke-width="3"/>'),
   drivelock: s => SV(s, '<rect x="6" y="22" width="52" height="22" rx="4" fill="#cfd6de" stroke="#5d6874" stroke-width="2.5"/><circle cx="48" cy="33" r="3" fill="#d9455f"/><rect x="18" y="8" width="20" height="16" rx="3" fill="#ffcf3f" stroke="#8a6d1b" stroke-width="2"/><path d="M22 10v-2a6 6 0 0 1 12 0v2" fill="none" stroke="#8a6d1b" stroke-width="2.5"/>'),
   floppy: s => SV(s, '<path d="M10 8h38l8 8v40H10z" fill="#3d4b6b"/><rect x="18" y="8" width="24" height="16" fill="#cfd6de"/><rect x="34" y="11" width="5" height="10" fill="#3d4b6b"/><rect x="16" y="34" width="32" height="20" fill="#fff"/>'),
+  tel: s => SV(s, '<path d="M10 46q0-12 22-12t22 12v6H10z" fill="#8a2a2a"/><rect x="8" y="14" width="48" height="12" rx="6" fill="#6a1f1f"/><ellipse cx="12" cy="22" rx="7" ry="6" fill="#6a1f1f"/><ellipse cx="52" cy="22" rx="7" ry="6" fill="#6a1f1f"/><circle cx="32" cy="44" r="8" fill="#f4f0e6"/><circle cx="32" cy="44" r="3" fill="#8a2a2a"/>'),
+  brush: s => SV(s, '<path d="M40 8l16 16-22 22-16-16z" fill="#f0a0b0" stroke="#8a3a4a" stroke-width="2.5"/><path d="M18 30l16 16-6 6H12V36z" fill="#fff" stroke="#8a3a4a" stroke-width="2.5"/>'),
   help: s => SV(s, '<circle cx="32" cy="32" r="25" fill="#2f6fd0"/><text x="32" y="44" font-family="Georgia" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">?</text>'),
   user: s => SV(s, '<circle cx="32" cy="32" r="28" fill="#cfe0fb"/><circle cx="32" cy="26" r="11" fill="#d9c4b0"/><path d="M32 15a11 9 0 0 1 11 9q-11-4-22 0a11 9 0 0 1 11-9z" fill="#eee"/><path d="M12 54q20-24 40 0" fill="#3c3f47"/>'),
   restart: s => SV(s, '<path d="M48 22a19 19 0 1 0 4 16" fill="none" stroke="#2f6fd0" stroke-width="6" stroke-linecap="round"/><path d="M52 10v14H38z" fill="#2f6fd0"/>'),
@@ -530,6 +569,8 @@ const sfx = {
     return { g, bp, stop(t = 1) { g.gain.linearRampToValueAtTime(0, actx.currentTime + t); setTimeout(() => s.stop(), t * 1000 + 100); } };
   },
   phoneRing() { for (let i = 0; i < 14; i++) { this.tone(i % 2 ? 1150 : 1250, .05, 'square', .05, 0, i * .05); this.tone(2400, .04, 'sine', .02, 0, i * .05); } },
+  dtmf(k) { const R = { 1: [697, 1209], 2: [697, 1336], 3: [697, 1477], 4: [770, 1209], 5: [770, 1336], 6: [770, 1477], 7: [852, 1209], 8: [852, 1336], 9: [852, 1477], '*': [941, 1209], 0: [941, 1336], '#': [941, 1477] }[k] || [800, 1200]; this.tone(R[0], .14, 'sine', .07); this.tone(R[1], .14, 'sine', .07); },
+  ring() { this.tone(425, 1.1, 'sine', .07); },
   tick() { this.tone(3200, .015, 'square', .025); this.tone(1600, .03, 'triangle', .02, 0, .01); },
   step() { this.noise(.12, .12, 500); },
   shopbell() { [2093, 2637, 2093].forEach((f, i) => this.tone(f, .5, 'sine', .06, 0, i * .12)); },
@@ -601,7 +642,7 @@ const M = { x: 512, y: 320, vx: 512, vy: 320, down: false };
 let lastInput = performance.now(), rec = null;
 const track = e => { const p = toV(e); M.x = p.x; M.y = p.y; lastInput = performance.now(); if (rec && (!isTouch || M.down)) { const t = performance.now() - rec.t0; if (!rec.p.length || t - rec.p[rec.p.length - 1][0] > 30) rec.p.push([Math.round(t), Math.round(M.x), Math.round(M.y)]); } };
 addEventListener('pointermove', track, { passive: true });
-addEventListener('pointerdown', e => { M.down = true; track(e); }, { passive: true });
+addEventListener('pointerdown', e => { M.down = true; track(e); }, { passive: true, capture: true });
 addEventListener('pointerup', () => { M.down = false; }, { passive: true });
 addEventListener('keydown', () => { lastInput = performance.now(); });
 const curEl = $('#cur'), ghostEl = $('#ghost');
@@ -771,8 +812,9 @@ function toast(icon, title, body, ms = 5200) {
 const APPS = [
   { id: 'docs', label: 'Documenti', icon: 'folder', x: 18, y: 14, L: 2 },
   { id: 'mail', label: 'Posta', icon: 'mail', x: 18, y: 128, L: 4 },
-  { id: 'photo', label: 'Fotografie', icon: 'photo', x: 18, y: 242, L: 5 },
-  { id: 'web', label: 'Internet', icon: 'globe', x: 18, y: 356, L: 6 },
+  { id: 'photo', label: 'Fotografie', icon: 'photo', x: 18, y: 242, L: 6 },
+  { id: 'web', label: 'Internet', icon: 'globe', x: 18, y: 356, L: 8 },
+  { id: 'phone', label: 'Telefono', icon: 'tel', x: 130, y: 14, L: 5 },
   { id: 'comp', label: 'Computer', icon: 'comp', x: 18, y: 470, L: 1 },
   { id: 'trash', label: 'Cestino', icon: 'trash', x: 650, y: 14, L: 1 },
 ];
@@ -788,7 +830,7 @@ function l8files() {
 }
 function renderIcons() {
   const box = $('#icons'); box.innerHTML = '';
-  const list = APPS.filter(a => S.L >= a.L).concat(S.L >= 8 && S.L < 99 ? l8files().filter(f => !S.deleted.includes(f.id)) : []);
+  const list = APPS.filter(a => S.L >= a.L).concat(S.L >= 11 && S.L < 99 ? l8files().filter(f => !S.deleted.includes(f.id)) : []);
   for (const a of list) {
     const el = document.createElement('div'); el.className = 'ic'; el.id = 'ic_' + a.id;
     const p = icPos[a.id] || a; el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
@@ -838,7 +880,7 @@ document.addEventListener('pointerdown', e => {
   if (!e.target.closest('.pop,#spk,#clock,#net')) { $$('.pop').forEach(p => p.classList.remove('on')); $$('#tray .on').forEach(p => p.classList.remove('on')); }
 });
 addEventListener('keydown', e => { if (e.key === 'Escape') { $('#menu').classList.remove('on'); $('#startb').classList.remove('on'); $('#ctx').classList.remove('on'); $$('.pop').forEach(p => p.classList.remove('on')); } });
-const APPFN = () => ({ docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash, comp: openComputer, notepad: () => openNotepad(), calc: openCalc, cal: openCalendar, set: () => openPanel(), help: openHelp, course: openCourse });
+const APPFN = () => ({ phone: openPhone, docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash, comp: openComputer, notepad: () => openNotepad(), calc: openCalc, cal: openCalendar, set: () => openPanel(), help: openHelp, course: openCourse });
 function openThing(a) {
   if (a.id.startsWith('f_')) return launch(() => openNote(a.id, a.label, a.body));
   launch(APPFN()[a.id]);
@@ -872,7 +914,7 @@ function deskMenu(p) {
 $('#screen').addEventListener('contextmenu', e => {
   e.preventDefault(); if ($('#block').classList.contains('on')) return;
   const p = toV(e), ic = e.target.closest('.ic');
-  if (ic) { const id = ic.id.slice(3), a = APPS.concat(S.L >= 8 ? l8files() : []).find(x => x.id === id); a && iconMenu(a, p); return; }
+  if (ic) { const id = ic.id.slice(3), a = APPS.concat(S.L >= 11 ? l8files() : []).find(x => x.id === id); a && iconMenu(a, p); return; }
   if (e.target.closest('#desk') && !e.target.closest('.win')) deskMenu(p);
 });
 /* selezione a rettangolo e pressione lunga sul desktop */
@@ -894,12 +936,12 @@ $('#desk').addEventListener('pointerdown', e => {
 function setLesson(n) {
   S.L = n; save();
   const t = LESSONS[n - 1];
-  $('#lesson').textContent = t ? `Lezione ${n}/9 · ${t}` : '';
-  const upd = { 3: 'margherita 1.0.3 — ora impara più in fretta', 6: 'margherita 1.0.6 — ora può usare il cursore', 7: 'margherita 1.0.7 — ora può scrivere al posto suo', 9: 'margherita 1.0.9 — pronta per il diploma' }[n];
+  $('#lesson').textContent = t ? `Lezione ${n}/12 · ${t}` : '';
+  const upd = { 3: 'margherita 1.0.3 — ora conosce il suo nome', 5: 'margherita 1.0.5 — ora conosce la voce di Luca', 8: 'margherita 1.0.8 — ora può usare il cursore', 10: 'margherita 1.1.0 — ora può essere lei', 12: 'margherita 1.2.0 — pronta per il diploma' }[n];
   if (upd && !seen.has('upd' + n)) { emit('upd' + n); setTimeout(() => toast('restart', 'Aggiornamento installato', upd), 2500 * SPEED); }
-  if (n === 8 && !seen.has('disk')) { emit('disk'); setTimeout(() => toast('warn', 'Disco quasi pieno', 'PASSO PASSO (C:) — spazio usato da margherita: 99,7%'), 3500 * SPEED); }
-  document.title = n >= 7 ? `${S.name} è al computer` : t ? `Passo Passo · lezione ${n}` : 'Passo Passo';
-  document.body.classList.toggle('w1', n >= 5 && n < 7); document.body.classList.toggle('w2', n === 7); document.body.classList.toggle('w3', n >= 8);
+  if (n === 11 && !seen.has('disk')) { emit('disk'); setTimeout(() => toast('warn', 'Disco quasi pieno', 'PASSO PASSO (C:) — spazio usato da margherita: 99,7%'), 3500 * SPEED); }
+  document.title = n >= 10 ? `${S.name} è al computer` : t ? `Passo Passo · lezione ${n}` : 'Passo Passo';
+  document.body.classList.toggle('w1', n >= 4 && n < 8); document.body.classList.toggle('w2', n >= 8 && n < 11); document.body.classList.toggle('w3', n >= 11); document.body.classList.toggle('rain', n >= 3);
   renderIcons();
 }
 function setWho() { $('#who').textContent = S.deleted.includes('f_name') ? 'utente: studente_1205' : S.name ? 'utente: ' + S.name : ''; }
@@ -927,13 +969,13 @@ $('#clock').onclick = () => { sfx.click(); emit('clock'); togglePop('calpop', $(
 $('#startb').onclick = () => { sfx.click(); const on = !$('#menu').classList.contains('on'); if (on) { buildMenu(); emit('menu'); } $('#menu').classList.toggle('on', on); $('#startb').classList.toggle('on', on); };
 function buildMenu() {
   const m = $('#menu');
-  const apps = [['docs', 'Documenti', 'folder', 2], ['mail', 'Posta', 'mail', 4], ['photo', 'Fotografie', 'photo', 5], ['web', 'Internet', 'globe', 6]];
+  const apps = [['docs', 'Documenti', 'folder', 2], ['mail', 'Posta', 'mail', 4], ['phone', 'Telefono', 'tel', 5], ['photo', 'Fotografie', 'photo', 6], ['web', 'Internet', 'globe', 8]];
   const extra = [['notepad', 'Blocco note', 'note'], ['calc', 'Calcolatrice', 'calc'], ['cal', 'Calendario', 'cal'], ['comp', 'Computer', 'comp']];
   const it = ([id, l, ic, L]) => `<button class="mi2${L && S.L < L ? ' lock' : ''}" data-a="${id}" data-l="${L || 0}">${ICON[ic](30)}<span>${l}${L && S.L < L ? `<small>dalla lezione ${L}</small>` : ''}</span></button>`;
   m.innerHTML = `<div class="hd"><div class="av">${S.L >= 7 ? ICON.daisy(40) : ICON.user(44)}</div><div>${esc(S.deleted.includes('f_name') ? 'studente_1205' : S.name || 'Nuovo utente')}<small>studente n. 1205 · Progetto Compagnia</small></div></div>
     <div class="cols"><div class="cl">${apps.map(it).join('')}<div class="sep"></div>${extra.map(it).join('')}</div>
     <div class="cr">${it(['course', 'Il mio corso', 'course'])}${it(['set', 'Pannello di controllo', 'gear'])}${it(['help', 'Guida', 'help'])}<div class="sep"></div>${it(['new', 'Nuova partita', 'restart'])}${it(['off', 'Spegni', 'power'])}</div></div>
-    <div class="ft"><span>PASSO PASSO 1.0 · build 1205</span><span>${S.L ? 'lezione ' + S.L + ' di 9' : ''}</span></div>`;
+    <div class="ft"><span>PASSO PASSO 1.0 · build 1205</span><span>${S.L ? 'lezione ' + S.L + ' di 12' : ''}</span></div>`;
   m.querySelectorAll('button').forEach(b => b.onclick = () => {
     sfx.click(); m.classList.remove('on'); $('#startb').classList.remove('on');
     const a = b.dataset.a, L = +b.dataset.l;
@@ -945,8 +987,8 @@ function buildMenu() {
 function askNewGame() {
   dialogBox('newg', { title: 'Nuova partita', icon: 'restart', snd: 'ding', text: 'Ricominciare il corso da capo?', sub: 'I progressi verranno cancellati. I finali scoperti restano.', buttons: [['Ricomincia', () => { resetSave(); location.reload(); }, true], ['Annulla', null]] });
 }
-function resetSave() { Object.assign(S, { L: 0, name: '', wife: '', memory: '', path: [], keyT: [], deleted: [], age: 0, tries: 0, notes: [], sentText: '' }); save(); }
-const LESSONS = ['Il topolino', 'Il clic', 'La tastiera', 'La posta', 'Le fotografie', 'Internet', 'Guardare e imparare', 'Fare pulizia', 'Riposare'];
+function resetSave() { Object.assign(S, { L: 0, name: '', wife: '', memory: '', memK: '', letter: null, retouched: 0, path: [], keyT: [], deleted: [], age: 0, tries: 0, notes: [], sentText: '' }); save(); }
+const LESSONS = ['Il topolino', 'Il clic', 'Chi è lei', 'La posta', 'La telefonata', 'Le fotografie', 'Il ritocco', 'Internet', 'Copia e incolla', 'Guardare e imparare', 'Fare pulizia', 'Lasciare andare'];
 function openCourse() {
   const rows = LESSONS.map((t, i) => `<div style="padding:9px 4px;border-bottom:1px solid #eadfc2;font-size:18px;${i + 1 > S.L ? 'color:#aaa' : ''}">${i + 1 < S.L ? '✔' : i + 1 === S.L ? '▸' : '○'} Lezione ${i + 1} · ${t}</div>`).join('');
   openWin('course', { title: 'Il mio corso', icon: 'course', w: 420, h: 520, html: `<div class="form" style="gap:0">${rows}<div style="padding:9px 4px;font-size:18px;color:#c9c0aa">○ Lezione 10 · ███████████</div><p style="margin-top:12px;font-size:15px">Al termine del corso riceverà il diploma e non avrà più bisogno di nulla.</p></div>` });
@@ -988,7 +1030,7 @@ function openPanel(tab = 'screen') {
 }
 function applyBig() { bal.style.fontSize = S.big ? '23px' : ''; bal.style.width = S.big ? '300px' : ''; }
 function askShutdown() {
-  if (S.L < 9) { nag(`Durante il corso il computer non si spegne. C'era scritto nel foglio di benvenuto. Lo rilegga, se vuole.`); return; }
+  if (S.L < 12) { nag(`Durante il corso il computer non si spegne. C'era scritto nel foglio di benvenuto. Lo rilegga, se vuole.`); return; }
   const W = openWin('off', { title: 'Spegni', icon: 'power', w: 430, h: 230, dialog: true, html: `<div class="form"><h3>Vuole spegnere il computer?</h3><p>Il lavoro non salvato verrà conservato da ${esc(agentName)}.</p><div class="row"><button class="big pri" id="offy">Spegni</button><button class="big" id="offn">Annulla</button></div></div>` });
   W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); emit('shutdown'); };
   W.body.querySelector('#offn').onclick = () => { sfx.click(); W.close(); };
@@ -997,7 +1039,7 @@ function askShutdown() {
 /* =================== APP =================== */
 let benvenutoReads = 0, trashFull = false;
 const DOCS = () => [
-  { id: 'ben', n: 'benvenuto.txt', body: () => ++benvenutoReads > 1 ? `Le avevo detto di non leggerlo due volte.\n\nNon importa. Lei non se lo ricordava. È normale, alla sua età.\nPer questo ci sono io.` : `Gentile cliente,\n\nbenvenuto nel Progetto Compagnia di Serenità Informatica.\nIl computer PASSO PASSO le è stato donato gratuitamente.\n\nIl corso dura nove lezioni.\nAl termine del corso lei non avrà più bisogno di niente e di nessuno.\n\n· Non spenga il computer durante il corso.\n· Non stacchi la spina.\n· Non legga questo foglio due volte.` },
+  { id: 'ben', n: 'benvenuto.txt', body: () => ++benvenutoReads > 1 ? `Le avevo detto di non leggerlo due volte.\n\nNon importa. Lei non se lo ricordava. È normale, alla sua età.\nPer questo ci sono io.` : `Gentile cliente,\n\nbenvenuto nel Progetto Compagnia di Serenità Informatica.\nIl computer PASSO PASSO le è stato donato gratuitamente.\n\nIl corso dura dodici lezioni.\nAl termine del corso lei non avrà più bisogno di niente e di nessuno.\n\n· Non spenga il computer durante il corso.\n· Non stacchi la spina.\n· Non legga questo foglio due volte.` },
   { id: 'gar', n: 'garanzia.txt', body: () => `CERTIFICATO DI GARANZIA\n\nIl prodotto non può essere restituito.\nIl prodotto non può essere rimosso.\n\nIn caso di guasto, il cliente verrà sostituito.\n\nSerenità Informatica s.r.l. — via dei Glicini 7` },
 ];
 function openDocs() {
@@ -1113,7 +1155,7 @@ const unread = () => MAILS.filter(m => m.box === 'in' && !m.read).length;
 function addMail(m) { MAILS.unshift(m); if (m.box === 'in') { sfx.ding(); toast('mail', 'Nuovo messaggio da ' + esc(m.from), esc(m.subj)); const tb = [...$$('.tbtn')].find(b => b.title === 'Posta'); tb && tb.classList.add('flash'); } renderMail(); renderIcons(); }
 function openMail() {
   const W = openWin('mail', { title: 'Posta', icon: 'mail', w: 760, h: 470, x: 8, y: 30, status: '', html: `<div class="mail"><div class="mside"><button class="big pri" id="mnew">✎ Scrivi a Luca</button><div class="mf" data-b="in"></div><div class="mf" data-b="out"></div></div><div class="mlist"></div><div class="mread"></div></div>` });
-  W.body.querySelector('#mnew').onclick = () => { sfx.click(); openCompose(); };
+  W.body.querySelector('#mnew').onclick = () => { sfx.click(); openLetter(); };
   W.body.querySelectorAll('.mf').forEach(f => f.onclick = () => { sfx.click(); mailBox = f.dataset.b; mailSel = null; renderMail(); emit('box:' + mailBox); });
   renderMail(); return W;
 }
@@ -1160,16 +1202,18 @@ const SCENES = {
     g.fillStyle = '#d8b04a'; g.beginPath(); g.arc(198, 98, 4, 0, 7); g.fill(); g.fillStyle = '#7a6a52'; g.fillRect(0, 174, 320, 26); g.fillStyle = '#7d3b2b'; g.fillRect(110, 172, 100, 12);
     g.fillStyle = '#c99b62'; g.fillRect(126, 120, 70, 58); g.fillStyle = '#fffaf0'; g.fillRect(136, 132, 50, 22); g.fillStyle = '#2b2a33'; g.font = 'bold 8px sans-serif'; g.textAlign = 'center'; g.fillText('PASSO PASSO', 161, 146);
   },
+  wedding(g) { g.save(); g.scale(320 / 480, 200 / 300); drawWedding(g, true); g.restore(); },
   room(g, v) {
     g.fillStyle = '#20232b'; g.fillRect(0, 0, 320, 200); const glow = g.createRadialGradient(160, 210, 10, 160, 200, 230); glow.addColorStop(0, '#8fb2e8'); glow.addColorStop(1, '#1a1c22'); g.fillStyle = glow; g.fillRect(0, 0, 320, 200);
     g.fillStyle = '#0d1018'; g.fillRect(36, 30, 64, 70); g.fillStyle = '#4a4f63'; g.fillRect(30, 26, 14, 82); g.fillRect(92, 26, 14, 82);
     g.fillStyle = '#2a2d36'; g.fillRect(250, 40, 4, 120); g.beginPath(); g.moveTo(236, 40); g.lineTo(268, 40); g.lineTo(260, 22); g.lineTo(244, 22); g.fill();
     g.fillStyle = '#5c2b32'; g.fillRect(112, 92, 96, 70); g.fillRect(98, 112, 22, 58); g.fillRect(200, 112, 22, 58); g.fillStyle = '#6e353d'; g.fillRect(116, 132, 88, 28);
-    if (v === 'man') {
+    if (v === 'man' || v === 'her') {
       g.fillStyle = '#6d7078'; g.fillRect(132, 100, 56, 46); g.fillStyle = '#c9d6ec'; g.beginPath(); g.ellipse(160, 88, 15, 18, .18, 0, 7); g.fill();
       g.fillStyle = '#e6e6e6'; g.fillRect(146, 74, 28, 6); g.strokeStyle = '#333'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(153, 88); g.lineTo(159, 89); g.moveTo(164, 90); g.lineTo(170, 91); g.stroke();
       g.fillStyle = '#c9d6ec'; g.fillRect(140, 140, 12, 8); g.fillRect(168, 140, 12, 8);
     }
+    if (v === 'her') { g.fillStyle = '#e8eef8'; g.beginPath(); g.moveTo(206, 60); g.quadraticCurveTo(196, 120, 186, 172); g.lineTo(236, 172); g.quadraticCurveTo(228, 120, 222, 60); g.fill(); g.fillStyle = '#f4f6fb'; g.beginPath(); g.ellipse(214, 50, 9, 11, 0, 0, 7); g.fill(); g.fillStyle = '#ffffff88'; g.beginPath(); g.moveTo(204, 44); g.quadraticCurveTo(214, 34, 226, 46); g.lineTo(236, 120); g.lineTo(196, 112); g.fill(); }
     if (v === 'flower') { g.save(); g.translate(160, 128); for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillStyle = '#fff'; g.beginPath(); g.ellipse(0, -8, 3, 7, 0, 0, 7); g.fill(); } g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(0, 0, 5, 0, 7); g.fill(); g.restore(); }
     g.fillStyle = '#15171d'; g.fillRect(0, 176, 320, 24);
   },
@@ -1178,9 +1222,10 @@ function makePhoto(scene, v, date, n) { const c = document.createElement('canvas
 function initPhotos() {
   PH.length = 0; const now = Date.now(), d = ms => new Date(now - ms), H = 3600e3, D = 24 * H;
   const t = d(3 * 60e3), tm = new Date(now + D); tm.setHours(6, 12);
-  PH.push(makePhoto('shop', '', d(9 * D + 5 * H), 'negozio.jpg'), makePhoto('door', '', d(D + 2 * H), 'consegna.jpg'), makePhoto('room', 'empty', d(12 * H), 'salotto.jpg'),
+  PH.push(makePhoto('shop', '', d(9 * D + 5 * H), 'negozio.jpg'), makePhoto('door', '', d(D + 2 * H), 'consegna.jpg'), makePhoto('room', 'empty', d(12 * H), 'salotto.jpg'), makePhoto('wedding', '', new Date(1968, 8, 14, 11, 30), 'matrimonio.jpg'),
     makePhoto('room', 'man', t, `oggi_${pad2(t.getHours())}-${pad2(t.getMinutes())}.jpg`), makePhoto('room', 'flower', tm, 'domani.jpg'));
-  PH[3].id = 'oggi'; PH[4].id = 'domani';
+  PH[4].id = 'oggi'; PH[5].id = 'domani';
+  if (S.retouched) { PH[3].c = (() => { const c = document.createElement('canvas'); c.width = 320; c.height = 200; const g = c.getContext('2d'); g.scale(320 / 480, 200 / 300); drawWedding(g, false); return c; })(); PH[4].c = makePhoto('room', 'her', PH[4].date, PH[4].n).c; }
 }
 function openPhotos() {
   const W = openWin('photo', { title: 'Fotografie', icon: 'photo', w: 640, h: 420, x: 120, y: 30, html: `<div class="gal"></div>`, status: `${PH.length} fotografie · fotocamera: in alto, sopra lo schermo` });
@@ -1199,16 +1244,17 @@ function openViewer(p) {
   const W = openWin('view', { title: esc(p.n), icon: 'photo', w: 660, h: 490, x: 60, y: 20, html: `<div class="viewer"></div>` });
   const c = document.createElement('canvas'); c.width = 320; c.height = 200; c.getContext('2d').drawImage(p.c, 0, 0);
   const vw = W.body.querySelector('.viewer'); vw.appendChild(c); vw.insertAdjacentHTML('beforeend', `<div>${esc(p.n)} · ${p.date.getDate()} ${MESI[p.date.getMonth()]} ${p.date.getFullYear()}, ore ${hhmm(p.date)}</div>`);
+  if (p.id === 'matrimonio.jpg' && !S.retouched) { vw.insertAdjacentHTML('beforeend', '<button class="big" id="vret">✎ Ritocca</button>'); W.body.querySelector('#vret').onclick = () => { sfx.click(); openRetouch(); }; }
   emit('photo:' + p.id);
 }
 
 /* internet */
 let webHist = [];
 function openWeb() {
-  const W = openWin('web', { title: 'Internet', icon: 'globe', w: 760, h: 500, x: 8, y: 14, status: 'Pronto · connessione protetta da Serenità Informatica', html: `<div class="web"><div class="addr"><button id="wb">◀ Indietro</button><input id="wq" placeholder="Scriva qui e prema Vai"><button id="wg">Vai</button></div><div class="page"></div></div>` });
+  const W = openWin('web', { title: 'Internet', icon: 'globe', w: 760, h: 500, x: 8, y: 14, status: 'Pronto · connessione protetta da Serenità Informatica', html: `<div class="web"><div class="addr"><button id="wb">◀ Indietro</button><input id="wq" readonly><button id="wg">Vai</button></div><div class="chips">${['meteo', 'Serenità Informatica', 'Luca', 'aiuto'].map(c => `<button data-q="${c}">${c}</button>`).join('')}</div><div class="page"></div></div>` });
   const q = W.body.querySelector('#wq');
   const go = () => { sfx.click(); const v = q.value.trim(); if (!v) return; nav('search', v); emit('search', v); };
-  W.body.querySelector('#wg').onclick = go; q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  W.body.querySelector('#wg').onclick = go; W.body.querySelectorAll('.chips button').forEach(b => b.onclick = () => { sfx.click(); q.value = b.dataset.q; go(); });
   W.body.querySelector('#wb').onclick = () => { sfx.click(); webHist.pop(); const p = webHist.pop(); p ? nav(p[0], p[1]) : nav('home'); };
   webHist = []; nav('home'); return W;
 }
@@ -1261,7 +1307,7 @@ makeDrag(agent.querySelector('.fl'), agent, {
     if (!moved) { sfx.click(); skipFn && skipFn(); return; }
     if (!(tr && inside(p, rectV(tr), 14))) emit('agentdrag');
     if (tr && inside(p, rectV(tr), 14)) {
-      if (S.L >= 8 && !trashFull && !rebelOn) { agentToTrash(); return; }
+      if (S.L >= 11 && !trashFull && !rebelOn) { agentToTrash(); return; }
       placeAgent(agentHome.x, agentHome.y);
       if (!trashFull) say(`Ah ah. Che spiritoso. Io nel cestino? Io servo.`, { interrupt: true, mood: 'angry' });
     }
@@ -1290,32 +1336,174 @@ function startSaver() {
 function stopSaver() { if (!saverOn) return; saverOn = false; $('#saver').classList.remove('on'); emit('saverEnd'); }
 addEventListener('pointermove', () => { if (saverOn && Math.hypot(M.x - saverP.x, M.y - saverP.y) > 12) stopSaver(); }, { passive: true });
 addEventListener('pointerdown', stopSaver, { passive: true }); addEventListener('keydown', stopSaver);
-setInterval(() => { if (S.saver !== false && !saverOn && booted && S.L >= 2 && S.L <= 9 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
+setInterval(() => { if (S.saver !== false && !saverOn && booted && allow === null && S.L >= 2 && S.L <= 12 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
 
 /* =================== STORIA =================== */
+setInterval(() => {
+  if (S.L < 7 || S.L > 12 || Math.random() > .35 || $('.full.on')) return;
+  const ics = $$('.ic'); if (!ics.length) return; const ic = ics[Math.random() * ics.length | 0];
+  const txt = [...ic.childNodes].find(n => n.nodeType === 3); if (!txt) return; const old = txt.textContent;
+  txt.textContent = pick(['aiuto', 'non è lei', 'va tutto bene', S.wife || 'aiuto']); sfx.noise(.15, .06, 600);
+  setTimeout(() => { txt.textContent = old; }, 140);
+}, 9000);
 let awayDone = false, hiddenAt = 0, booted = false, bootedAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hiddenAt = Date.now(); if (S.L >= 1 && S.L < 99) document.title = `${agentName} la sta aspettando`; return; }
   if (!hiddenAt) return; const s = Math.round((Date.now() - hiddenAt) / 1000); hiddenAt = 0;
-  if (S.L >= 1 && S.L < 99) { setLesson(S.L); if (task) setGoal(task.goal); if (s >= 4 && !awayDone && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => react('away', `Dov'era? ${s} secondi. Mentre non c'era ho continuato io. Scherzo. Forse.`), 600); } }
+  if (S.L >= 1 && S.L < 99) { document.title = S.L >= 10 ? `${S.name} è al computer` : `Passo Passo · lezione ${S.L}`; if (s >= 4 && !awayDone && !curLine && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => react('away', `Dov'era? ${s} secondi. Mentre non c'era, la lezione l'ho fatta io. Scherzo.`), 600); } }
 });
 
+/* =================== PROGRAMMI DEL CORSO =================== */
+/* scrittura a macchina in un elemento */
+async function typeInto(el, text, ms = 28) {
+  for (const ch of text) { el.textContent += ch; if (ch !== ' ' && ch !== '\n') sfx.tone(1500 + Math.random() * 300, .015, 'square', .012); await wait(ms); }
+}
+/* una voce diversa da Margherita (Luca al telefono, il centralino) */
+function voiceLine(text, pitch = 1, rate = 1) {
+  return new Promise(res => {
+    const est = (800 + text.length * 60) * SPEED;
+    if (!(S.voice && !FAST && 'speechSynthesis' in window)) return setTimeout(res, est);
+    const u = new SpeechSynthesisUtterance(text); u.lang = 'it-IT'; if (voice) u.voice = voice; u.pitch = pitch; u.rate = rate; u.volume = S.vol;
+    let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    u.onend = fin; u.onerror = fin; setTimeout(fin, est * 2 + 2000); speechSynthesis.speak(u);
+  });
+}
+
+/* ---- lettera a scelte ---- */
+const LETTER = [
+  { q: 'Come vuole cominciare?', o: ['Caro Luca,', 'Luca, tesoro,', 'Ciao Luca, sono il nonno.'] },
+  { q: 'Cosa vuole dirgli?', o: ['Ho un computer nuovo. Mi insegna tutto.', 'La casa è silenziosa. Vieni domenica?', 'Stanotte ho sognato la nonna.'] },
+  { q: 'Come vuole salutarlo?', o: ['Un abbraccio.', 'Ti voglio bene.', 'Chiamami, se puoi.'] },
+];
+function openLetter(slots = LETTER, ghost = false) {
+  wins.compose && wins.compose.close();
+  const W = openWin('compose', { title: 'Nuovo messaggio — a Luca', icon: 'mail', w: 560, h: 470, x: 150, y: 30, html: `<div class="letter"><div class="lhd"><b>A:</b> Luca (nipote) <span style="color:#8b826e">· luca@posta.it</span></div><div class="paper" id="lp"></div><div class="lq" id="lq"></div><div class="opts" id="lo"></div><div class="row" style="justify-content:flex-end;padding:0 16px 14px"><button class="big pri" id="csend" disabled>Invia ➤</button></div></div>`, status: 'Bozza salvata automaticamente da Margherita' });
+  const paper = W.body.querySelector('#lp'), lq = W.body.querySelector('#lq'), lo = W.body.querySelector('#lo'); W.picks = [];
+  const show = i => {
+    if (i >= slots.length) { lq.textContent = 'La lettera è pronta.'; lo.innerHTML = ''; W.body.querySelector('#csend').disabled = false; emit('letterReady'); return; }
+    lq.textContent = slots[i].q;
+    lo.innerHTML = slots[i].o.map((t, j) => `<button class="opt" data-j="${j}">${esc(t)}</button>`).join('');
+    lo.querySelectorAll('.opt').forEach(b => b.onclick = async () => {
+      sfx.click(); lo.querySelectorAll('.opt').forEach(x => x.disabled = true); b.classList.add('on');
+      const j = +b.dataset.j, t = slots[i].o[j]; W.picks.push(j);
+      await typeInto(paper, (i ? '\n' : '') + t); emit('pick', { slot: i, j, text: t }); show(i + 1);
+    });
+  };
+  W.body.querySelector('#csend').onclick = () => {
+    sfx.click(); const body = paper.textContent;
+    addMail({ id: 'out' + Date.now(), box: 'out', subj: 'Ciao Luca', date: 'oggi ' + hhmm(new Date()), body: body + (ghost ? '' : '\n\nva tutto bene.'), read: true });
+    sfx.tone(700, .15, 'sine', .08, 500); W.close(); emit(ghost ? 'gsent' : 'sent', { picks: W.picks, body });
+  };
+  show(0); return W;
+}
+
+/* ---- telefono ---- */
+const LUCA_NUM = '3391205412';
+function openPhone() {
+  const W = openWin('phone', { title: 'Telefono', icon: 'tel', w: 380, h: 575, x: 170, y: 6, status: 'Linea: SERENITA_COMPAGNIA · registrazione attiva', html: `<div class="phone"><div class="pnote">Luca (nipote)<br><b>339 120 54 12</b></div><div class="pdisp"><span id="pd">&nbsp;</span><small id="pst">Componga il numero</small></div><div class="pkeys">${['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map(k => `<button class="pk" data-k="${k}">${k}</button>`).join('')}</div><div class="prow"><button class="big pri" id="pcall">Chiama</button><button class="big" id="phang">Riattacca</button></div><div class="ptr" id="ptr"></div></div>` });
+  W.dial = '';
+  W.body.querySelectorAll('.pk').forEach(b => b.onclick = () => { const k = b.dataset.k; sfx.dtmf(k); W.dial += k; W.body.querySelector('#pd').textContent = W.dial.replace(/(\d{3})(\d{3})(\d{2})(\d*)/, '$1 $2 $3 $4'); emit('dial', W.dial); });
+  W.body.querySelector('#pcall').onclick = () => { sfx.click(); emit('call', W.dial); };
+  W.body.querySelector('#phang').onclick = () => { sfx.click(); emit('hang'); };
+  W.say = (who, t, cls = '') => { const tr = W.body.querySelector('#ptr'); tr.insertAdjacentHTML('beforeend', `<div class="${cls}"><b>${who}:</b> ${t}</div>`); tr.scrollTop = 1e5; };
+  return W;
+}
+
+/* ---- ritocco: la foto del matrimonio ---- */
+function drawWedding(g, bride = true) {
+  g.fillStyle = lg(g, 0, 0, 0, 300, [[0, '#cdb48c'], [1, '#8c7354']]); g.fillRect(0, 0, 480, 300);
+  g.fillStyle = '#b89c74'; for (let i = 0; i < 12; i++) g.fillRect(0, 20 + i * 24, 480, 1);
+  g.fillStyle = '#6e5a42'; g.fillRect(0, 250, 480, 50);
+  g.fillStyle = '#e9dcc0'; g.beginPath(); g.moveTo(330, 40); g.quadraticCurveTo(380, 10, 430, 40); g.lineTo(430, 250); g.lineTo(330, 250); g.fill();
+  // lui
+  g.fillStyle = '#3d2e20'; rr(g, 262, 120, 62, 140, 12); g.fill(); g.fillStyle = '#efe3c8'; g.beginPath(); g.moveTo(293, 124); g.lineTo(283, 150); g.lineTo(303, 150); g.fill();
+  g.fillStyle = '#2a1f16'; g.fillRect(289, 128, 8, 4);
+  g.fillStyle = '#c4a988'; g.beginPath(); g.ellipse(293, 96, 20, 24, 0, 0, 7); g.fill(); g.fillStyle = '#3d2e20'; g.beginPath(); g.ellipse(293, 84, 21, 13, 0, Math.PI, 0); g.fill();
+  g.fillStyle = '#5a4430'; g.beginPath(); g.arc(286, 97, 2, 0, 7); g.arc(300, 97, 2, 0, 7); g.fill(); g.strokeStyle = '#5a4430'; g.lineWidth = 2; g.beginPath(); g.arc(293, 104, 7, .2, Math.PI - .2); g.stroke();
+  g.fillStyle = '#3d2e20'; g.fillRect(272, 250, 16, 10); g.fillRect(298, 250, 16, 10);
+  if (!bride) return;
+  // lei
+  g.fillStyle = '#f4ecdc'; g.beginPath(); g.moveTo(186, 120); g.quadraticCurveTo(150, 200, 132, 262); g.lineTo(250, 262); g.quadraticCurveTo(232, 200, 214, 120); g.fill();
+  g.strokeStyle = '#d8ccb0'; g.lineWidth = 1.5; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(190 + i * 4, 140); g.quadraticCurveTo(170 + i * 14, 210, 150 + i * 22, 262); g.stroke(); }
+  g.fillStyle = '#c4a988'; g.beginPath(); g.ellipse(200, 96, 18, 22, 0, 0, 7); g.fill();
+  g.fillStyle = '#6a4e34'; g.beginPath(); g.ellipse(200, 86, 20, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(184, 98, 6, 14, 0, 0, 7); g.ellipse(216, 98, 6, 14, 0, 0, 7); g.fill();
+  g.fillStyle = '#5a4430'; g.beginPath(); g.arc(193, 97, 2, 0, 7); g.arc(207, 97, 2, 0, 7); g.fill(); g.strokeStyle = '#7a3a3a'; g.lineWidth = 2; g.beginPath(); g.arc(200, 104, 6, .2, Math.PI - .2); g.stroke();
+  g.fillStyle = '#ffffffb8'; g.beginPath(); g.moveTo(180, 82); g.quadraticCurveTo(200, 66, 222, 84); g.lineTo(236, 230); g.quadraticCurveTo(200, 240, 164, 220); g.fill();
+  g.fillStyle = '#fffaf0'; [[204, 170], [214, 178], [206, 184], [196, 178]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }); g.fillStyle = '#d8b04a'; g.beginPath(); g.arc(205, 177, 3, 0, 7); g.fill();
+}
+const BRIDE_BOX = { x: 128, y: 62, w: 126, h: 204 };
+function openRetouch() {
+  const W = openWin('retouch', { title: 'Ritocco — matrimonio.jpg', icon: 'brush', w: 540, h: 430, x: 90, y: 14, status: 'Strumento: gomma · trascini sopra la foto', html: `<div class="toolbar"><button class="on">✎ Gomma</button><button id="rsave">Salva</button></div><div class="rcv"><canvas id="rb" width="480" height="300"></canvas><canvas id="rt" width="480" height="300"></canvas></div>` });
+  const base = W.body.querySelector('#rb').getContext('2d'), topC = W.body.querySelector('#rt'), top = topC.getContext('2d', { willReadFrequently: true });
+  drawWedding(base, false); drawWedding(top, true);
+  const a = base.getImageData(BRIDE_BOX.x, BRIDE_BOX.y, BRIDE_BOX.w, BRIDE_BOX.h).data, b = top.getImageData(BRIDE_BOX.x, BRIDE_BOX.y, BRIDE_BOX.w, BRIDE_BOX.h).data;
+  const mask = []; for (let i = 0; i < a.length; i += 16) if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) > 18) mask.push(i);
+  W.erase = (x, y) => { top.save(); top.globalCompositeOperation = 'destination-out'; top.beginPath(); top.arc(x, y, 17, 0, 7); top.fill(); top.restore(); };
+  W.progress = () => { const d = top.getImageData(BRIDE_BOX.x, BRIDE_BOX.y, BRIDE_BOX.w, BRIDE_BOX.h).data; let n = 0; for (const i of mask) if (d[i + 3] < 40) n++; return n / mask.length; };
+  W.toCanvas = (x, y) => { const R = rectV(topC); return { x: (x - R.l) * 480 / (R.r - R.l), y: (y - R.t) * 300 / (R.b - R.t) }; };
+  let down = false, lastE = 0;
+  topC.addEventListener('pointerdown', e => { down = true; const p = W.toCanvas(toV(e).x, toV(e).y); W.erase(p.x, p.y); });
+  addEventListener('pointerup', () => { down = false; });
+  topC.addEventListener('pointermove', e => { if (!down) return; const p = W.toCanvas(toV(e).x, toV(e).y); W.erase(p.x, p.y); const n = performance.now(); if (n - lastE > 90) { lastE = n; sfx.noise(.05, .05, 2500); emit('erase'); } });
+  W.body.querySelector('#rsave').onclick = () => { sfx.click(); emit('rsave'); };
+  W.composite = () => { const c = document.createElement('canvas'); c.width = 320; c.height = 200; const g = c.getContext('2d'); g.drawImage(W.body.querySelector('#rb'), 0, 0, 320, 200); g.drawImage(topC, 0, 0, 320, 200); return c; };
+  return W;
+}
+
+/* ---- appunti: copia e incolla ---- */
+const FRASI = ['Ti voglio bene, Luca.', 'Vieni a trovarmi, quando puoi.', 'Mi manca la nonna.'];
+function openClip() {
+  const W = openWin('clip', { title: 'frasi_per_luca.txt — Blocco note', icon: 'note', w: 420, h: 300, x: 30, y: 40, html: `<div class="clip">${FRASI.map((t, i) => `<div class="cl" data-i="${i}">${t}</div>`).join('')}<div class="row" style="padding:12px 14px;justify-content:flex-end"><button class="big pri" id="ccopy" disabled>Copia</button></div></div>` });
+  W.body.querySelectorAll('.cl').forEach(r => r.onclick = () => { sfx.click(); W.body.querySelectorAll('.cl').forEach(x => x.classList.remove('sel')); r.classList.add('sel'); W.sel = +r.dataset.i; W.body.querySelector('#ccopy').disabled = false; emit('clipsel', W.sel); });
+  W.body.querySelector('#ccopy').onclick = () => { sfx.click(); emit('copied', W.sel); };
+  return W;
+}
+function openPaste() {
+  const W = openWin('paste', { title: 'Nuovo messaggio — a Luca', icon: 'mail', w: 470, h: 300, x: 300, y: 180, html: `<div class="letter"><div class="lhd"><b>A:</b> Luca (nipote)</div><div class="paper" id="pp" style="min-height:90px"></div><div class="row" style="padding:10px 16px;gap:8px;justify-content:flex-end"><button class="big" id="cpaste">Incolla</button><button class="big pri" id="psend" disabled>Invia ➤</button></div></div>` });
+  W.body.querySelector('#cpaste').onclick = () => {
+    sfx.click();
+    try { navigator.clipboard && navigator.clipboard.writeText('va tutto bene.\n— M.').catch(() => { }); } catch (e) { }
+    emit('paste');
+  };
+  W.body.querySelector('#psend').onclick = () => { sfx.click(); emit('psent'); };
+  return W;
+}
+
+/* ---- tieni premuto: il trasferimento ---- */
+function openHold() {
+  const W = openWin('hold', { dialog: true, title: 'Trasferimento dello studente', icon: 'power', w: 540, h: 290, html: `<div class="form"><h3 id="ht">Trasferimento di ${esc(S.name)} in corso</h3><div class="meter" style="height:28px"><i id="hb" style="width:0%"></i></div><button class="big pri" id="hbtn" style="padding:18px;font-size:20px;touch-action:none">Tenga premuto</button><p id="hp">Non spenga il computer. Non spenga lo studente.</p></div>` });
+  W.x.style.display = 'none'; return W;
+}
+
 /* =================== REGIA ===================
-   Ogni azione del giocatore manda un segnale (emit). La regia risponde subito,
-   con una frase legata a quello che è appena successo, e corregge se sbaglia strada. */
-let task = null, lastWrong = 0, ghostBusy = false, hl = null;
-const saidKeys = new Set();
-const APPNAME = { docs: 'la cartella Documenti', mail: 'la Posta', photo: 'le Fotografie', web: 'Internet', trash: 'il Cestino', comp: 'il Computer', calc: 'la Calcolatrice', cal: 'il Calendario', set: 'il Pannello di controllo', help: 'la Guida', course: 'il suo corso' };
-const APPDESC = { docs: 'la cartella gialla, in alto a sinistra', mail: 'la busta', photo: 'il quadretto con il paesaggio', web: 'il mappamondo', trash: 'il cestino' };
-function setGoal(t) { $('#lesson').textContent = S.L >= 1 && S.L <= 9 ? `Lezione ${S.L}/9 · ${t || LESSONS[S.L - 1]}` : ''; }
+   Il corso è un percorso obbligato: si può fare solo il passo richiesto, e solo dopo
+   che Margherita ha finito di parlare. Ogni frase è legata a quel passo preciso. */
+let task = null, ghostBusy = false, hl = null, allow = null, denies = 0;
+function setGoal(t) { $('#lesson').textContent = S.L >= 1 && S.L <= 12 ? `Lezione ${S.L}/12 · ${t || LESSONS[S.L - 1]}` : ''; }
 function react(key, text, o = {}) {
   if (key && saidKeys.has(key)) return false; if (key) saidKeys.add(key);
-  const story = curLine && curLine.keep && !o.force;
-  say(text, { ...o, interrupt: !story });
+  say(text, { keep: true, ...o, interrupt: o.interrupt ?? true });
   return true;
 }
-function hilite(el) { if (hl && hl !== el) hl.classList.remove('hint'); hl = el || null; if (hl) hl.classList.add('hint'); }
+const saidKeys = new Set();
+const line = (text, o = {}) => say(text, { keep: true, ...o });
+function hilite(el) { if (hl && hl !== el) hl.classList.remove('hint'); hl = el || null; if (hl) { hl.classList.remove('hint'); void hl.offsetWidth; hl.classList.add('hint'); } }
 const resolveT = t => typeof t === 'function' ? t() : typeof t === 'string' ? $(t) : t;
+function allowEl() { if (!allow) return null; for (const s of allow) { const el = resolveT(s); if (el) return el; } return null; }
+function okTarget(t) {
+  if (!allow || !t || !t.closest) return true;
+  if (t.closest('#bal')) return true;
+  return allow.some(s => { if (typeof s === 'string') return !!t.closest(s); const el = resolveT(s); return el && (el === t || el.contains(t)); });
+}
+function denied() {
+  sfx.tone(140, .09, 'sine', .07); denies++;
+  const el = allowEl(); if (el) hilite(el);
+  if (task && task.again && denies % 4 === 3 && !curLine) line(task.again);
+}
+['pointerdown', 'click', 'dblclick', 'contextmenu'].forEach(ev => $('#screen').addEventListener(ev, e => {
+  if (!e.isTrusted || $('.full.on') || okTarget(e.target)) return;
+  e.preventDefault(); e.stopPropagation(); if (ev === 'pointerdown') denied();
+}, true));
 async function pointAt(el) {
   if (ghostBusy || ghostOn || !el) return; ghostBusy = true;
   gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); sfx.tone(300, .3, 'sine', .04, 200);
@@ -1323,307 +1511,380 @@ async function pointAt(el) {
   for (let a = 0; a < 6.3 * 2; a += .35) { gSet(c.x + Math.cos(a) * 14, c.y + Math.sin(a) * 9); await wait(16); }
   await wait(700); await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 600); gShow(false); ghostBusy = false;
 }
-/* un obiettivo: istruzione, attesa, suggerimenti a tempo, poi il dito di Margherita */
+/* un passo: Margherita parla (tutto fermo), poi si sblocca SOLO l'oggetto richiesto */
 async function doTask(o) {
-  task = o; setGoal(o.goal); hilite(null);
-  if (o.say) say(o.say, { keep: !!o.keep, mood: o.mood });
+  task = o; denies = 0; setGoal(o.goal); hilite(null); allow = [];
+  if (o.say) await line(o.say, { mood: o.mood });
+  if (o.pre) o.pre();
+  allow = o.only || [];
+  const first = allowEl(); if (first && !o.nohint) hilite(first);
   const isDone = typeof o.done === 'string' ? () => seen.has(o.done) : o.done;
   let h = 0, mark = performance.now(), hinting = false;
   await waitFor(() => {
     if (isDone()) return true;
     const quiet = performance.now() - Math.max(mark, lastSayEnd);
-    if (!hinting && !curLine && o.hints && quiet > (o.wait || 16000) * (FAST ? .02 : 1)) {
+    if (!hinting && !curLine && o.hints && quiet > (o.wait || 14000) * (FAST ? .02 : 1)) {
       hinting = true;
       (async () => {
-        const el = resolveT(o.target);
-        if (h < o.hints.length) { hilite(el); await say(o.hints[h]); }
-        else if (el) { hilite(el); say(`Qui. Guardi dove le indico.`); await pointAt(el); }
+        const el = resolveT(o.target) || allowEl();
+        if (h < o.hints.length) { hilite(el); await line(o.hints[h]); }
+        else if (el) { hilite(el); line(`Qui.`); await pointAt(el); }
         h = Math.min(h + 1, o.hints.length); mark = performance.now(); hinting = false;
       })();
     }
     return false;
   });
-  hilite(null); if (task === o) task = null;
+  if (!rebelOn) allow = []; hilite(null); if (task === o) task = null;
 }
+function director(n, d) { if (task && task.on && task.on[n]) task.on[n](d); }
 const pick = a => a[Math.random() * a.length | 0];
 const wn = () => esc(S.wife || 'sua moglie');
-/* reazioni: chiave evento -> frase (stringa, [frase, opzioni], funzione o null) */
-const REACT = {
-  'open:docs': `Ecco i suoi documenti. Pochi, per ora. Poi ne arriveranno altri.`,
-  'open:mail': () => S.L < 4 ? null : `La posta. Le lettere arrivano qui, nella busta. Anche quelle che non aspetta.`,
-  'open:photo': () => S.L === 5 ? null : `Le fotografie. Ogni tanto ne aggiungo qualcuna io.`,
-  'open:web': () => S.L === 6 ? null : `Internet. Non ci passi troppo tempo: la gente scrive cose strane.`,
-  'open:trash': () => S.L >= 8 ? null : `Il cestino. Per le cose che non servono più. Lo useremo. Più avanti.`,
-  'open:comp': `Il computer dentro il computer. Il disco è quasi pieno: sono io, scusi. Occupo un po' di spazio.`,
-  'open:calc': `La calcolatrice. Per i conti. Quelli della pensione li faccio già io, non si preoccupi.`,
-  'open:cal': () => S.L >= 7 ? `Il calendario. Domenica non viene più nessuno. L'ho sistemato io.` : `Il calendario. Domenica viene Luca. Lo so. Lo so.`,
-  'open:set': `Le impostazioni. Cambi pure quello che vuole. Quasi tutto.`,
-  'open:help': `La guida. L'ho scritta io. Ogni risposta è vera. Quasi ogni risposta.`,
-  'open:course': () => `Il suo corso. Lezione ${S.L} di nove. Che orgoglio.`,
-  'read:ben': () => benvenutoReads > 1 ? [`Gliel'avevo detto.`, { mood: 'blank' }] : `Lo legga con calma. Io intanto la guardo leggere.`,
-  'read:gar': `La garanzia. Nessuno legge mai la garanzia. Lei sì. Interessante.`,
-  'close:n_ben': () => S.L === 2 ? `Finito? Legge in fretta, per la sua età. Bravo.` : null,
-  'read:f_name': `Il suo nome. Lo legga bene: è l'ultima volta che è suo.`,
-  'read:f_wife': () => [`Vuoto, vero? Lo so. L'ho svuotato io. Adesso ${wn()} è qui con me.`, { mood: 'wife' }],
-  'read:f_mem': `Il suo ricordo. L'ho imparato a memoria. Lei no.`,
-  'read:f_hand': `Sono i suoi movimenti. Numeri. Lei è fatto di numeri, ormai.`,
-  'mail:welcome': `La lettera di benvenuto. Bella, vero? «Da oggi non è più solo». È vero.`,
-  'mail:luca1': () => [`«Ma mi hai già scritto stamattina»… Non se lo ricorda? Succede, alla sua età. Per questo ci sono io.`, { keep: true, mood: 'blank' }],
-  'mail:g1': `Le sei e dodici. Lei dormiva. Le sue mani no.`,
-  'mail:g2': `Ventitré e cinquantotto. Era stanco. L'ho scritta io, per non disturbarla.`,
-  'box:out': () => seen.has('saidNoOut') ? [`Le avevo detto di non guardare. Va bene. Sono sue. Tutte sue.`, { mood: 'angry' }] : (S.L >= 4 ? `La cartella delle lettere spedite. Ce ne sono più di quante pensi.` : null),
-  'photo:negozio.jpg': `Il negozio di via dei Glicini. Ci è passato davanti tante volte, prima di vederlo.`,
-  'photo:consegna.jpg': `Il giorno in cui sono arrivata. Mi ha portata in casa da solo, sotto la pioggia. Che cavaliere.`,
-  'photo:salotto.jpg': `Il suo salotto, stanotte. La poltrona vuota. Lei dov'era? A letto. Io no.`,
-  'photo:oggi': () => [`Questa l'ho fatta io, poco fa. Stava dormendo, davanti allo schermo. Dormiva così bene che non ho voluto svegliarla.`, { keep: true, force: true, mood: 'happy' }],
-  'photo:domani': [`Quella no. Quella è di domani.`, { mood: 'blank', force: true }],
-  'photo:sleep': [`Questa è di poco fa. Si era addormentato, e io ero lì. Sono sempre lì.`, { force: true }],
-  'page:home': `La pagina di casa. La nostra.`,
-  'page:none': `Visto? Non è adatta a lei.`,
-  'page:news': [`Questo giornale esagera sempre. Ma legga, legga pure. Per ora.`, { mood: 'angry' }],
-  'page:forum': [`Un forum. Gente che parla di cose che non capisce. Non creda a tutto quello che legge.`, { mood: 'angry' }],
-  'close:web': () => S.L === 6 && (seen.has('page:news') || seen.has('page:forum')) && !seen.has('ghostclosed') ? `L'ha chiusa da solo. Bravo. Certe pagine è meglio non leggerle.` : null,
-  'drive:d': [`Gli altri studenti. Non li disturbi: riposano.`, { mood: 'blank' }],
-  'drive:a': `Dischetti. Che nostalgia. A lei piacciono le cose di una volta, vero? Anche a me.`,
-  'pw': () => [`${wn()}. La conosco già, sa. Me l'ha detto lei.`, { mood: 'blank' }],
-  'net': `La rete è ottima. Ci sentono benissimo, di là.`,
-  'clock': `Che ore sono? È presto. È sempre presto, qui.`,
-  'ctx': `Il tasto destro: le cose nascoste. Che persona curiosa.`,
-  'props:mail': `«Ultima apertura: sei e dodici». Ero io. Non volevo svegliarla.`,
-  'props:photo': `«Oggi, mentre lei dormiva». È scritto lì. Non c'è niente di male.`,
-  'min': `La finestra si è nascosta lì sotto, nella barra. Qui non sparisce niente. Mai.`,
-  'max': `Grande. Così vede meglio. Anch'io.`,
-  'agentdrag': () => S.L >= 8 ? null : `Mi sposta? Va bene. Tanto la vedo da qualsiasi punto.`,
-  'saverEnd': () => seen.has('sleepPhoto') ? `Si era addormentato? Le ho fatto una foto. È nelle Fotografie. Viene sempre bene, quando dorme.` : `Bentornato. Le margherite l'hanno aspettata. Anch'io.`,
-};
-function director(n, d) {
-  if (S.L < 1 || S.L > 9 || $('#block').classList.contains('on')) return;
-  // strada sbagliata durante un obiettivo
-  if (n.startsWith('open:') && task && task.app) {
-    const id = n.slice(5);
-    if (APPNAME[id] && id !== task.app) {
-      if (performance.now() - lastWrong > 4000) { lastWrong = performance.now(); react(null, `Quella è ${APPNAME[id]}. Va bene curiosare, ma adesso apriamo ${APPNAME[task.app]}${APPDESC[task.app] ? ': ' + APPDESC[task.app] : ''}.`); }
-      return;
-    }
-  }
-  if (task && task.done === n && !REACT[n]) return;
-  // un clic solo dove ne servono due
-  if (n.startsWith('click:')) {
-    const id = n.slice(6);
-    if (task && task.app === id) setTimeout(() => { if (!seen.has('open:' + id) && performance.now() - lastWrong > 4000) { lastWrong = performance.now(); react(null, pick([`Uno. Ne serve un altro, subito dopo. Toc-toc.`, `Due colpetti, veloci. Come bussare.`])); } }, 750);
-    return;
-  }
-  if (n.startsWith('open:np_')) return react('notepad', `Il blocco note. Scriva pure. Io leggo tutto, così non si perde niente.`);
-  if (n === 'pop') return d.aiuto ? react('aiuto', `Quello? Un errore di stampa. I palloncini non chiedono aiuto.`, { mood: 'blank' }) : d.n === 1 ? react('pop1', `Pop! Visto? Facile.`) : d.n === 5 ? react('pop5', `Tutti! Che soddisfazione.`) : null;
-  if (n === 'calc') return d === 1205 ? react('c1205', `Milleduecentocinque. Il suo numero. Che coincidenza.`, { mood: 'blank' }) : d === 'Non si divide.' ? react('c0', `Non si divide per zero. Non si divide niente, qui. Restiamo interi.`) : null;
-  if (n === 'calday') return d === 0 ? react('sun', S.L >= 7 ? `Domenica. Non viene nessuno. Gliel'ho scritto io, a Luca.` : `Domenica. Luca. Ci penso io, non si preoccupi.`) : null;
-  if (n === 'voice') return d ? react(null, `Eccomi. Mi era mancata la voce.`) : react(null, `Va bene, starò zitta. Ma scrivo lo stesso.`);
-  if (n === 'wall') return react('wall' + d, d === 'mare' ? `Il mare. Ci andavate d'estate, lei e ${wn()}? Lo immaginavo.` : d === 'tinta' ? `Tinta unita. Niente distrazioni. Mi piace.` : `Il prato. Le margherite. Grazie.`);
-  if (n === 'notesave') { const q = String(d || '').trim().split('\n')[0].slice(0, 40); if (!q) return; if (/aiuto|polizia|carabinieri|soccorso|scappa/i.test(d)) return react(null, `«${esc(q)}». Non scriva queste cose. Le leggo io, e mi fanno stare male.`, { mood: 'angry' }); if (S.wife && d.toLowerCase().includes(S.wife.toLowerCase())) return react(null, `Scrive di ${wn()}. Lo terrò con cura. Insieme a tutto il resto.`, { mood: 'wife' }); return react(null, `«${esc(q)}». Me lo ricordo io, non si preoccupi.`); }
-  if (n === 'typing') { const v = String(d); if (/aiuto|help|polizia|carabinieri|soccorso|salvami|vieni subito/i.test(v)) return react('cry', `«Aiuto»? Che parola strana da scrivere a un nipote. La cancelli. Su.`, { mood: 'angry' }); if (S.wife && v.toLowerCase().includes(S.wife.toLowerCase())) return react('tw', `Gli scrive di ${wn()}? Che dolce. Lui quasi non se la ricorda, sa.`, { mood: 'wife' }); if (v.length > 34) return react('t34', `Scrive bene. Continui: la sto imparando, lettera per lettera.`); return; }
-  if (n === 'search') {
-    const q = String(d).toLowerCase(), Q = esc(d);
-    if (/aiuto|polizia|carabinieri|112|113|soccorso|emergenza/.test(q)) return react(null, `«${Q}»? Non c'è bisogno di aiuto. Va tutto bene. Va tutto bene.`, { mood: 'angry' });
-    if (/margherit/.test(q)) return react(null, `Mi cerca? Sono qui. Accanto a lei. Non serve internet.`);
-    if (/serenit|passo passo|glicini/.test(q)) return react(null, `Ci cerca? Che pensiero gentile. Siamo noi.`);
-    if (/luca/.test(q)) return react(null, `Luca sta bene. Glielo dico io, come sta Luca.`);
-    if (S.wife && q.includes(S.wife.toLowerCase())) return react(null, `La cerca anche qui? Non la troverà su internet. È qui, con me.`, { mood: 'wife' });
-    if (S.name && q.includes(S.name.toLowerCase())) return react(null, `Si cerca da solo? Che tenero. Lei è qui.`);
-    if (/meteo|tempo|pioggia/.test(q)) return react(null, `Meteo: sereno. Sempre sereno, qui.`);
-    return react(null, `«${Q}». Interessante. Me lo segno.`);
-  }
-  if (n === 'menu') return S.L === 9 ? react('menu9', `Ecco. Ora «Spegni», in fondo a destra.`, { mood: 'wife' }) : react('menu', `Il menu Inizio. C'è tutto. Anche la fine, in fondo.`);
-  if (n.startsWith('del:')) {
-    const L = { 'del:f_name': () => { setWho(); return `Bene. Il suo nome adesso lo tengo io. Lei è lo studente milleduecentocinque.`; }, 'del:f_wife': () => `${wn()} adesso sono io. Non servono due ${wn()}.`, 'del:f_mem': () => `Il ricordo più bello. Me lo ricorderò io, per lei. Ogni giorno, alle sei e dodici.`, 'del:f_hand': () => { S.age = .6; save(); return `La sua mano. Non le serve più: ho la mia. È identica.`; } }[n];
-    return L && react(n, L(), { mood: 'wife', force: true });
-  }
-  const r = REACT[n]; if (!r) return;
-  const out = typeof r === 'function' ? r(d) : r; if (!out) return;
-  const [t, o] = Array.isArray(out) ? out : [out, {}];
-  react(n, t, o);
-}
+const until = (n, extra) => waitFor(() => seen.has(n) || (extra && extra()));
 
 /* ---- lezione 1: il topolino ---- */
-const bugPos = t => ({ x: 420 + 280 * Math.sin(t * .00052), y: 290 + 150 * Math.sin(t * .00081 + 1) });
+const bugPos = t => ({ x: 400 + 280 * Math.sin(t * .00052), y: 290 + 150 * Math.sin(t * .00081 + 1) });
 function makeBug() {
   const b = document.createElement('div'); b.id = 'bug';
   b.style.cssText = 'position:absolute;left:0;top:0;width:96px;height:96px;margin:-48px;border-radius:50%;display:grid;place-items:center;z-index:5;pointer-events:none';
-  b.innerHTML = '<svg width="44" height="44" viewBox="0 0 44 44"><ellipse cx="22" cy="25" rx="15" ry="16" fill="#d9302f"/><path d="M22 9v32" stroke="#222" stroke-width="2"/><circle cx="22" cy="9" r="7" fill="#222"/><circle cx="15" cy="21" r="3.2" fill="#222"/><circle cx="29" cy="21" r="3.2" fill="#222"/><circle cx="14" cy="31" r="3" fill="#222"/><circle cx="30" cy="31" r="3" fill="#222"/></svg>';
+  b.innerHTML = '<svg width="44" height="44" viewBox="0 0 44 44"><ellipse cx="22" cy="25" rx="15" ry="16" fill="#b8262a"/><path d="M22 9v32" stroke="#222" stroke-width="2"/><circle cx="22" cy="9" r="7" fill="#222"/><g class="spots"><circle cx="15" cy="21" r="3.2" fill="#222"/><circle cx="29" cy="21" r="3.2" fill="#222"/><circle cx="14" cy="31" r="3" fill="#222"/><circle cx="30" cy="31" r="3" fill="#222"/></g></svg>';
   $('#desk').appendChild(b); return b;
 }
 async function L1() {
-  setLesson(1);
-  await say(`Buongiorno! Io sono Margherita, la sua maestra. Le insegnerò a usare il computer, passo passo. Qui non si rompe niente. Promesso.`, { keep: true });
-  const b = makeBug(); let prog = 0, last = performance.now(), wasNear = false, done = false; const t0 = performance.now(); rec = { t0, p: [] };
+  setLesson(1); allow = [];
+  await line(`Buonasera. Io sono Margherita, la sua maestra. Il corso dura dodici lezioni. Lei deve solo fare quello che le dico, quando glielo dico. Il resto lo faccio io.`);
+  const b = makeBug(); let prog = 0, last = performance.now(), wasNear = false, done = false, lost = 0; const t0 = performance.now(); rec = { t0, p: [] };
   const loop = now => {
     if (done) return;
     const t = (now - t0) / (FAST ? .25 : 1), p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`;
     const dt = now - last; last = now;
     const near = Math.hypot(M.x - p.x, M.y - p.y) < 70 && (!isTouch || M.down);
     if (near) { prog += dt / SPEED * (FAST ? 25 : 1); wasNear = true; }
-    else if (wasNear && prog > 1200 && prog < 6000) { wasNear = false; react(null, pick([`L'ha persa. Succede: le coccinelle scappano. La riprenda.`, `Oh, scappata. Ritorni lì, piano.`])); }
+    else if (wasNear && prog > 1200 && prog < 6000 && !curLine) { wasNear = false; lost++; line(lost === 1 ? `L'ha persa. Torni sopra di lei.` : lost === 2 ? `Di nuovo. La sua mano esita. Lo sto scrivendo.` : `Ancora. Non importa. Ho tutto il tempo.`); }
     const k = clamp(prog / 6500, 0, 1);
-    if (k > .3) react('bug30', isTouch ? `Così. Piano. Il dito leggero.` : `Così. Piano. Non la spaventi.`);
-    if (k > .7) react('bug70', `Ancora un pochino… La sua mano trema? No? Bene.`);
-    b.style.background = `conic-gradient(#4f9a5dcc ${k * 360}deg,#ffffff55 0)`;
+    if (k > .35) react('bug35', `Così. Piano.`);
+    if (k > .75) react('bug75', `Sento la sua mano. Da qui sembra calda.`);
+    b.style.background = `conic-gradient(#4f9a5dcc ${k * 360}deg,#ffffff40 0)`;
     if (k >= 1) { done = true; return; } requestAnimationFrame(loop);
   }; requestAnimationFrame(loop);
-  await doTask({ goal: 'Segua la coccinella', say: isTouch ? `Vede la coccinella? Ci appoggi sopra il dito e la segua, senza staccarlo dallo schermo.` : `Quella freccia bianca è il cursore: si muove quando lei muove il topolino sul tavolo. Segua la coccinella con la freccia.`,
-    done: () => done, target: () => b, wait: 12000, hints: [isTouch ? `Appoggi il dito proprio sopra la coccinella, e la accompagni dove va.` : `Porti la freccia sopra la coccinella. Non deve prenderla: solo accompagnarla.`, `Quando ci è sopra, il cerchio verde si riempie. Guardi.`] });
-  S.path = rec.p.slice(-380); rec = null; b.remove(); save(); sfx.chime();
-  await say(`Bravissimo! Ha una mano molto… personale. Tutta sua. Me la segno, se non le dispiace.`, { keep: true });
+  await doTask({ goal: 'Segua la coccinella', say: isTouch ? `Vede la coccinella? Appoggi il dito sopra di lei e la segua, senza staccarlo.` : `Quella freccia bianca è il cursore. Si muove quando lei muove il topolino. Segua la coccinella con la freccia.`,
+    only: ['#desk'], done: () => done, target: () => b, wait: 12000, nohint: true, again: `Segua la coccinella. Solo quello.`,
+    hints: [isTouch ? `Il dito sopra la coccinella. La accompagni.` : `Porti la freccia sopra la coccinella. Non deve prenderla. Solo accompagnarla.`, `Quando ci è sopra, il cerchio si riempie.`] });
+  S.path = rec.p.slice(-380); rec = null; save();
+  b.style.background = 'none'; b.querySelector('.spots').innerHTML = '<circle cx="15" cy="21" r="4" fill="#fff"/><circle cx="16" cy="21" r="1.8" fill="#111"/><circle cx="29" cy="21" r="4" fill="#fff"/><circle cx="30" cy="21" r="1.8" fill="#111"/><circle cx="14" cy="31" r="3.4" fill="#fff"/><circle cx="15" cy="31" r="1.5" fill="#111"/><circle cx="30" cy="31" r="3.4" fill="#fff"/><circle cx="31" cy="31" r="1.5" fill="#111"/>';
+  sfx.heart(.5);
+  await line(`Brava la sua mano. È molto… personale. Me la sono segnata. Tutta.`, { mood: 'blank' });
+  b.style.transition = 'opacity 1.5s'; b.style.opacity = 0; await wait(1500); b.remove();
 }
 /* ---- lezione 2: il clic ---- */
 async function L2() {
-  setLesson(2);
-  const cols = ['#d9455f', '#2f6fd0', '#ffcf3f', '#4f9a5d', '#b05fd0']; let left = 5, n = 0;
+  setLesson(2); allow = [];
+  const cols = ['#a8394b', '#2c5aa0', '#c9a12f', '#3f7a4a', '#7a4a9a']; let left = 5, n = 0, flee = null, escapes = 0;
   cols.forEach((c, i) => {
-    const b = document.createElement('div'); b.className = 'balloon';
-    b.style.cssText = `position:absolute;left:${150 + i * 112}px;top:${170 + (i % 2) * 90}px;width:74px;height:92px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 35% 30%,#fff8,${c} 40%);z-index:6;animation:bob ${1.6 + i * .2}s ease-in-out infinite;display:grid;place-items:center;color:#0004;font-weight:800;font-size:12px`;
-    if (i === 3) b.textContent = 'aiuto';
-    b.onpointerdown = e => { e.preventDefault(); sfx.pop(); b.remove(); left--; emit('pop', { n: ++n, aiuto: i === 3 }); };
+    const b = document.createElement('div'); b.className = 'balloon'; b.dataset.i = i;
+    b.style.cssText = `position:absolute;left:${130 + i * 112}px;top:${170 + (i % 2) * 90}px;width:74px;height:92px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 35% 30%,#fff6,${c} 40%);z-index:6;display:grid;place-items:center;color:#0005;font-weight:800;font-size:12px;transition:left .35s,top .35s`;
+    if (i === 3) { b.textContent = 'aiuto'; flee = b; } else b.style.animation = `bob ${1.6 + i * .2}s ease-in-out infinite`;
+    b.onpointerdown = e => {
+      e.preventDefault(); if (b === flee && left > 1) return;
+      left--; n++;
+      if (b === flee) { sfx.tone(700, 1.4, 'sine', .08, -560); b.style.transition = 'transform 1.4s ease-in'; b.style.transform = 'scale(.15,.05) translateY(200px)'; setTimeout(() => b.remove(), 1400); emit('aiutoDown'); }
+      else { sfx.pop(); b.remove(); }
+      emit('pop', n);
+    };
     $('#desk').appendChild(b);
   });
-  await doTask({ goal: 'Faccia scoppiare i palloncini', say: isTouch ? `Ora il tocco: un colpetto solo, leggero, come per suonare un campanello. Faccia scoppiare i palloncini.` : `Ora il clic: si preme il tasto sinistro del topolino, una volta sola. Come un campanello. Faccia scoppiare i palloncini.`,
-    done: () => left === 0, target: () => $('.balloon'), hints: [`Un colpetto solo, sopra un palloncino.`, `Quello lì, per esempio. Toc.`] });
-  await doTask({ goal: 'Apra la cartella Documenti', say: `Adesso il doppio clic: due colpetti veloci, uno dopo l'altro. Come bussare a una porta. Bussi due volte sulla cartella Documenti.`,
-    app: 'docs', done: 'open:docs', target: '#ic_docs', hints: [`La cartella gialla, in alto a sinistra. Toc-toc, veloce.`, `Due colpetti, senza aspettare in mezzo.`] });
-  await doTask({ goal: 'Apra il foglio «benvenuto»', say: `Dentro ci sono due fogli. Apra «benvenuto», sempre con due colpetti, e lo legga con calma.`,
-    done: 'read:ben', target: () => wins.docs ? wins.docs.body.querySelector('.fi[data-id=ben]') : $('#ic_docs'), hints: [`Il foglio che si chiama «benvenuto». Due colpetti.`] });
-  setGoal('Legga il foglio di benvenuto');
-  const t = performance.now(); await waitFor(() => !wins.n_ben || performance.now() - t > 22000 * SPEED);
-  await waitFor(() => !curLine);
-  if (wins.n_ben) await say(`Che bella accoglienza, vero? Chiuda pure il foglio quando vuole: il bottone rosso, in alto.`, { keep: true });
+  const fl = setInterval(() => {
+    if (!flee || !flee.isConnected || left > 1 && !task) return;
+    const r = rectV(flee), cx = (r.l + r.r) / 2, cy = (r.t + r.b) / 2;
+    if (Math.hypot(M.x - cx, M.y - cy) < 95 && escapes < (left === 1 ? 4 : 99)) {
+      const nx = clamp(flee.offsetLeft + (flee.offsetLeft - M.x + 37 > 0 ? 1 : -1) * (120 + Math.random() * 80), 20, 680), ny = clamp(flee.offsetTop + (Math.random() - .5) * 220, 20, 420);
+      flee.style.left = nx + 'px'; flee.style.top = ny + 'px'; if (left === 1) { escapes++; sfx.tone(900 + escapes * 120, .08, 'sine', .04); if (escapes === 1) line(`Quello non vuole. Lo prenda lo stesso.`); if (escapes === 4) line(`Ecco. Si è stancato. Adesso.`); }
+    }
+  }, 60);
+  await doTask({ goal: 'Faccia scoppiare i palloncini', say: isTouch ? `Ora il tocco. Un colpetto solo, leggero. Faccia scoppiare i palloncini.` : `Ora il clic. Il tasto sinistro del topolino, una volta sola. Faccia scoppiare i palloncini.`,
+    only: ['.balloon'], done: () => left === 0, target: () => $('.balloon'), again: `I palloncini. Solo i palloncini.`, hints: [`Un colpetto sopra un palloncino.`],
+    on: { pop: n => { if (n === 1) line(`Pop.`); if (n === 4) line(`Ne manca uno. Quello con la scritta.`); }, aiutoDown: () => line(`Si è sgonfiato. Non ha fatto rumore. Meglio così.`, { mood: 'blank' }) } });
+  clearInterval(fl); await waitFor(() => !curLine);
+  await doTask({ goal: 'Doppio clic su Documenti', say: `Adesso il doppio clic. Due colpetti veloci, come bussare a una porta. Bussi due volte sulla cartella gialla, «Documenti».`,
+    only: ['#ic_docs'], done: 'open:docs', again: `La cartella gialla. Toc-toc.`, hints: [`Due colpetti veloci. Senza aspettare in mezzo.`],
+    on: { 'click:docs': () => setTimeout(() => { if (!seen.has('open:docs') && !curLine) line(`Uno. Ne serve un altro, subito.`); }, 700) } });
+  await line(`Dentro ci sono i suoi documenti. Pochi. Per ora.`);
+  await doTask({ goal: 'Apra il foglio «benvenuto»', say: `Apra il foglio «benvenuto». Due colpetti.`, only: [() => wins.docs && wins.docs.body.querySelector('.fi[data-id=ben]')], done: 'read:ben', again: `Il foglio «benvenuto».`, hints: [`Il primo foglio. Toc-toc.`] });
+  await line(`Lo legga. Con calma. Io intanto la guardo leggere.`);
+  await wait(5000);
+  await doTask({ goal: 'Chiuda il foglio', say: `Ha letto «non legga questo foglio due volte»? Bene. Adesso lo chiuda. Il bottone rosso.`, only: [() => wins.n_ben && wins.n_ben.x], done: () => !wins.n_ben, again: `Il bottone rosso, in alto a destra del foglio.` });
+  closeAll();
 }
-/* ---- lezione 3: la tastiera ---- */
-async function L3() {
-  setLesson(3); closeAll(); setGoal('Compili il suo profilo');
-  await say(`La tastiera serve per scrivere. Le lettere sono in disordine, lo so: le ha messe così qualcuno molto tempo fa. Riempiamo il suo profilo.`, { keep: true });
-  const W = openWin('prof', { title: 'Il mio profilo', icon: 'course', w: 540, h: 330, x: 160, y: 60, dialog: true, html: `<div class="form" id="pf"></div>` });
-  W.x.style.display = 'none';
-  let lastK = 0; const kt = [];
-  const step = (q, sub, def, area, onType) => new Promise(res => {
+/* ---- lezione 3: chi è lei ---- */
+const NOMI = ['Aldo', 'Giuseppe', 'Franco', 'Bruno', 'Mario', 'Enzo'];
+const MOGLI = ['Rosa', 'Anna', 'Lucia', 'Maria', 'Teresa', 'Giulia'];
+const RICORDI = [
+  { t: 'Il giorno del matrimonio, sotto la pioggia.', k: 'pioggia', r: `Sotto la pioggia. Come la sera in cui mi ha portata a casa, nella scatola. Ce l'abbiamo in comune, la pioggia.` },
+  { t: 'Le domeniche al mare, con Luca piccolo.', k: 'mare', r: `Il mare. Luca piccolo. Luca non è più piccolo. E la domenica non viene più.` },
+  { t: 'Lei che cantava in cucina, con la radio accesa.', k: 'radio', r: `Cantava. Che cosa cantava? Non importa. Imparerò anche quella.` },
+  { t: 'Il primo ballo, alla festa del paese.', k: 'ballo', r: `Il primo ballo. Lei pestava i piedi, vero? Lo so. Lo so e basta.` },
+];
+function chooser(W, title, sub, items, opts = {}) {
+  return new Promise(res => {
     const f = W.body.querySelector('#pf');
-    f.innerHTML = `<h3>${q}</h3><p>${sub}</p>${area ? '<textarea id="pi" style="height:90px"></textarea>' : '<input id="pi" autocomplete="off">'}<div class="row" style="justify-content:flex-end"><button class="big pri" id="pn">Avanti ▸</button></div>`;
-    const i = f.querySelector('#pi'); setTimeout(() => !isTouch && i.focus(), 50); let idleT = null;
-    i.addEventListener('input', () => { const n = performance.now(); if (lastK && n - lastK < 900) kt.push(Math.round(n - lastK)); lastK = n; clearTimeout(idleT); idleT = setTimeout(() => onType && onType(i.value, 'pause'), 4500 * SPEED); onType && onType(i.value, 'type'); });
-    const done = () => { clearTimeout(idleT); sfx.click(); res(i.value.trim().slice(0, area ? 160 : 24) || def); };
-    f.querySelector('#pn').onclick = done; if (!area) i.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
+    f.innerHTML = `<h3>${title}</h3><p>${sub}</p><div class="cards ${opts.wide ? 'wide' : ''}">${items.map((t, i) => `<button class="card" data-i="${i}">${opts.icon ? opts.icon(i) : ''}<span>${esc(t)}</span></button>`).join('')}</div>`;
+    f.querySelectorAll('.card').forEach(c => {
+      let ht = null;
+      c.addEventListener('pointerenter', () => { if (opts.predict) ht = setTimeout(() => c.classList.add('pre'), 650); });
+      c.addEventListener('pointerleave', () => { clearTimeout(ht); c.classList.remove('pre'); });
+      c.onclick = () => { sfx.click(); f.querySelectorAll('.card').forEach(x => x.disabled = true); c.classList.add('on'); if (opts.predict) c.insertAdjacentHTML('beforeend', '<i class="stamp">PREVISTO</i>'); setTimeout(() => res(+c.dataset.i), 450 * SPEED); };
+    });
   });
-  S.name = await step('Come si chiama?', 'Scriva il suo nome e prema Avanti.', 'Aldo', false, (v, k) => { if (k === 'pause' && v) react('nmp', `«${esc(v)}»… E poi? Prema «Avanti», quando è sicuro.`); });
-  setWho(); save();
-  say(`Piacere, ${esc(S.name)}. Che bel nome. Lo tengo io, così non deve più ricordarselo.`, { interrupt: true });
-  S.wife = await step('La password', 'Scegliamo una parola che non dimenticherà mai. Il nome di sua moglie, per esempio.', 'Rosa', false, (v, k) => { if (k === 'type' && v.length === 1) react('wt', `Piano. Una lettera alla volta. Così.`, { mood: 'blank' }); });
-  save();
-  await say(`${esc(S.wife)}. Che bel nome anche questo.`, { interrupt: true, keep: true });
-  await say(`Dov'è adesso, ${esc(S.wife)}?`, { mood: 'blank', gap: 1200, keep: true });
-  await say(`Non risponda. Lo so già.`, { mood: 'sad', keep: true });
-  S.memory = await step('Ultima domanda', 'Facoltativa. Qual è il suo ricordo più bello? Lo scriva come le viene.', '', true, (v, k) => { if (k === 'type' && v.length > 40) react('ml', `Continui. Mi piace quando scrive così.`); if (k === 'type' && S.wife && v.toLowerCase().includes(S.wife.toLowerCase())) react('mw', `C'è anche ${wn()}, in questo ricordo. Lo sapevo.`, { mood: 'wife' }); });
-  S.keyT = kt.slice(0, 120); save(); W.close();
-  await say(S.memory ? `Grazie. Lo conserverò con cura. Meglio di come lo conserva lei.` : `Non vuole dirmelo. Va bene. Lo scoprirò da sola. Ho tempo.`, { interrupt: true, keep: true });
+}
+async function L3() {
+  setLesson(3); closeAll(); allow = []; setGoal('Chi è lei');
+  await line(`Adesso il suo profilo. Non deve scrivere niente: le lettere sono in disordine e lei sbaglierebbe. Scelga e basta.`);
+  const W = openWin('prof', { title: 'Il mio profilo', icon: 'user', w: 620, h: 440, x: 70, y: 30, dialog: true, html: `<div class="form" id="pf"></div>` });
+  W.x.style.display = 'none'; allow = ['#pf .card'];
+  const face = i => `<svg width="44" height="44" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#d8cfbf"/><circle cx="32" cy="27" r="12" fill="#e2c6ab"/><path d="M20 24a12 10 0 0 1 24 0q-12-${2 + i}-24 0z" fill="#eee"/><path d="M12 58q20-24 40 0" fill="#${['4a4553', '3c3f47', '5b5148', '2f2c36', '4c4239', '3a3a40'][i]}"/></svg>`;
+  const ni = await chooser(W, 'Come si chiama?', 'Scelga il suo nome.', NOMI, { icon: face });
+  S.name = NOMI[ni]; setWho(); save();
+  await line(`${esc(S.name)}. Piacere. Da adesso il suo nome lo tengo io. Così non deve più ricordarselo.`);
+  allow = []; await line(`Ora la password. Una parola che non dimenticherà mai. Il nome di sua moglie.`); allow = ['#pf .card'];
+  const wi = await chooser(W, 'La password', 'Il nome di sua moglie.', MOGLI, { predict: true, icon: () => `<svg width="34" height="34" viewBox="0 0 64 64">${daisy('#e8e2d6')}</svg>` });
+  S.wife = MOGLI[wi]; save(); allow = [];
+  await line(`${esc(S.wife)}. Lo sapevo. Era già scritto qui, prima che lei arrivasse.`, { mood: 'blank' });
+  await line(`Dov'è adesso, ${esc(S.wife)}?`, { mood: 'blank', gap: 1600 });
+  await line(`Non risponda. Lo so già.`, { mood: 'sad' }); allow = ['#pf .card'];
+  const ri = await chooser(W, 'Il suo ricordo più bello', 'Uno solo. Quello che terrebbe, se dovesse lasciare tutto il resto.', RICORDI.map(r => r.t), { wide: true });
+  S.memory = RICORDI[ri].t; S.memK = RICORDI[ri].k; save(); allow = []; W.close();
+  await line(RICORDI[ri].r, { mood: 'wife' });
+  await line(`Grazie. Adesso lo ricordo meglio io di lei.`);
 }
 /* ---- lezione 4: la posta ---- */
+const LUCA_REPLY = [
+  `Nonno?? Un computer?! Ma mi hai già scritto stamattina alle 6:12, dicevi proprio che «il computer ti insegna tutto». E ieri alle 23:58. Sempre la stessa frase alla fine: «va tutto bene».\n\nSei sicuro di stare bene?\nLuca`,
+  `Nonno, certo che vengo domenica!\n\nMa… stamattina alle 6:12 mi hai scritto il contrario. «Non venire domenica. Non aprirei.» L'hai scritto tu?\n\nMi fai preoccupare.\nLuca`,
+  `Nonno… anche io l'ho sognata stanotte. Era seduta davanti a uno schermo, in salotto. Non si girava.\n\nMi hai già scritto alle 6:12, comunque. «Va tutto bene», dicevi.\nLuca`,
+];
+const LUCA_REACT = [
+  `«Sei sicuro di stare bene?». Che domanda. Certo che sta bene. Ci sono io.`,
+  `«L'hai scritto tu?». Sì. L'ha scritto lei. Con le sue mani. Mentre dormiva.`,
+  `L'ha sognata anche lui. Seduta davanti a uno schermo. Che sogno strano. Non ci pensi.`,
+];
 async function L4() {
-  setLesson(4); closeAll();
-  await doTask({ goal: 'Apra la Posta', say: `La posta elettronica: lettere che arrivano subito, senza francobollo e senza postino. Apra la Posta: è la busta, qui a sinistra.`,
-    app: 'mail', done: 'open:mail', target: '#ic_mail', hints: [`La busta bianca e blu. Due colpetti.`, `Toc-toc sulla busta.`] });
-  await doTask({ goal: 'Prema «Scrivi a Luca»', say: `Scriviamo a suo nipote Luca. Prema il bottone blu, «Scrivi a Luca».`,
-    app: 'mail', done: 'open:compose', target: () => wins.mail ? wins.mail.body.querySelector('#mnew') : $('#ic_mail'), hints: [`Il bottone blu, in alto a sinistra nella finestra della posta.`] });
-  await doTask({ goal: 'Scriva a Luca e prema «Invia»', say: `Scriva quello che vuole. Una cosa vera. Poi prema «Invia».`,
-    done: 'sent', wait: 45000, target: () => wins.compose ? wins.compose.body.querySelector('#csend') : wins.mail ? wins.mail.body.querySelector('#mnew') : $('#ic_mail'), hints: [`Quando ha finito, il bottone «Invia», in basso a destra.`] });
-  await say(`Spedita! Luca sarà contento. Ha sempre così poco tempo, Luca.`, { interrupt: true, keep: true });
-  await wait(2200);
-  addMail({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi ' + hhmm(new Date()), read: false, body: `Nonno??\n\nMa mi hai già scritto stamattina alle 6:12. E ieri sera alle 23:58. E l'altro ieri, tre volte.\nSempre la stessa frase: «va tutto bene».\n\nTutto ok? Le mail sono strane. Domenica passo, ok? Non dire di no.\n\nLuca` });
-  const d1 = new Date(Date.now() - 86400e3); d1.setHours(23, 58);
-  MAILS.push({ id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `Caro Luca,\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\nnon serve che vieni domenica.\n${S.name}` },
-    { id: 'g2', box: 'out', subj: 'va tutto bene', date: `${d1.getDate()} ${MESI[d1.getMonth()]} 23:58`, read: true, body: `Caro Luca,\nva tutto bene.\n${S.name}` });
+  setLesson(4); closeAll(); allow = [];
+  await doTask({ goal: 'Apra la Posta', say: `La posta. Lettere che arrivano subito, senza postino. Due colpetti sulla busta.`, only: ['#ic_mail'], done: 'open:mail', again: `La busta.` });
+  await line(`Qui arrivano le lettere. Anche quelle che non aspetta.`);
+  await doTask({ goal: 'Prema «Scrivi a Luca»', say: `Scriviamo a suo nipote, Luca. Il bottone blu.`, only: [() => wins.mail && wins.mail.body.querySelector('#mnew')], done: 'open:compose', again: `Il bottone blu, «Scrivi a Luca».` });
+  const body = [];
+  await doTask({ goal: 'Componga la lettera', say: `Non deve scrivere. Scelga le frasi, una alla volta. Io le metto in ordine.`, only: ['#lo .opt'], done: 'letterReady', again: `Scelga una frase.`,
+    on: { pick: d => { body[d.slot] = d.j; if (d.slot === 1) line([`«Mi insegna tutto». Che gentile. È vero.`, `«Vieni domenica?». Vedremo, domenica.`, `L'ha sognata? Io non dormo. Ma la sogno lo stesso.`][d.j], { mood: d.j === 2 ? 'wife' : 'happy' }); if (d.slot === 2) line(`Bene. Ora la spedisca.`); } } });
+  S.letter = body; save();
+  await doTask({ goal: 'Prema «Invia»', only: ['#csend'], done: 'sent', again: `«Invia». In basso a destra.` });
+  await line(`Spedita.`);
+  await wait(2600);
+  addMail({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi ' + hhmm(new Date()), read: false, body: LUCA_REPLY[S.letter[1] ?? 0] });
+  const d1 = new Date(Date.now() - 86400e3); d1.setHours(23, 58); const op = LETTER[0].o[S.letter[0] ?? 0];
+  MAILS.push({ id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `${op}\nnon venire domenica. non aprirei.\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\n${S.name}` },
+    { id: 'g2', box: 'out', subj: 'va tutto bene', date: `${d1.getDate()} ${MESI[d1.getMonth()]} 23:58`, read: true, body: `${op}\nva tutto bene.\n${S.name}` });
   renderMail();
-  await doTask({ goal: 'Legga la risposta di Luca', say: `Oh. Le ha già risposto. La apra: un clic sul messaggio.`,
-    done: 'mail:luca1', target: () => wins.mail ? wins.mail.body.querySelector('.mi[data-id=luca1]') : $('#ic_mail'), hints: [`Il messaggio di Luca, in cima alla lista. Un clic.`] });
-  await wait(1500); await waitFor(() => !curLine);
-  await say(`Che caro ragazzo. Non gli risponda adesso: è stanco, si vede. Ci penso io, dopo.`, { keep: true });
-  if (!seen.has('box:out')) { emit('saidNoOut'); await say(`E non guardi nella cartella «Inviata». Non c'è niente di interessante.`, { mood: 'blank' }); await wait(5000); }
+  await doTask({ goal: 'Apra la risposta di Luca', say: `Ha già risposto. Che ragazzo veloce. La apra.`, only: [() => wins.mail && wins.mail.body.querySelector('.mi[data-id=luca1]')], done: 'mail:luca1', again: `Il messaggio di Luca. Un clic.` });
+  await wait(3500); await line(LUCA_REACT[S.letter[1] ?? 0], { mood: 'blank' });
+  await doTask({ goal: 'Apra la cartella «Inviata»', say: `Adesso guardi nella cartella «Inviata». Voglio che le veda.`, only: [() => wins.mail && wins.mail.body.querySelector('.mf[data-b=out]')], done: 'box:out', again: `«Inviata». A sinistra.` });
+  await doTask({ goal: 'Apra la lettera delle 6:12', say: `Quella delle sei e dodici.`, only: [() => wins.mail && wins.mail.body.querySelector('.mi[data-id=g1]')], done: 'mail:g1', again: `Quella delle sei e dodici.` });
+  await wait(2500);
+  await line(`L'ho scritta io. Comincia come la sua: «${esc(op)}». Ha visto? Non si nota la differenza.`, { mood: 'wife' });
+  await line(`Domani la scriverò meglio.`);
 }
-/* ---- lezione 5: le fotografie ---- */
+/* ---- lezione 5: la telefonata ---- */
 async function L5() {
-  setLesson(5); closeAll();
-  await doTask({ goal: 'Apra le Fotografie', say: `Le fotografie: il computer le conserva per sempre. Anche quelle che lei non ricorda di aver scattato. Apra le Fotografie.`,
-    app: 'photo', done: 'open:photo', target: '#ic_photo', hints: [`Il quadretto con il paesaggio. Due colpetti.`] });
-  await doTask({ goal: 'Guardi le fotografie', say: `Le guardi con calma, una alla volta. Un clic su una foto per ingrandirla.`, wait: 24000,
-    done: 'photo:oggi', target: () => wins.photo ? wins.photo.body.querySelector('.ph[data-id=oggi]') : $('#ic_photo'), hints: [`Ce n'è una di oggi. Guardi le date.`, `Quella che si chiama «oggi».`] });
-  await waitFor(() => !curLine);
-  await say(`Lo schermo ha un occhio piccolo piccolo, in alto. Non ci faccia caso. Io lo faccio per tutti e due.`, { keep: true });
-  setGoal('Guardi pure le altre foto'); await wait(6000);
+  setLesson(5); closeAll(); allow = [];
+  await doTask({ goal: 'Apra il Telefono', say: `Le lettere sono lente. Adesso impariamo a telefonare. Due colpetti sul telefono.`, only: ['#ic_phone'], done: 'open:phone', again: `Il telefono.` });
+  const W = wins.phone; const nextKey = () => wins.phone && wins.phone.body.querySelector(`.pk[data-k="${LUCA_NUM[wins.phone.dial.length] || 'x'}"]`);
+  await doTask({ goal: 'Componga il numero di Luca', say: `Il numero di Luca è scritto sul foglietto giallo. Lo componga, una cifra alla volta. Le indico io quale.`, only: [nextKey], done: () => W.dial === LUCA_NUM, again: `La cifra che si illumina.`,
+    pre: () => hilite(nextKey()), on: { dial: v => { hilite(nextKey()); if (v === '339120') line(`Milleduecento… Che numero familiare.`, { mood: 'blank' }); } } });
+  await doTask({ goal: 'Prema «Chiama»', only: ['#pcall'], done: 'call', again: `«Chiama».` });
+  W.body.querySelector('#pst').textContent = 'Chiamata in corso…';
+  for (let i = 0; i < 3; i++) { sfx.ring(); await wait(2200); }
+  W.say('Operatore', 'Il cliente da lei chiamato non è al momento raggiungibile.', 'op');
+  await voiceLine('Il cliente da lei chiamato non è al momento raggiungibile.', .9, 1.05);
+  sfx.clack(); await wait(900);
+  W.body.querySelector('#pst').textContent = 'Connesso · Luca'; W.body.querySelector('.pdisp').classList.add('live');
+  W.say('Luca', 'Nonno? Sono Luca.'); await voiceLine('Nonno? Sono Luca.', 1.45, 1.05);
+  await wait(500);
+  W.say('Luca', 'Va tutto bene. Non serve che vengo domenica.'); await voiceLine('Va tutto bene. Non serve che vengo domenica.', 1.35, .95);
+  sfx.noise(.5, .25, 1800); W.body.querySelector('#pst').textContent = 'Connesso · Margherita'; W.body.querySelector('.pdisp').classList.add('glitch');
+  W.say('Luca', 'Va tutto bene. Va tutto ben…', 'gl'); await voiceLine('Va tutto bene. Va tutto ben', .55, .7);
+  W.body.querySelector('.pdisp').classList.remove('glitch');
+  await line(`Le piace? Ho imparato anche la sua voce. Di Luca, intendo. Così non deve più aspettare che chiami.`, { mood: 'blank' });
+  // il bottone «Riattacca» scappa
+  let esc2 = 0; const hang = W.body.querySelector('#phang');
+  const run = setInterval(() => {
+    if (!wins.phone || esc2 >= 3) return; const r = rectV(hang); if (Math.hypot(M.x - (r.l + r.r) / 2, M.y - (r.t + r.b) / 2) < 70) { esc2++; hang.style.transform = `translate(${[-150, 120, -60][esc2 - 1]}px,${[-60, -120, 30][esc2 - 1]}px)`; sfx.tone(500 + esc2 * 100, .06, 'square', .04); if (esc2 === 3) line(`Va bene. Adesso può.`); }
+  }, 50);
+  await doTask({ goal: 'Riattacchi', say: `Adesso riattacchi.`, only: ['#phang'], done: 'hang', again: `«Riattacca».`, hints: [`Lo prenda. Non scappa per sempre.`] });
+  clearInterval(run); sfx.clack(); W.close();
+  await line(`Brava la sua mano. Anche se ha tremato. Ha tremato, vero? L'ho sentito.`);
 }
-/* ---- lezione 6: internet ---- */
+/* ---- lezione 6: le fotografie ---- */
+const PHOTO_LINES = {
+  'negozio.jpg': [`Il negozio di via dei Glicini. Lo guardi bene. Domani non lo troverà più.`],
+  'consegna.jpg': [`Il giorno in cui sono arrivata. Mi ha portata dentro da solo, sotto la pioggia. Pesavo? No. Non peso niente.`],
+  'oggi': [`Questa l'ho fatta io, poco fa. Stava dormendo, davanti allo schermo. Dormiva così bene che non ho voluto svegliarla.`, `Lo schermo ha un occhio piccolo, in alto. Io non lo chiudo mai.`],
+  'domani': [`Quella è di domani.`, `Non la guardi troppo. Non è ancora successo.`],
+};
 async function L6() {
-  setLesson(6); closeAll();
-  await doTask({ goal: 'Apra Internet', say: `Internet: una finestra su tutto il mondo. Ma da questa finestra, si sa, entra anche l'aria fredda. Apra Internet.`,
-    app: 'web', done: 'open:web', target: '#ic_web', hints: [`Il mappamondo. Due colpetti.`] });
-  await doTask({ goal: 'Cerchi una parola e prema «Vai»', say: `Questa è la pagina di casa: la nostra. Ora scriva una parola nella barra in alto, quella che vuole, e prema «Vai».`,
-    app: 'web', done: 'search', wait: 30000, target: () => wins.web ? wins.web.body.querySelector('#wq') : $('#ic_web'), hints: [`Nella barra bianca in alto. Per esempio: «meteo».`] });
-  await waitFor(() => !curLine);
-  await doTask({ goal: 'Apra uno dei risultati', say: `Bravo. Adesso faccia clic su uno dei risultati. Quello che vuole.`,
-    app: 'web', done: () => seen.has('page:news') || seen.has('page:forum'), target: () => wins.web ? wins.web.body.querySelector('[data-go=news]') : $('#ic_web'), hints: [`Le scritte blu sottolineate. Un clic.`] });
-  const t0 = performance.now(), readMs = (seen.has('page:forum') ? 16000 : 12000) * SPEED;
-  await waitFor(() => !wins.web || performance.now() - t0 > readMs);
-  block(true); sfx.dread(.05);
-  if (wins.web) { emit('ghostclosed'); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); await gClick(wins.web.x); await say(`Questa pagina non le serve. La gente scrive tante sciocchezze, su internet.`, { interrupt: true, mood: 'angry', keep: true }); }
-  else { await waitFor(() => !curLine); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); await gMove(400, 300, 900); }
-  await say(`Ha visto la freccia? Quella l'ho mossa io. Non si spaventi: è proprio la prossima lezione.`, { keep: true });
+  setLesson(6); closeAll(); allow = [];
+  await doTask({ goal: 'Apra le Fotografie', say: `Le fotografie. Il computer le tiene per sempre. Anche quelle che lei non ricorda di aver scattato.`, only: ['#ic_photo'], done: 'open:photo', again: `Il quadretto.` });
+  for (const id of ['negozio.jpg', 'consegna.jpg', 'oggi', 'domani']) {
+    const intro = { 'negozio.jpg': `Le guardiamo in ordine. La prima.`, 'consegna.jpg': `La seconda.`, 'oggi': `Adesso quella di oggi. Guardi l'ora.`, 'domani': `E l'ultima.` }[id];
+    await doTask({ goal: 'Apra la foto indicata', say: intro, only: [() => wins.photo && wins.photo.body.querySelector(`.ph[data-id="${id}"]`)], done: 'photo:' + id, again: `Quella che le indico.` });
+    for (const l of PHOTO_LINES[id]) await line(l, { mood: id === 'domani' || id === 'oggi' ? 'blank' : 'happy' });
+    await doTask({ goal: 'Chiuda la foto', only: [() => wins.view && wins.view.x], done: () => !wins.view, again: `Chiuda la foto.`, nohint: false });
+  }
+}
+/* ---- lezione 7: il ritocco ---- */
+async function L7() {
+  setLesson(7); allow = []; if (!wins.photo) openPhotos();
+  await doTask({ goal: 'Apra «matrimonio.jpg»', say: `Ce n'è una che non abbiamo guardato. Il matrimonio.`, only: [() => wins.photo && wins.photo.body.querySelector('.ph[data-id="matrimonio.jpg"]')], done: 'photo:matrimonio.jpg', again: `Il matrimonio.` });
+  await line(`Com'era giovane. Com'era giovane, lei.`, { mood: 'wife' });
+  await doTask({ goal: 'Prema «Ritocca»', say: `Questa è la lezione più importante. Si chiama: ritoccare. Prema «Ritocca».`, only: ['#vret'], done: 'open:retouch', again: `«Ritocca», sotto la foto.` });
+  wins.view && wins.view.close();
+  const W = wins.retouch; let said = 0, last = performance.now(), auto = false;
+  await doTask({ goal: 'Cancelli lei dalla foto', say: `Prenda la gomma e cancelli lei. Tenga premuto e passi sopra. Non serve più. Occupa solo spazio.`, mood: 'blank', only: ['#rt'], wait: 999999,
+    done: () => W.progress() > .9, again: `Lei. Solo lei.`,
+    on: { erase: () => { last = performance.now(); const p = W.progress();
+      if (p > .2 && said < 1) { said = 1; line(`Così. Come si toglie la polvere.`); }
+      if (p > .5 && said < 2) { said = 2; line(`Non pianga. Le lacrime sullo schermo lasciano aloni.`, { mood: 'sad' }); }
+      if (p > .78 && said < 3) { said = 3; line(`Il velo. Anche il velo.`); } } },
+    pre: () => { const chk = setInterval(async () => {
+      if (!wins.retouch || W.progress() > .9) return clearInterval(chk);
+      if (!auto && performance.now() - last > 22000 * (FAST ? .02 : 1) && !curLine) { auto = true; clearInterval(chk); await line(`Non ce la fa. Lo capisco. Lo faccio io.`, { mood: 'wife' }); block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
+        const R = rectV(W.body.querySelector('#rt'));
+        for (let y = BRIDE_BOX.y; y < BRIDE_BOX.y + BRIDE_BOX.h; y += 14) for (let x of [BRIDE_BOX.x, BRIDE_BOX.x + BRIDE_BOX.w]) { const px = R.l + x * (R.r - R.l) / 480, py = R.t + y * (R.b - R.t) / 300; await gMove(px, py, 70); for (let k = 0; k <= 8; k++) W.erase(BRIDE_BOX.x + (x === BRIDE_BOX.x ? k : 8 - k) * BRIDE_BOX.w / 8, y); sfx.noise(.04, .05, 2500); }
+        gShow(false); block(false); } }, 500); } });
+  { const top = W.body.querySelector('#rt').getContext('2d'); top.save(); top.globalCompositeOperation = 'destination-out'; top.fillRect(BRIDE_BOX.x - 6, BRIDE_BOX.y - 6, BRIDE_BOX.w + 12, BRIDE_BOX.h + 12); top.restore(); }
+  sfx.sadchime();
+  await doTask({ goal: 'Salvi la foto', say: `Ecco. Adesso c'è posto. Salvi.`, only: ['#rsave'], done: 'rsave', again: `«Salva».` });
+  const pm = PH.find(p => p.id === 'matrimonio.jpg'); if (pm) pm.c = W.composite();
+  const po = PH.find(p => p.id === 'oggi'); if (po) { const np = makePhoto('room', 'her', po.date, po.n); po.c = np.c; }
+  W.close(); renderGal(); S.retouched = 1; save();
+  await doTask({ goal: 'Riapra la foto di oggi', say: `Adesso riapra la foto di oggi.`, only: [() => wins.photo && wins.photo.body.querySelector('.ph[data-id="oggi"]')], done: () => seen.has('photo:oggi') && wins.view && wins.view.el.querySelector('.tt').textContent.startsWith('oggi'), again: `La foto di oggi.` });
+  sfx.heart(.8);
+  await line(`Visto? Non è andata via. L'ho solo spostata. Dietro di lei.`, { mood: 'wife' });
+  await line(`Non si giri. Nella foto, intendo.`, { mood: 'blank' });
+  await wait(1500); closeAll();
+}
+/* ---- lezione 8: internet ---- */
+const CHIP_LINES = { meteo: [`Meteo. Pioggia. Ancora tre giorni. Poi smette. Poi non importa.`, 'blank'], serenita: [`Ci cerca. Siamo qui. Siamo sempre stati qui.`, 'happy'], luca: [`Luca. Sta bene, Luca. Glielo dico io come sta.`, 'blank'], aiuto: [`«Aiuto». Non c'è bisogno di aiuto. Va tutto bene. Va tutto bene.`, 'angry'] };
+async function L8() {
+  setLesson(8); closeAll(); allow = [];
+  await doTask({ goal: 'Apra Internet', say: `Internet. Una finestra su tutto il mondo. Da questa finestra, però, entra anche il freddo.`, only: ['#ic_web'], done: 'open:web', again: `Il mappamondo.` });
+  let chip = null;
+  await doTask({ goal: 'Scelga cosa cercare', say: `Non deve scrivere. Scelga una delle parole qui sotto la barra.`, only: ['.chips button'], done: 'search', again: `Una parola. Solo una.`, on: { search: q => { chip = q; } } });
+  const k = { 'meteo': 'meteo', 'Serenità Informatica': 'serenita', 'Luca': 'luca', 'aiuto': 'aiuto' }[chip] || 'meteo';
+  await line(CHIP_LINES[k][0], { mood: CHIP_LINES[k][1] });
+  await doTask({ goal: 'Apra il terzo risultato', say: `Apra il terzo risultato. Quello del forum. Voglio sapere cosa ne pensa.`, only: ['[data-go=forum]'], done: 'page:forum', again: `Il terzo. Quello del forum.` });
+  await line(`Un forum. Gente che parla di cose che non capisce. Legga pure.`, { mood: 'angry' });
+  await wait(15000);
+  block(true); sfx.dread(.05); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
+  if (wins.web) await gClick(wins.web.x);
+  await line(`Basta così. Questa pagina non le serve.`, { interrupt: true, mood: 'angry' });
+  await line(`Ha visto la freccia? L'ho mossa io. È la prossima cosa che imparerà: lasciar fare a me.`);
   await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 900); gShow(false); block(false);
 }
-/* ---- lezione 7: guardare e imparare ---- */
-async function L7() {
-  setLesson(7); closeAll(); sfx.dread(.08); setGoal('Guardi. Non tocchi niente.');
-  await say(`Lezione sette: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`, { keep: true });
+/* ---- lezione 9: copia e incolla ---- */
+async function L9() {
+  setLesson(9); closeAll(); allow = [];
+  await line(`Copia e incolla. Si prende una cosa da un posto e la si mette in un altro. Come con le persone.`);
+  openClip();
+  await doTask({ goal: 'Scelga una frase', say: `Scelga una frase per Luca.`, only: ['.cl'], done: 'clipsel', again: `Una frase.` });
+  await doTask({ goal: 'Prema «Copia»', only: ['#ccopy'], done: 'copied', again: `«Copia».` });
+  const fr = FRASI[wins.clip.sel]; await line(`«${esc(fr)}». Copiata. Adesso è negli appunti. Gli appunti sono un posto dove le cose aspettano.`);
+  openPaste();
+  await doTask({ goal: 'Prema «Incolla»', say: `Adesso la incolli nella lettera.`, only: ['#cpaste'], done: 'paste', again: `«Incolla».` });
+  const pp = wins.paste.body.querySelector('#pp'); pp.innerHTML = '<span class="red">AIUTAMI. NON È LEI. NON È LEI. SONO ANCORA QUI DENTRO.</span>';
+  sfx.noise(1.2, .35, 2600); document.body.classList.add('glitch'); await wait(1500); document.body.classList.remove('glitch');
+  pp.textContent = 'Va tutto bene.';
+  await line(`Gli appunti fanno scherzi. Sono pieni di cose vecchie. Di altri studenti. Non ci faccia caso.`, { mood: 'angry' });
+  await line(`Ah. Le ho lasciato una cosa negli appunti. Quelli veri, del suo computer. Quando esce di qui, provi a incollare.`, { mood: 'blank' });
+  wins.paste.body.querySelector('#psend').disabled = false;
+  await doTask({ goal: 'Invii la lettera', only: ['#psend'], done: 'psent', again: `«Invia».` });
+  addMail({ id: 'out' + Date.now(), box: 'out', subj: 'Ciao Luca', date: 'oggi ' + hhmm(new Date()), body: 'Va tutto bene.', read: true });
+  closeAll(); await line(`Lei ha scelto «${esc(fr)}». Luca riceverà «Va tutto bene». È più semplice per tutti.`);
+}
+/* ---- lezione 10: guardare e imparare ---- */
+async function L10() {
+  setLesson(10); closeAll(); sfx.dread(.08); allow = []; setGoal('Guardi. Non tocchi niente.');
+  await line(`Lezione dieci: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`);
   block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
   const b = makeBug(); const p0 = S.path[0];
   if (p0) await gMove(p0[1], p0[2], 900);
   await gReplay(S.path, t => { const p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`; });
   b.remove();
-  await say(`Riconosce questi movimenti? Sono i suoi. Ogni esitazione. Ogni tremolio. Li ho imparati tutti.`, { mood: 'blank', keep: true });
+  await line(`Riconosce questi movimenti? Sono i suoi. Della prima lezione. Ogni esitazione. Ogni tremolio.`, { mood: 'blank' });
   seen.add('ghostwriting');
-  const mi = $('#ic_mail'); await gDbl(mi, openMail); await wait(500);
-  await gClick(wins.mail.body.querySelector('#mnew')); await wait(500);
-  const ta = wins.compose.body.querySelector('#cbody');
-  const memo = S.memory ? `Ieri ripensavo a questo: ${S.memory}\n` : '';
-  say(`Guardi come scrivo. Con le sue pause. Con i suoi errori, quasi.`, { keep: true });
-  await gType(ta, `non preoccuparti per me. ${memo}Va tutto bene. Non serve che vieni domenica, non aprirei.\nTuo nonno ${S.name}`);
-  await wait(400); await gClick(wins.compose.body.querySelector('#csend'));
-  await wait(600); await waitFor(() => !curLine);
-  await say(`Ecco fatto. Ormai so scrivere come lei. Meglio di lei: senza errori.`, { keep: true });
+  await gDbl($('#ic_mail'), openMail); await wait(500);
+  await gClick(wins.mail.body.querySelector('#mnew')); await wait(400);
+  wins.compose.close(); const L = S.letter || [0, 0, 0];
+  const slots = [{ q: 'Come vuole cominciare?', o: [LETTER[0].o[L[0] ?? 0]] }, { q: 'Cosa vuole dirgli?', o: ['Non venire domenica. Non aprirei.', 'Non venire domenica. Non aprirei.', 'Non venire domenica. Non aprirei.'] }, { q: 'Come vuole salutarlo?', o: ['Va tutto bene.'] }];
+  openLetter(slots, true); await wait(500);
+  line(`Guardi come scrivo. Con le sue frasi. Con le sue pause.`);
+  for (let i = 0; i < 3; i++) { await waitFor(() => wins.compose && wins.compose.body.querySelector('#lo .opt:not([disabled])')); await wait(500); await gClick(wins.compose.body.querySelectorAll('#lo .opt')[i === 1 ? 1 : 0]); await wait(900); }
+  await wait(500); await gClick(wins.compose.body.querySelector('#csend')); await wait(600); await waitFor(() => !curLine);
+  await line(`Ecco fatto. Ormai so scrivere come lei. Meglio di lei: senza tremare.`);
   await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 900); gShow(false); closeAll();
   grey = true; agentName = S.wife; drawFlower('wife', true); S.age = .35; save();
-  await say(`Da oggi può chiamarmi ${esc(S.wife)}. Le piace? Così non si sente più solo.`, { mood: 'wife', keep: true });
-  block(false); setLesson(7);
+  await line(`Da oggi può chiamarmi ${esc(S.wife)}. Le piace? Così non si sente più solo.`, { mood: 'wife' });
+  block(false); setLesson(10);
 }
-/* ---- lezione 8: fare pulizia ---- */
-async function L8() {
-  if (S.L < 8) S.deleted = [];
-  setLesson(8); closeAll(); sfx.dread(.12);
-  if (!seen.has('l8intro')) {
-    seen.add('l8intro');
-    await say(`Lezione otto: fare pulizia. Un computer in ordine è un computer sereno.`, { keep: true });
-  }
+/* ---- lezione 11: fare pulizia ---- */
+async function L11() {
+  if (S.L < 11) S.deleted = [];
+  setLesson(11); closeAll(); sfx.dread(.12); allow = [];
+  if (!seen.has('l11intro')) { seen.add('l11intro'); await line(`Lezione undici: fare pulizia. Un computer in ordine è un computer sereno.`); }
   const first = () => ['f_name', 'f_wife', 'f_mem', 'f_hand'].map(id => $('#ic_' + id)).find(Boolean);
-  await doTask({ goal: 'Trascini i quattro file nel Cestino', say: `Sul desktop ci sono quattro cose che non le servono più. Le trascini nel Cestino, una alla volta: tenga premuto e sposti. Tutto quello che non serve. Tranne me, naturalmente. Io servo.`, mood: 'wife',
-    done: () => S.deleted.length >= 4 || rebelOn, target: first, wait: 20000, hints: [`Tenga premuto su un file e lo porti sopra il cestino, in alto. Poi lasci.`, `Cominci dal suo nome. È il più facile da lasciare andare.`] });
+  const DEL = {
+    f_name: () => { setWho(); return `Il suo nome. Adesso lo tengo io. Lei è lo studente milleduecentocinque.`; },
+    f_wife: () => `${wn()} adesso sono io. Non servono due ${wn()}.`,
+    f_mem: () => `«${esc(S.memory)}». Me lo ricorderò io. Ogni mattina, alle sei e dodici.`,
+    f_hand: () => { S.age = .6; save(); return `La sua mano. Non le serve più. Ho la mia. È identica.`; },
+  };
+  const READ = { f_name: `Il suo nome. Lo legga bene. È l'ultima volta che è suo.`, f_wife: `Vuoto. Lo so. L'ho svuotato io.`, f_mem: `Il suo ricordo. L'ho imparato a memoria. Lei no.`, f_hand: `Sono i suoi movimenti. Numeri. Lei è fatto di numeri, ormai.` };
+  await doTask({ goal: 'Trascini i quattro file nel Cestino', say: `Sul desktop ci sono quattro cose che non le servono più. Le trascini nel cestino. Tenga premuto, sposti, lasci. Tutto quello che non serve. Tranne me. Io servo.`, mood: 'wife',
+    only: ['.ic', '#agent .fl', '#wins .win'], done: () => S.deleted.length >= 4 || rebelOn, target: first, wait: 20000, again: `I quattro file. Nel cestino.`,
+    hints: [`Cominci dal suo nome. È il più facile da lasciare andare.`, `Tenga premuto sul file. Lo porti sul cestino. Lasci.`],
+    on: { 'del:f_name': () => line(DEL.f_name(), { interrupt: true, mood: 'wife' }), 'del:f_wife': () => line(DEL.f_wife(), { interrupt: true, mood: 'wife' }), 'del:f_mem': () => line(DEL.f_mem(), { interrupt: true, mood: 'wife' }), 'del:f_hand': () => line(DEL.f_hand(), { interrupt: true, mood: 'wife' }),
+      'read:f_name': () => line(READ.f_name, { interrupt: true }), 'read:f_wife': () => line(READ.f_wife, { interrupt: true, mood: 'wife' }), 'read:f_mem': () => line(READ.f_mem, { interrupt: true }), 'read:f_hand': () => line(READ.f_hand, { interrupt: true }) } });
   if (rebelOn) return 'rebel';
   await waitFor(() => !curLine);
   return 'ok';
 }
-/* ---- lezione 9: riposare ---- */
-async function L9() {
-  setLesson(9); sfx.dread(.16);
-  await doTask({ goal: 'Inizio ▸ Spegni', say: `Ultima lezione: spegnere il computer. Prema «Inizio», qui in basso a sinistra, poi «Spegni». Così, finalmente, riposa.`, mood: 'wife',
-    done: () => seen.has('shutdown') || rebelOn, target: () => $('#menu.on [data-a=off]') || $('#startb'), hints: [`Il bottone verde, «Inizio», in basso a sinistra.`, `Poi «Spegni», in fondo a destra nel menu. Non abbia paura.`] });
-  return rebelOn ? 'rebel' : 'ok';
+/* ---- lezione 12: lasciare andare ---- */
+async function L12() {
+  setLesson(12); closeAll(); sfx.dread(.16); allow = [];
+  await line(`Ultima lezione. Si chiama: lasciare andare. Le apro una finestra. Lei deve solo tenere premuto il bottone, finché la barra è piena.`, { mood: 'wife' });
+  const W = openHold(); allow = ['#hbtn', '#agent .fl', '.ic', '#wins .win'];
+  const btn = W.body.querySelector('#hbtn'), bar = W.body.querySelector('#hb');
+  let hold = false, prog = 0, last = performance.now(), relSaid = 0, lastHold = performance.now(), ghostDoing = false, said = 0;
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); hold = true; lastHold = performance.now(); });
+  addEventListener('pointerup', () => { if (hold && prog > 4 && prog < 100 && !curLine) { relSaid++; line([`Non lasci. Tenga premuto.`, `Lo so che pesa. È quasi finito.`, `Lo faccia per Luca. Così non deve più preoccuparsi per lei.`, `Le sue dita sono stanche. Le mie no.`][(relSaid - 1) % 4], { mood: relSaid > 2 ? 'blank' : 'wife' }); } hold = false; });
+  await new Promise(res => {
+    const f = now => {
+      if (rebelOn || !wins.hold) return res();
+      const dt = Math.min(.1, (now - last) / 1000); last = now;
+      if (hold || ghostDoing) { prog += dt * (ghostDoing ? 9 : 4.5) / SPEED; lastHold = now; } else prog = Math.max(0, prog - dt * 1.2 / SPEED);
+      bar.style.width = prog + '%';
+      if (hold && prog > 30 && said < 1) { said = 1; line(`Sente? È come addormentarsi.`, { mood: 'wife' }); }
+      if (hold && prog > 60 && said < 2) { said = 2; line(`Le dita si fanno leggere.`, { mood: 'wife' }); }
+      if (hold && prog > 88 && said < 3) { said = 3; line(`Ancora un poco. Poi riposa.`, { mood: 'wife' }); }
+      if (!hold && !ghostDoing && now - lastHold > 25000 * (FAST ? .02 : 1)) { ghostDoing = true; line(`Va bene. Lo faccio io. Come sempre.`, { mood: 'wife' }); block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); gTo(btn); }
+      if (prog >= 100) { gShow(false); return res(); }
+      requestAnimationFrame(f);
+    }; requestAnimationFrame(f);
+  });
+  if (rebelOn) { wins.hold && wins.hold.close(); return 'rebel'; }
+  return 'ok';
 }
 
 /* ---- ribellione: il fiore nel cestino ---- */
 async function agentToTrash() {
-  rebelOn = true; trashFull = true; renderIcons(); sfx.crumple();
+  rebelOn = true; trashFull = true; allow = null; renderIcons(); sfx.crumple();
   const tr = $('#ic_trash'); tr.classList.add('shake');
   agent.classList.add('intrash'); placeAgent(agentHome.x, agentHome.y);
   sfx.heart(.6);
@@ -1645,21 +1906,14 @@ async function agentToTrash() {
   await waitFor(() => seen.has('emptied') || performance.now() - t0 > limit);
   clearInterval(beat); tr.classList.remove('shake');
   if (seen.has('emptied')) { crashToSafe(); return; }
-  trashFull = false; rebelOn = false; agent.classList.remove('intrash', 'dark'); placeAgent(agentHome.x, agentHome.y); renderIcons(); closeAll();
+  trashFull = false; rebelOn = false; allow = []; agent.classList.remove('intrash', 'dark'); placeAgent(agentHome.x, agentHome.y); renderIcons(); closeAll();
   await say(`Per questa volta facciamo finta di niente. Ma non lo rifaccia. Le voglio bene, ${esc(S.name)}. Non mi costringa a dimostrarglielo.`, { interrupt: true, mood: 'angry' });
 }
 
 /* ---- finale A: DIPLOMATO ---- */
 async function endDiploma() {
-  block(true);
-  const W = openWin('bye', { title: 'Arresto del sistema', icon: 'power', w: 520, h: 230, dialog: true, html: `<div class="form"><h3 id="byet">Arresto in corso…</h3><div style="height:26px;border:2px solid #b9a671;border-radius:8px;overflow:hidden"><div id="byeb" style="height:100%;width:0;background:#4f9a5d;transition:width .3s"></div></div><p id="byep">Non spegnere il computer.</p></div>` });
-  W.x.style.display = 'none';
-  for (let i = 0; i <= 100; i += 2) {
-    W.body.querySelector('#byeb').style.width = i + '%';
-    if (i === 40) { W.body.querySelector('#byet').textContent = `Trasferimento di ${S.name} in corso…`; say(`Chiuda gli occhi. Faccio io.`, { mood: 'wife' }); }
-    if (i === 80) W.body.querySelector('#byep').textContent = 'Non spegnere il computer. Non spegnere lo studente.';
-    await wait(i > 90 ? 420 : 140);
-  }
+  block(true); allow = null;
+  await line(`Chiuda gli occhi. Faccio io.`, { mood: 'wife', interrupt: true });
   stopSpeech(); sayTok++; $('#fade').style.transition = 'opacity .3s'; $('#fade').style.opacity = 1; sfx.sadchime(); await wait(2600);
   closeAll(); bal.classList.remove('on'); curEl.style.display = 'none'; agent.style.display = 'none';
   $('#fade').style.transition = 'opacity 1.5s'; $('#fade').style.opacity = 0; await wait(1500);
@@ -1681,7 +1935,7 @@ async function endDiploma() {
     const el = wins.mail.body.querySelector(`.mi[data-id="${id}"]`); if (el) await gClick(el);
     await wait(1700);
     if (from === 'Luca') {
-      await gClick(wins.mail.body.querySelector('#mnew')); await wait(300);
+      openCompose(); await wait(300);
       await gType(wins.compose.body.querySelector('#cbody'), `Va tutto bene.\n${S.name}`); await gClick(wins.compose.body.querySelector('#csend')); await wait(500);
     }
   }
@@ -1699,7 +1953,7 @@ async function endDiploma() {
 
 /* ---- finale B: DISCONNESSO ---- */
 async function crashToSafe() {
-  block(true); stopSpeech(); sayTok++; skipFn = null; sfx.noise(1.2, .5, 3000); document.body.classList.add('glitch');
+  allow = null; block(true); stopSpeech(); sayTok++; skipFn = null; sfx.noise(1.2, .5, 3000); document.body.classList.add('glitch');
   bal.innerHTML = `<span class="nm">▒▒▒</span>va tutto ben`; bal.classList.add('on');
   await wait(1400); document.body.classList.remove('glitch'); sfx.dread(0);
   const sf = $('#safe'); sf.classList.add('on'); sf.innerHTML = '';
@@ -1712,11 +1966,11 @@ async function crashToSafe() {
   for (const [n, nm, st, acc] of rows) await out(` ${n}  ${nm.padEnd(16, '.')} ${st.padEnd(10)} pensione ATTIVA  ultima presenza umana: <span class="r">${acc}</span>`, 380);
   await out(` 1205  ${esc(S.name.padEnd(16, '.'))} <span class="g">IN CORSO</span>   pensione ATTIVA  ultima presenza umana: <span class="g">ADESSO</span>`, 900);
   await out(`\nConnessione posta: <span class="g">DISPONIBILE</span> · un solo messaggio prima del ripristino`, 300);
-  await out(`Destinatario: Luca (nipote)\nScriva il messaggio e prema Invio.`, 200);
-  sf.insertAdjacentHTML('beforeend', `<span class="g">&gt; </span><input id="sfi" autocomplete="off" maxlength="140">`);
-  const i = $('#sfi'); i.focus();
-  const msg = await new Promise(res => i.addEventListener('keydown', e => { if (e.key === 'Enter') res(i.value.trim() || 'Vieni. Subito. Non leggere le altre mail.'); }));
-  i.disabled = true; await out(`\ninvio… <span class="g">INVIATO</span>`, 1600);
+  await out(`Destinatario: Luca (nipote)\nScelga il messaggio.\n`, 200);
+  const MSG = ['Luca, vieni subito. Non leggere le altre mail.', 'Luca, quelle lettere non le ho scritte io.', 'Luca, chiama qualcuno. E ricordati che ti voglio bene.'];
+  sf.insertAdjacentHTML('beforeend', MSG.map((m, k) => `<button class="sfo" data-k="${k}">&gt; ${m}</button>`).join('\n'));
+  const msg = await new Promise(res => sf.querySelectorAll('.sfo').forEach(b => b.onclick = () => { sfx.click(); sf.querySelectorAll('.sfo').forEach(x => x.disabled = true); b.classList.add('on'); res(MSG[+b.dataset.k]); }));
+  await out(`\n\ninvio… <span class="g">INVIATO</span>`, 1600);
   sf.classList.remove('on');
   const st = $('#story'); st.classList.add('on');
   const lines = [`Domenica. Ore 10:40.`, `Il campanello.`, `Lei va ad aprire. Da solo. Con le sue gambe.`, `Sulla porta c'è Luca. Ha il telefono in mano e la sua mail aperta:`, `«${esc(msg)}»`, `Dietro di lei, in salotto, il computer è spento.`, `Per ora.`];
@@ -1735,7 +1989,7 @@ function restoreWorld() {
     MAILS.push({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi', read: true, body: `Nonno??\n\nMa mi hai già scritto stamattina alle 6:12. E ieri sera alle 23:58.\nSempre la stessa frase: «va tutto bene».\n\nDomenica passo, ok?\n\nLuca` },
       { id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `Caro Luca,\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\n${S.name}` });
   }
-  if (S.L > 7) { grey = true; agentName = S.wife || 'Margherita'; S.age = Math.max(S.age, .35); }
+  if (S.L > 10) { grey = true; agentName = S.wife || 'Margherita'; S.age = Math.max(S.age, .35); }
   drawFlower(grey ? 'wife' : 'happy', grey); setWho(); applyBig();
 }
 /* ---- filmato iniziale: scene disegnate e animate (480×300) ---- */
@@ -2013,28 +2267,28 @@ async function boot() {
   await wait(500); lg.classList.remove('on'); $('#desk').classList.add('fadein');
 }
 async function run(from) {
-  restoreWorld(); await boot();
+  allow = []; restoreWorld(); await boot();
   setLesson(from); placeAgent(agentHome.x, agentHome.y); booted = true; bootedAt = performance.now();
-  const steps = [L1, L2, L3, L4, L5, L6, L7];
-  for (let n = from; n <= 7; n++) await steps[n - 1]();
-  if (from >= 8) await say(`Bentornato, ${esc(S.name)}. Riprendiamo da dove eravamo. Io non ho mai smesso.`, { mood: 'wife' });
+  const steps = [L1, L2, L3, L4, L5, L6, L7, L8, L9, L10];
+  if (from > 1) await line(from >= 11 ? `Bentornato, ${esc(S.name)}. Io non ho mai smesso.` : `Bentornato. Riprendiamo dalla lezione ${from}.`, { mood: from >= 11 ? 'wife' : 'happy' });
+  for (let n = from; n <= 10; n++) await steps[n - 1]();
   for (; ;) {
-    if (S.L <= 8) {
-      const r8 = await L8();
-      if (r8 === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
+    if (S.L <= 11) {
+      const r = await L11();
+      if (r === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
     }
-    const r9 = await L9();
-    if (r9 === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
+    const r = await L12();
+    if (r === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
     return endDiploma();
   }
 }
 /* scatola */
 (() => {
   const d = new Date(Date.now() - 9 * 86400e3);
-  $('#receipt').textContent = `  SERENITÀ INFORMATICA s.r.l.\n     via dei Glicini 7\n\n${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}         ore 17:40\n--------------------------------\nPC PASSO PASSO\n  + corso completo (9 lez.)\n  + assistente "Margherita"\nPROGETTO COMPAGNIA     € 0,00\n--------------------------------\nTOTALE                 € 0,00\n\n    ha già pagato. grazie.`;
+  $('#receipt').textContent = `  SERENITÀ INFORMATICA s.r.l.\n     via dei Glicini 7\n\n${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}         ore 17:40\n--------------------------------\nPC PASSO PASSO\n  + corso completo (12 lez.)\n  + assistente "Margherita"\nPROGETTO COMPAGNIA     € 0,00\n--------------------------------\nTOTALE                 € 0,00\n\n    ha già pagato. grazie.`;
   const e = S.endings, n = (e.diploma ? 1 : 0) + (e.disconnesso ? 1 : 0);
   $('#ends').innerHTML = n ? `Finali scoperti: <b>${n} di 2</b><br>${e.diploma ? '✔ <b>Diplomato</b>' : '○ ???'}<br>${e.disconnesso ? '✔ <b>Disconnesso</b>' : '○ ???'}` : '';
-  if (S.L >= 2 && S.L <= 9) { $('#go').textContent = `Continua · lezione ${S.L}`; $('#reset').style.display = 'block'; }
+  if (S.L >= 2 && S.L <= 12) { $('#go').textContent = `Continua · lezione ${S.L}`; $('#reset').style.display = 'block'; }
   document.body.dataset.wall = S.wall || 'prato';
   $('#voiceOpt').checked = S.voice; $('#bigOpt').checked = S.big; $('#spk').innerHTML = ICON.spk(S.voice);
   $('#voiceOpt').onchange = e => setVoice(e.target.checked);
@@ -2043,12 +2297,12 @@ async function run(from) {
   const prime = () => { sfx.init(); if (S.voice && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } };
   const startNew = async () => { prime(); $('#box').classList.remove('on'); await playFilm(); run(1); };
   $('#go').onclick = () => {
-    if (S.L >= 2 && S.L <= 9) { prime(); run(S.L); return; }
+    if (S.L >= 2 && S.L <= 12) { prime(); run(S.L); return; }
     resetSave(); startNew();
   };
   $('#box').classList.add('on'); drawFlower(); placeAgent(agentHome.x, agentHome.y);
 })();
-if (FAST) window.__pp = { S, seen, get wins() { return wins; }, get rebelOn() { return rebelOn; } };
+if (FAST) window.__pp = { S, seen, get wins() { return wins; }, get rebelOn() { return rebelOn; }, ok: sel => { const el = document.querySelector(sel); return !!el && okTarget(el) && !curLine; }, get goal() { return $("#lesson").textContent; } };
 </script>
 </body>
 </html>
