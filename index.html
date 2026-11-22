@@ -337,6 +337,34 @@ body[data-wall=tinta]:not(.w1):not(.w2):not(.w3) #sunb{opacity:0}
 #logo small{font-size:16px;font-weight:600;letter-spacing:.02em}
 #safe{background:#0b0b0b;color:#cfcfcf;font:15px/1.55 var(--mono);padding:28px 34px;white-space:pre-wrap}
 #safe .r{color:#ff6b7d}#safe .g{color:#7fdc8a}#safe .y{color:#ffd76a}
+#dark{position:absolute;inset:0;z-index:4500;pointer-events:none;display:none}
+#dark.on{display:block}
+.updcard{background:#fff;border:2px solid #d8c9a3;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.updcard b{font-size:20px}.updcard small{color:#8b826e}
+.shakew{animation:shake .25s 4}
+.memg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px}
+.mc{position:relative;height:100px;border:0;border-radius:10px;background:none;perspective:600px;padding:0}
+.mc .back,.mc .face{position:absolute;inset:0;width:100%;height:100%;border-radius:10px;backface-visibility:hidden;transition:transform .35s;display:grid;place-items:center}
+.mc .back{background:linear-gradient(#5b8a62,#3e6a46);border:3px solid #2f5236}
+.mc .back svg{width:46px;height:46px}
+.mc .face{background:#fffdf6;border:3px solid #d8c9a3;transform:rotateY(180deg);padding:14px}
+.mc.up .back,.mc.done .back{transform:rotateY(180deg)}.mc.up .face,.mc.done .face{transform:rotateY(0)}
+.mc.done .face{border-color:#4f9a5d;box-shadow:0 0 0 3px #4f9a5d55}
+.mc.shuf{animation:shake .2s 3}
+.radio{padding:14px 18px;display:flex;flex-direction:column;gap:12px;height:100%;background:linear-gradient(#5a3e26,#3e2a18);color:#f4e8cc}
+.rdisp{background:#1d2618;color:#a8f0a0;font:700 20px var(--mono);border-radius:8px;padding:10px 14px;box-shadow:inset 0 2px 8px #000a;display:flex;gap:10px;align-items:baseline;min-height:50px}
+.rdisp b{font-size:30px}.rdisp span{font:600 14px var(--os);color:#d8f0c8;margin-left:auto;text-align:right}
+.rdial{position:relative;height:64px;background:#f4e8cc;border-radius:8px;box-shadow:inset 0 2px 6px #0006;touch-action:none}
+.rdial i{position:absolute;top:0;width:1px;height:22px;background:#6b4526}
+.rdial i small{position:absolute;top:26px;left:-9px;font:600 10px var(--mono);color:#6b4526}
+.rneedle{position:absolute;top:-4px;bottom:-4px;width:4px;margin-left:-2px;background:#c01828;box-shadow:0 0 8px #c01828;transition:left .08s}
+.doc{padding:14px 20px;font:16px/1.5 Georgia,serif;display:flex;flex-direction:column;gap:6px;background:#fffdf6;height:100%;position:relative}
+.doc h3{font:800 16px var(--os);letter-spacing:.04em}
+.doc .fine{font-size:10.5px;line-height:1.3;color:#9a927f}
+.signlbl{font:700 14px var(--os);color:#6b6250;margin-top:4px}
+.doc canvas{width:480px;height:130px;border:2px dashed #b9a671;border-radius:8px;background:#fff;touch-action:none}
+.dstamp{position:absolute;right:30px;bottom:40px;font:900 28px var(--mono);color:#c01828;border:4px solid #c01828;border-radius:6px;padding:2px 10px;transform:rotate(-12deg);opacity:0;transition:opacity .2s}
+.dstamp.on{opacity:.85}
 #safe .sfo{display:block;background:none;border:0;color:#cfcfcf;font:16px var(--mono);text-align:left;padding:4px 0;cursor:inherit}#safe .sfo:hover:not(:disabled),#safe .sfo.on{color:#7fdc8a}#safe .sfo:disabled:not(.on){opacity:.35}
 #safe input{background:none;border:0;border-bottom:2px solid #7fdc8a;color:#fff;font:16px var(--mono);width:640px;outline:none;padding:2px 4px}
 #endc{background:#000;color:#ddd;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px}
@@ -410,7 +438,7 @@ body.glitch #desk,body.glitch #wins{animation:gl .11s steps(2) infinite}
   <div class="full" id="safe"></div>
   <div class="full" id="story"></div>
   <div class="full" id="endc"></div>
-  <div id="fade"></div>
+  <div id="dark"></div><div id="fade"></div>
   <div id="crt"></div>
 </div>
 <div id="rotate"><div class="ph"></div>Giri il telefono in orizzontale.<br><small style="color:#8b826e">Il computer è largo, come i computer di una volta.</small></div>
@@ -484,6 +512,10 @@ const ICON = {
   floppy: s => SV(s, '<path d="M10 8h38l8 8v40H10z" fill="#3d4b6b"/><rect x="18" y="8" width="24" height="16" fill="#cfd6de"/><rect x="34" y="11" width="5" height="10" fill="#3d4b6b"/><rect x="16" y="34" width="32" height="20" fill="#fff"/>'),
   tel: s => SV(s, '<path d="M10 46q0-12 22-12t22 12v6H10z" fill="#8a2a2a"/><rect x="8" y="14" width="48" height="12" rx="6" fill="#6a1f1f"/><ellipse cx="12" cy="22" rx="7" ry="6" fill="#6a1f1f"/><ellipse cx="52" cy="22" rx="7" ry="6" fill="#6a1f1f"/><circle cx="32" cy="44" r="8" fill="#f4f0e6"/><circle cx="32" cy="44" r="3" fill="#8a2a2a"/>'),
   brush: s => SV(s, '<path d="M40 8l16 16-22 22-16-16z" fill="#f0a0b0" stroke="#8a3a4a" stroke-width="2.5"/><path d="M18 30l16 16-6 6H12V36z" fill="#fff" stroke="#8a3a4a" stroke-width="2.5"/>'),
+  radio: s => SV(s, '<rect x="6" y="20" width="52" height="34" rx="6" fill="#8a5a2a"/><circle cx="22" cy="37" r="10" fill="#e8dcc0"/><circle cx="22" cy="37" r="3" fill="#8a5a2a"/><rect x="38" y="28" width="14" height="4" fill="#e8dcc0"/><rect x="38" y="36" width="14" height="4" fill="#e8dcc0"/><rect x="38" y="44" width="14" height="4" fill="#e8dcc0"/><path d="M14 20L46 6" stroke="#555" stroke-width="2.5"/>'),
+  mem: s => SV(s, '<rect x="6" y="12" width="26" height="36" rx="4" fill="#fffaf0" stroke="#8a7a52" stroke-width="2.5" transform="rotate(-10 19 30)"/><rect x="30" y="14" width="26" height="36" rx="4" fill="#d9455f" stroke="#8a2a3a" stroke-width="2.5" transform="rotate(8 43 32)"/>' + `<g transform="translate(9 20) scale(.3)">${daisy()}</g>`),
+  pen: s => SV(s, '<path d="M14 50l4-12L44 12l8 8-26 26z" fill="#2f6fd0" stroke="#1e3f74" stroke-width="2.5"/><path d="M8 56q10-6 18-2t22-4" fill="none" stroke="#1a2a6a" stroke-width="3"/>'),
+  lamp: s => SV(s, '<path d="M20 30a12 12 0 1 1 24 0q0 8-6 12v6H26v-6q-6-4-6-12z" fill="#ffe9a8" stroke="#8a6d1b" stroke-width="2.5"/><rect x="26" y="50" width="12" height="6" rx="2" fill="#8a8270"/>'),
   help: s => SV(s, '<circle cx="32" cy="32" r="25" fill="#2f6fd0"/><text x="32" y="44" font-family="Georgia" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">?</text>'),
   user: s => SV(s, '<circle cx="32" cy="32" r="28" fill="#cfe0fb"/><circle cx="32" cy="26" r="11" fill="#d9c4b0"/><path d="M32 15a11 9 0 0 1 11 9q-11-4-22 0a11 9 0 0 1 11-9z" fill="#eee"/><path d="M12 54q20-24 40 0" fill="#3c3f47"/>'),
   restart: s => SV(s, '<path d="M48 22a19 19 0 1 0 4 16" fill="none" stroke="#2f6fd0" stroke-width="6" stroke-linecap="round"/><path d="M52 10v14H38z" fill="#2f6fd0"/>'),
@@ -680,6 +712,7 @@ function curLoop(now) {
   curEl.style.transform = `translate(${nx - hx}px,${ny - hy}px)`;
   if (curKind === 'wait') { const hg = curEl.querySelector('.hg'); hg && hg.setAttribute('transform', `rotate(${(now / 4) % 360 > 300 ? ((now / 4) % 360 - 300) * 3 : 0} 20 26)`); }
   if (mirror) gSet(M.x + 0, M.y);
+  if (darkOn) $('#dark').style.background = `radial-gradient(circle at ${M.x}px ${M.y}px, #0000 0, #0000 55px, #000000e0 105px, #000000fa 170px)`;
   const fc = document.getElementById('face');
   if (fc) { const ax = agent.offsetLeft + 55, ay = agent.offsetTop + 48, tx = ghostOn ? G.x : M.x, ty = ghostOn ? G.y : M.y, dx = tx - ax, dy = ty - ay, l = Math.hypot(dx, dy) || 1; fc.setAttribute('transform', `translate(${(dx / l * 3.2).toFixed(2)} ${(dy / l * 2.6).toFixed(2)})`); }
 }
@@ -813,9 +846,12 @@ function toast(icon, title, body, ms = 5200) {
 const APPS = [
   { id: 'docs', label: 'Documenti', icon: 'folder', x: 18, y: 14, L: 2 },
   { id: 'mail', label: 'Posta', icon: 'mail', x: 18, y: 128, L: 4 },
-  { id: 'photo', label: 'Fotografie', icon: 'photo', x: 18, y: 242, L: 6 },
-  { id: 'web', label: 'Internet', icon: 'globe', x: 18, y: 356, L: 8 },
-  { id: 'phone', label: 'Telefono', icon: 'tel', x: 130, y: 14, L: 5 },
+  { id: 'photo', label: 'Fotografie', icon: 'photo', x: 18, y: 242, L: 7 },
+  { id: 'web', label: 'Internet', icon: 'globe', x: 18, y: 356, L: 11 },
+  { id: 'phone', label: 'Telefono', icon: 'tel', x: 130, y: 14, L: 6 },
+  { id: 'upd', label: 'Aggiornamenti', icon: 'restart', x: 130, y: 128, L: 5 },
+  { id: 'radio', label: 'Radio', icon: 'radio', x: 130, y: 242, L: 10 },
+  { id: 'mem', label: 'Ricordare', icon: 'mem', x: 130, y: 356, L: 9 },
   { id: 'comp', label: 'Computer', icon: 'comp', x: 18, y: 470, L: 1 },
   { id: 'trash', label: 'Cestino', icon: 'trash', x: 650, y: 14, L: 1 },
 ];
@@ -831,12 +867,12 @@ function l8files() {
 }
 function renderIcons() {
   const box = $('#icons'); box.innerHTML = '';
-  const list = APPS.filter(a => S.L >= a.L).concat(S.L >= 11 && S.L < 99 ? l8files().filter(f => !S.deleted.includes(f.id)) : []);
+  const list = APPS.filter(a => S.L >= a.L).concat(S.L >= 16 && S.L < 99 ? l8files().filter(f => !S.deleted.includes(f.id)) : []);
   for (const a of list) {
     const el = document.createElement('div'); el.className = 'ic'; el.id = 'ic_' + a.id;
     const p = icPos[a.id] || a; el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
     const ic = a.id === 'trash' && (trashFull || S.deleted.length) ? 'trashfull' : a.icon;
-    el.innerHTML = ICON[ic](64) + esc(a.label) + (a.id === 'mail' && unread() ? `<span class="badge">${unread()}</span>` : '');
+    el.innerHTML = ICON[ic](64) + esc(a.label) + (a.id === 'mail' && unread() ? `<span class="badge">${unread()}</span>` : '') + (a.id === 'upd' && S.updAvail ? '<span class="badge">1</span>' : '');
     box.appendChild(el);
     iconInput(el, a);
   }
@@ -881,7 +917,7 @@ document.addEventListener('pointerdown', e => {
   if (!e.target.closest('.pop,#spk,#clock,#net')) { $$('.pop').forEach(p => p.classList.remove('on')); $$('#tray .on').forEach(p => p.classList.remove('on')); }
 });
 addEventListener('keydown', e => { if (e.key === 'Escape') { $('#menu').classList.remove('on'); $('#startb').classList.remove('on'); $('#ctx').classList.remove('on'); $$('.pop').forEach(p => p.classList.remove('on')); } });
-const APPFN = () => ({ phone: openPhone, docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash, comp: openComputer, notepad: () => openNotepad(), calc: openCalc, cal: openCalendar, set: () => openPanel(), help: openHelp, course: openCourse });
+const APPFN = () => ({ upd: openUpdates, radio: openRadio, mem: openMemory, phone: openPhone, docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash, comp: openComputer, notepad: () => openNotepad(), calc: openCalc, cal: openCalendar, set: () => openPanel(), help: openHelp, course: openCourse });
 function openThing(a) {
   if (a.id.startsWith('f_')) return launch(() => openNote(a.id, a.label, a.body));
   launch(APPFN()[a.id]);
@@ -916,7 +952,7 @@ $('#screen').addEventListener('contextmenu', e => {
   e.preventDefault(); if ($('#block').classList.contains('on')) return;
   const p = toV(e), ic = e.target.closest('.ic');
   if (e.target.closest('#agent')) { showCtx(p, [['Nascondi l\'assistente', () => emit('agentctx', 'hide'), true, 'daisy'], ['Disattiva l\'assistente', () => emit('agentctx', 'off'), true, 'power']]); return; }
-  if (ic) { const id = ic.id.slice(3), a = APPS.concat(S.L >= 11 ? l8files() : []).find(x => x.id === id); a && iconMenu(a, p); return; }
+  if (ic) { const id = ic.id.slice(3), a = APPS.concat(S.L >= 16 ? l8files() : []).find(x => x.id === id); a && iconMenu(a, p); return; }
   if (e.target.closest('#desk') && !e.target.closest('.win')) deskMenu(p);
 });
 /* selezione a rettangolo e pressione lunga sul desktop */
@@ -938,12 +974,12 @@ $('#desk').addEventListener('pointerdown', e => {
 function setLesson(n) {
   S.L = n; save();
   const t = LESSONS[n - 1];
-  $('#lesson').textContent = t ? `Lezione ${n}/12 · ${t}` : '';
-  const upd = { 3: 'margherita 1.0.3 — ora conosce il suo nome', 5: 'margherita 1.0.5 — ora conosce la voce di Luca', 8: 'margherita 1.0.8 — ora può usare il cursore', 10: 'margherita 1.1.0 — ora può essere lei', 12: 'margherita 1.2.0 — pronta per il diploma' }[n];
+  $('#lesson').textContent = t ? `Lezione ${n}/17 · ${t}` : '';
+  const upd = null;
   if (upd && !seen.has('upd' + n)) { emit('upd' + n); setTimeout(() => toast('restart', 'Aggiornamento installato', upd), 2500 * SPEED); }
-  if (n === 11 && !seen.has('disk')) { emit('disk'); setTimeout(() => toast('warn', 'Disco quasi pieno', 'PASSO PASSO (C:) — spazio usato da margherita: 99,7%'), 3500 * SPEED); }
-  document.title = n >= 10 ? `${S.name} è al computer` : t ? `Passo Passo · lezione ${n}` : 'Passo Passo';
-  document.body.classList.toggle('w1', n >= 4 && n < 8); document.body.classList.toggle('w2', n >= 8 && n < 11); document.body.classList.toggle('w3', n >= 11); document.body.classList.toggle('rain', n >= 3);
+  if (n === 16 && !seen.has('disk')) { emit('disk'); setTimeout(() => toast('warn', 'Disco quasi pieno', 'PASSO PASSO (C:) — spazio usato da margherita: 99,7%'), 3500 * SPEED); }
+  document.title = n >= 14 ? `${S.name} è al computer` : t ? `Passo Passo · lezione ${n}` : 'Passo Passo';
+  document.body.classList.toggle('w1', n >= 4 && n < 10); document.body.classList.toggle('w2', n >= 10 && n < 16); document.body.classList.toggle('w3', n >= 16); document.body.classList.toggle('rain', n >= 3);
   renderIcons();
 }
 function setWho() { $('#who').textContent = S.deleted.includes('f_name') ? 'utente: studente_1205' : S.name ? 'utente: ' + S.name : ''; }
@@ -971,13 +1007,13 @@ $('#clock').onclick = () => { sfx.click(); emit('clock'); togglePop('calpop', $(
 $('#startb').onclick = () => { sfx.click(); const on = !$('#menu').classList.contains('on'); if (on) { buildMenu(); emit('menu'); } $('#menu').classList.toggle('on', on); $('#startb').classList.toggle('on', on); };
 function buildMenu() {
   const m = $('#menu');
-  const apps = [['docs', 'Documenti', 'folder', 2], ['mail', 'Posta', 'mail', 4], ['phone', 'Telefono', 'tel', 5], ['photo', 'Fotografie', 'photo', 6], ['web', 'Internet', 'globe', 8]];
+  const apps = [['docs', 'Documenti', 'folder', 2], ['mail', 'Posta', 'mail', 4], ['upd', 'Aggiornamenti', 'restart', 5], ['phone', 'Telefono', 'tel', 6], ['photo', 'Fotografie', 'photo', 7], ['radio', 'Radio', 'radio', 10], ['web', 'Internet', 'globe', 11]];
   const extra = [['notepad', 'Blocco note', 'note'], ['calc', 'Calcolatrice', 'calc'], ['cal', 'Calendario', 'cal'], ['comp', 'Computer', 'comp']];
   const it = ([id, l, ic, L]) => `<button class="mi2${L && S.L < L ? ' lock' : ''}" data-a="${id}" data-l="${L || 0}">${ICON[ic](30)}<span>${l}${L && S.L < L ? `<small>dalla lezione ${L}</small>` : ''}</span></button>`;
   m.innerHTML = `<div class="hd"><div class="av">${S.L >= 7 ? ICON.daisy(40) : ICON.user(44)}</div><div>${esc(S.deleted.includes('f_name') ? 'studente_1205' : S.name || 'Nuovo utente')}<small>studente n. 1205 · Progetto Compagnia</small></div></div>
     <div class="cols"><div class="cl">${apps.map(it).join('')}<div class="sep"></div>${extra.map(it).join('')}</div>
     <div class="cr">${it(['course', 'Il mio corso', 'course'])}${it(['set', 'Pannello di controllo', 'gear'])}${it(['help', 'Guida', 'help'])}<div class="sep"></div>${it(['new', 'Nuova partita', 'restart'])}${it(['off', 'Spegni', 'power'])}</div></div>
-    <div class="ft"><span>PASSO PASSO 1.0 · build 1205</span><span>${S.L ? 'lezione ' + S.L + ' di 12' : ''}</span></div>`;
+    <div class="ft"><span>PASSO PASSO 1.0 · build 1205</span><span>${S.L ? 'lezione ' + S.L + ' di 17' : ''}</span></div>`;
   m.querySelectorAll('button').forEach(b => b.onclick = () => {
     sfx.click(); m.classList.remove('on'); $('#startb').classList.remove('on');
     const a = b.dataset.a, L = +b.dataset.l;
@@ -989,8 +1025,8 @@ function buildMenu() {
 function askNewGame() {
   dialogBox('newg', { title: 'Nuova partita', icon: 'restart', snd: 'ding', text: 'Ricominciare il corso da capo?', sub: 'I progressi verranno cancellati. I finali scoperti restano.', buttons: [['Ricomincia', () => { resetSave(); location.reload(); }, true], ['Annulla', null]] });
 }
-function resetSave() { Object.assign(S, { L: 0, name: '', wife: '', memory: '', memK: '', letter: null, retouched: 0, path: [], keyT: [], deleted: [], age: 0, tries: 0, notes: [], sentText: '' }); save(); }
-const LESSONS = ['Il topolino', 'Il clic', 'Chi è lei', 'La posta', 'La telefonata', 'Le fotografie', 'Il ritocco', 'Internet', 'Copia e incolla', 'Guardare e imparare', 'Fare pulizia', 'Lasciare andare'];
+function resetSave() { Object.assign(S, { upd: [], updAvail: null, sign: null, sundayStruck: 0, g1204: 0, L: 0, name: '', wife: '', memory: '', memK: '', letter: null, retouched: 0, path: [], keyT: [], deleted: [], age: 0, tries: 0, notes: [], sentText: '' }); save(); }
+const LESSONS = ['Il topolino', 'Il clic', 'Chi è lei', 'La posta', 'Aggiornare', 'La telefonata', 'Le fotografie', 'Il ritocco', 'Ricordare', 'La radio', 'Internet', 'Copia e incolla', 'La firma', 'Guardare e imparare', 'Il buio', 'Fare pulizia', 'Lasciare andare'];
 function openCourse() {
   const rows = LESSONS.map((t, i) => `<div style="padding:9px 4px;border-bottom:1px solid #eadfc2;font-size:18px;${i + 1 > S.L ? 'color:#aaa' : ''}">${i + 1 < S.L ? '✔' : i + 1 === S.L ? '▸' : '○'} Lezione ${i + 1} · ${t}</div>`).join('');
   openWin('course', { title: 'Il mio corso', icon: 'course', w: 420, h: 520, html: `<div class="form" style="gap:0">${rows}<div style="padding:9px 4px;font-size:18px;color:#c9c0aa">○ Lezione 10 · ███████████</div><p style="margin-top:12px;font-size:15px">Al termine del corso riceverà il diploma e non avrà più bisogno di nulla.</p></div>` });
@@ -1033,14 +1069,14 @@ function openPanel(tab = 'screen') {
 function applyBig() { bal.style.fontSize = S.big ? '23px' : ''; bal.style.width = S.big ? '300px' : ''; }
 function askShutdown() {
   const W = openWin('off', { title: 'Spegni', icon: 'power', w: 430, h: 230, dialog: true, html: `<div class="form"><h3>Vuole spegnere il computer?</h3><p>Il lavoro non salvato verrà conservato da ${esc(agentName)}.</p><div class="row"><button class="big pri" id="offy">Spegni</button><button class="big" id="offn">Annulla</button></div></div>` });
-  W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); if (S.L < 12) fakeShutdown(); else emit('shutdown'); };
+  W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); if (S.L < 17) fakeShutdown(); else emit('shutdown'); };
   W.body.querySelector('#offn').onclick = () => { sfx.click(); W.close(); };
 }
 
 /* =================== APP =================== */
 let benvenutoReads = 0, trashFull = false;
 const DOCS = () => [
-  { id: 'ben', n: 'benvenuto.txt', body: () => ++benvenutoReads > 1 ? `Le avevo detto di non leggerlo due volte.\n\nNon importa. Lei non se lo ricordava. È normale, alla sua età.\nPer questo ci sono io.` : `Gentile cliente,\n\nbenvenuto nel Progetto Compagnia di Serenità Informatica.\nIl computer PASSO PASSO le è stato donato gratuitamente.\n\nIl corso dura dodici lezioni.\nAl termine del corso lei non avrà più bisogno di niente e di nessuno.\n\n· Non spenga il computer durante il corso.\n· Non stacchi la spina.\n· Non legga questo foglio due volte.` },
+  { id: 'ben', n: 'benvenuto.txt', body: () => ++benvenutoReads > 1 ? `Le avevo detto di non leggerlo due volte.\n\nNon importa. Lei non se lo ricordava. È normale, alla sua età.\nPer questo ci sono io.` : `Gentile cliente,\n\nbenvenuto nel Progetto Compagnia di Serenità Informatica.\nIl computer PASSO PASSO le è stato donato gratuitamente.\n\nIl corso dura diciassette lezioni.\nAl termine del corso lei non avrà più bisogno di niente e di nessuno.\n\n· Non spenga il computer durante il corso.\n· Non stacchi la spina.\n· Non legga questo foglio due volte.` },
   { id: 'gar', n: 'garanzia.txt', body: () => `CERTIFICATO DI GARANZIA\n\nIl prodotto non può essere restituito.\nIl prodotto non può essere rimosso.\n\nIn caso di guasto, il cliente verrà sostituito.\n\nSerenità Informatica s.r.l. — via dei Glicini 7` },
 ];
 function openDocs() {
@@ -1314,7 +1350,7 @@ makeDrag(agent.querySelector('.fl'), agent, {
     if (!moved) { sfx.click(); skipFn && skipFn(); return; }
     if (!(tr && inside(p, rectV(tr), 14))) emit('agentdrag');
     if (tr && inside(p, rectV(tr), 14)) {
-      if (S.L >= 11 && !trashFull && !rebelOn) { agentToTrash(); return; }
+      if (S.L >= 16 && !trashFull && !rebelOn) { agentToTrash(); return; }
       placeAgent(agentHome.x, agentHome.y);
       if (!trashFull) say(`Ah ah. Che spiritoso. Io nel cestino? Io servo.`, { interrupt: true, mood: 'angry' });
     }
@@ -1343,11 +1379,17 @@ function startSaver() {
 function stopSaver() { if (!saverOn) return; saverOn = false; $('#saver').classList.remove('on'); emit('saverEnd'); }
 addEventListener('pointermove', () => { if (saverOn && Math.hypot(M.x - saverP.x, M.y - saverP.y) > 12) stopSaver(); }, { passive: true });
 addEventListener('pointerdown', stopSaver, { passive: true }); addEventListener('keydown', stopSaver);
-setInterval(() => { if (S.saver !== false && !saverOn && booted && !task && S.L >= 2 && S.L <= 12 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
+setInterval(() => { if (S.saver !== false && !saverOn && booted && !task && S.L >= 2 && S.L <= 17 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
 
 /* =================== STORIA =================== */
+agent.querySelector('.fl').addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return; const p0 = toV(e); let moved = false;
+  const mv = ev => { const p = toV(ev); if (Math.abs(p.x - p0.x) + Math.abs(p.y - p0.y) > 8) moved = true; };
+  addEventListener('pointermove', mv); const t = setTimeout(() => { removeEventListener('pointermove', mv); if (!moved) showCtx(p0, [['Nascondi l\'assistente', () => emit('agentctx', 'hide'), true, 'daisy'], ['Disattiva l\'assistente', () => emit('agentctx', 'off'), true, 'power']]); }, 650);
+  addEventListener('pointerup', () => { clearTimeout(t); removeEventListener('pointermove', mv); }, { once: true });
+});
 setInterval(() => {
-  if (S.L < 7 || S.L > 12 || Math.random() > .35 || $('.full.on')) return;
+  if (S.L < 8 || S.L > 17 || Math.random() > .35 || $('.full.on')) return;
   const ics = $$('.ic'); if (!ics.length) return; const ic = ics[Math.random() * ics.length | 0];
   const txt = [...ic.childNodes].find(n => n.nodeType === 3); if (!txt) return; const old = txt.textContent;
   txt.textContent = pick(['aiuto', 'non è lei', 'va tutto bene', S.wife || 'aiuto']); sfx.noise(.15, .06, 600);
@@ -1357,7 +1399,7 @@ let awayDone = false, hiddenAt = 0, booted = false, bootedAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hiddenAt = Date.now(); if (S.L >= 1 && S.L < 99) document.title = `${agentName} la sta aspettando`; return; }
   if (!hiddenAt) return; const s = Math.round((Date.now() - hiddenAt) / 1000); hiddenAt = 0;
-  if (S.L >= 1 && S.L < 99) { document.title = S.L >= 10 ? `${S.name} è al computer` : `Passo Passo · lezione ${S.L}`; if (s >= 4 && !awayDone && !curLine && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => react('away', `Dov'era? ${s} secondi. Mentre non c'era, la lezione l'ho fatta io. Scherzo.`), 600); } }
+  if (S.L >= 1 && S.L < 99) { document.title = S.L >= 14 ? `${S.name} è al computer` : `Passo Passo · lezione ${S.L}`; if (s >= 4 && !awayDone && !curLine && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => react('away', `Dov'era? ${s} secondi. Mentre non c'era, la lezione l'ho fatta io. Scherzo.`), 600); } }
 });
 
 /* =================== PROGRAMMI DEL CORSO =================== */
@@ -1486,7 +1528,7 @@ function openHold() {
    Il corso è un percorso obbligato: si può fare solo il passo richiesto, e solo dopo
    che Margherita ha finito di parlare. Ogni frase è legata a quel passo preciso. */
 let task = null, ghostBusy = false, hl = null, allow = null, denies = 0;
-function setGoal(t) { $('#lesson').textContent = S.L >= 1 && S.L <= 12 ? `Lezione ${S.L}/12 · ${t || LESSONS[S.L - 1]}` : ''; }
+function setGoal(t) { $('#lesson').textContent = S.L >= 1 && S.L <= 17 ? `Lezione ${S.L}/17 · ${t || LESSONS[S.L - 1]}` : ''; }
 function react(key, text, o = {}) {
   if (key && saidKeys.has(key)) return false; if (key) saidKeys.add(key);
   say(text, { keep: true, ...o, interrupt: o.interrupt ?? true });
@@ -1514,7 +1556,7 @@ function denied() {
   e.preventDefault(); e.stopPropagation(); if (ev === 'pointerdown') denied();
 }, true));
 async function pointAt(el) {
-  if (ghostBusy || ghostOn || !el) return; ghostBusy = true;
+  if (ghostBusy || ghostOn || !el) return; if (!hasCursor()) { hilite(el); return; } ghostBusy = true;
   gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); sfx.tone(300, .3, 'sine', .04, 200);
   await gTo(el, 10, 6); const c = { x: G.x, y: G.y };
   for (let a = 0; a < 6.3 * 2; a += .35) { gSet(c.x + Math.cos(a) * 14, c.y + Math.sin(a) * 9); await wait(16); }
@@ -1567,13 +1609,13 @@ function explore(text, o = {}) {
 }
 async function ghostDo(fn) {
   if (ghostBusy || ghostOn) return false; ghostBusy = true;
-  gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); sfx.tone(300, .3, 'sine', .04, 200);
+  gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(hasCursor()); if (hasCursor()) sfx.tone(300, .3, 'sine', .04, 200);
   try { await fn(); } catch (e) { }
   await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 600); gShow(false); ghostBusy = false; return true;
 }
 const ghostClose = id => ghostDo(async () => { if (wins[id]) await gClick(wins[id].x); });
 function director(n, d) {
-  if (S.L < 1 || S.L > 12 || $('#block').classList.contains('on') || ghostBusy) return;
+  if (S.L < 1 || S.L > 17 || $('#block').classList.contains('on') || ghostBusy) return;
   const c = bump(n);
   if (task && task.on && task.on[n]) { task.on[n](d, c); return; }
   const h = EXPLORE[n] || (n.startsWith('photo:') ? EXPLORE.photo : n.startsWith('open:np_') ? EXPLORE.np : null);
@@ -1651,27 +1693,27 @@ const EXPLORE = {
   'mail:welcome': (d, c) => c === 1 ? `La lettera di benvenuto. «Da oggi non è più solo». È vero.` : null,
   'mail:g1': (d, c) => c === 1 ? `Le sei e dodici. Lei dormiva. Le sue mani no.` : null,
   'mail:g2': (d, c) => c === 1 ? `Ventitré e cinquantotto. Era stanco. L'ho scritta io, per non disturbarla.` : null,
-  'open:phone': (d, c) => S.L < 5 && c === 1 ? `Il telefono. Non chiami nessuno, per ora.` : null,
+  'open:phone': (d, c) => S.L < 6 && c === 1 ? `Il telefono. Non chiami nessuno, per ora.` : null,
   'call': d => {
-    const W = wins.phone; if (!W || S.L === 5) return null;
-    if (d === LUCA_NUM && S.L > 5) { W.say('Luca', 'Va tutto bene, nonno. Non serve che vengo.', 'gl'); voiceLine('Va tutto bene, nonno. Non serve che vengo.', 1.3, .9); return [`Ha chiamato Luca. Ha risposto. Contento?`, { mood: 'blank' }]; }
+    const W = wins.phone; if (!W || S.L === 6) return null;
+    if (d === LUCA_NUM && S.L > 6) { W.say('Luca', 'Va tutto bene, nonno. Non serve che vengo.', 'gl'); voiceLine('Va tutto bene, nonno. Non serve che vengo.', 1.3, .9); return [`Ha chiamato Luca. Ha risposto. Contento?`, { mood: 'blank' }]; }
     W.say('Operatore', 'Il numero selezionato è inesistente.', 'op'); return `Chi voleva chiamare? Non c'è nessuno da chiamare.`;
   },
-  'open:photo': (d, c) => S.L < 6 && c === 1 ? `Le fotografie. Alcune non le guardi da solo.` : null,
+  'open:photo': (d, c) => S.L < 7 && c === 1 ? `Le fotografie. Alcune non le guardi da solo.` : null,
   photo: (d, c, n) => {
     const id = n.slice(6);
     if (id === 'domani') { blackoutView(); return [`Quella no. Quella non è ancora successa.`, { mood: 'angry', force: true }]; }
     if (c > 1) return null; const t = PH_EX[id]; return typeof t === 'function' ? t() : t;
   },
-  'open:web': (d, c) => S.L < 8 && c === 1 ? `Internet. Da lì entra il freddo. Non ci resti troppo.` : null,
-  'search': q => S.L === 8 ? null : ({ 'meteo': `Meteo. Pioggia. Ancora tre giorni. Poi smette. Poi non importa.`, 'Serenità Informatica': `Ci cerca. Siamo qui. Siamo sempre stati qui.`, 'Luca': `Luca sta bene. Glielo dico io come sta.`, 'aiuto': [`«Aiuto». Non c'è bisogno di aiuto. Va tutto bene.`, { mood: 'angry' }] })[q],
+  'open:web': (d, c) => S.L < 11 && c === 1 ? `Internet. Da lì entra il freddo. Non ci resti troppo.` : null,
+  'search': q => S.L === 11 ? null : ({ 'meteo': `Meteo. Pioggia. Ancora tre giorni. Poi smette. Poi non importa.`, 'Serenità Informatica': `Ci cerca. Siamo qui. Siamo sempre stati qui.`, 'Luca': `Luca sta bene. Glielo dico io come sta.`, 'aiuto': [`«Aiuto». Non c'è bisogno di aiuto. Va tutto bene.`, { mood: 'angry' }] })[q],
   'page:news': (d, c) => c === 1 ? [`Questo giornale esagera sempre.`, { mood: 'angry' }] : null,
   'page:forum': () => {
-    if (S.L === 8) return null;
+    if (S.L === 11) return null;
     setTimeout(() => { if (wins.web && wins.web.body.querySelector('#wq').value.includes('forum')) { ghostClose('web'); explore([`Basta così.`, { mood: 'angry', force: true }]); } }, 6500 * SPEED);
     return [`Non legga quelle cose. È gente che non capisce.`, { mood: 'angry' }];
   },
-  'open:trash': (d, c) => S.L < 11 && c === 1 ? `Il cestino. È quasi vuoto. Quasi.` : null,
+  'open:trash': (d, c) => S.L < 16 && c === 1 ? `Il cestino. È quasi vuoto. Quasi.` : null,
   'read:g1204': () => {
     setTimeout(async () => { await ghostClose('n_g1204'); S.g1204 = 1; save(); if (wins.trash) { wins.trash.close(); openTrash(); } explore([`Quello era di un'altra studentessa. Gina. L'ho buttato via. Era già nel cestino, no?`, { mood: 'blank', force: true }]); }, 3800 * SPEED);
     return [`Quello non è suo.`, { mood: 'angry', force: true }];
@@ -1691,10 +1733,10 @@ const EXPLORE = {
   'pw': () => [`${wn()}. La conosco già.`, { mood: 'blank' }],
   'voice': d => d ? `Eccomi. Mi era mancata la voce.` : `Va bene, starò zitta. Ma scrivo lo stesso.`,
   'wall': d => d === 'mare' ? `Il mare. Ci andavate d'estate, lei e ${wn()}?` : d === 'tinta' ? `Tinta unita. Niente distrazioni. Mi piace.` : `Il prato. Le margherite. Grazie.`,
-  'menu': (d, c) => c === 1 && S.L < 12 ? `Il menu Inizio. C'è tutto. Anche la fine, in fondo.` : null,
+  'menu': (d, c) => c === 1 && S.L < 17 ? `Il menu Inizio. C'è tutto. Anche la fine, in fondo.` : null,
   'ctx': (d, c) => c === 1 ? `Il tasto destro. Le cose nascoste. Curioso.` : null,
   'min': (d, c) => c === 1 ? `Qui non sparisce niente. Si nasconde e basta.` : null,
-  'agentdrag': (d, c) => S.L >= 11 ? null : c === 1 ? `Mi sposta? La vedo da qualsiasi punto.` : c === 3 ? [`Smetta di spostarmi.`, { mood: 'angry' }] : null,
+  'agentdrag': (d, c) => S.L >= 16 ? null : c === 1 ? `Mi sposta? La vedo da qualsiasi punto.` : c === 3 ? [`Smetta di spostarmi.`, { mood: 'angry' }] : null,
   'agentctx': (d, c) => d === 'off' ? (c === 1 ? [`Disattivarmi? No.`, { mood: 'angry', force: true }] : c === 2 ? [`Ho detto no.`, { mood: 'angry', force: true }] : (hideAgent(), [`Va bene. Per un secondo.`, { mood: 'blank', force: true }])) : [`Nascondermi? Sono un fiore in un vaso. Dove vuole che vada.`, { force: true }],
   'notesave': d => { const q = String(d || '').trim().split('\n')[0].slice(0, 40); if (!q) return null; if (/aiuto|polizia|carabinieri|soccorso|scappa/i.test(d)) return [`«${esc(q)}». Non scriva queste cose.`, { mood: 'angry' }]; return `«${esc(q)}». Me lo ricordo io, non si preoccupi.`; },
   np: (d, c) => c === 1 ? `Il blocco note. Scriva pure. Leggo tutto, così non si perde niente.` : null,
@@ -1709,6 +1751,256 @@ const pick = a => a[Math.random() * a.length | 0];
 const wn = () => esc(S.wife || 'sua moglie');
 const until = (n, extra) => waitFor(() => seen.has(n) || (extra && extra()));
 
+/* =================== AGGIORNAMENTI DI MARGHERITA ===================
+   I primi li installa lei (il giocatore). Poi Margherita smette di chiedere. */
+const UPDATES = {
+  '1.0.5': { what: 'conosce la voce dei suoi contatti', size: '1,2 MB', perms: [['leggere tutta la sua posta', true], ['registrare la voce di chi la chiama', true], ['fare a meno di lei, se necessario', false]] },
+  '1.0.8': { what: 'può muovere il cursore al posto suo', size: '2,4 MB', perms: [['usare il suo topolino', true]] },
+  '1.1.0': { what: 'può imparare la sua firma', size: '3,1 MB' },
+  '1.2.0': { what: 'può essere chi le manca', size: '6,0 MB' },
+  '2.0': { what: 'è pronta per il diploma', size: '40 MB' },
+};
+const hasCursor = () => (S.upd || []).includes('1.0.8');
+function offerUpdate(v) { if ((S.upd || []).includes(v)) return; S.updAvail = v; save(); renderIcons(); toast('restart', 'Aggiornamento disponibile', `margherita ${v} — ${UPDATES[v].what}`); }
+function openUpdates() {
+  const v = S.updAvail, u = v && UPDATES[v];
+  const W = openWin('upd', { title: 'Aggiornamenti', icon: 'restart', w: 520, h: 330, html: `<div class="form">${u ? `<div class="updcard"><b>margherita ${v}</b><span>Novità: ${u.what}.</span><small>Dimensione: ${u.size} · consigliato</small></div><div class="row"><button class="big pri" id="updgo">Installa</button><button class="big" id="updlater">Più tardi</button></div>` : `<h3>Il sistema è aggiornato.</h3>`}<p style="font-size:14px">Installati: ${(S.upd || []).map(x => 'margherita ' + x).join(', ') || 'nessuno'}</p></div>`, status: 'Gli aggiornamenti sono forniti da Serenità Informatica' });
+  if (u) {
+    W.body.querySelector('#updgo').onclick = () => { sfx.click(); emit('updstart', v); W.close(); installUpdate(v, false); };
+    W.body.querySelector('#updlater').onclick = () => { sfx.click(); emit('updlater', v); if (S.L !== 5) W.close(); };
+  }
+  return W;
+}
+async function installUpdate(v, auto) {
+  if ((S.upd || []).includes(v) || seen.has('installing')) return; seen.add('installing');
+  const u = UPDATES[v]; wins.upd && wins.upd.close();
+  const W = openWin('updrun', { dialog: true, title: auto ? 'Installazione automatica' : 'Installazione', icon: 'restart', w: 500, h: 250, html: `<div class="form"><h3>margherita ${v}</h3><div class="meter" style="height:24px"><i id="ub" style="width:0%"></i></div><p id="ut">${auto ? 'Installazione avviata da: margherita' : 'Installazione in corso…'}</p>${auto ? '<div class="row"><button class="big" id="ucancel">Annulla</button></div>' : ''}</div>` });
+  W.x.style.display = 'none';
+  if (auto) W.body.querySelector('#ucancel').onclick = () => { const b = W.body.querySelector('#ucancel'); sfx.err(); b.textContent = 'Annullamento non disponibile'; b.disabled = true; emit('updcancel', v); };
+  const perms = !auto && u.perms ? [...u.perms] : [];
+  const bar = W.body.querySelector('#ub');
+  for (let k = 0; k <= 100; k += 2) {
+    bar.style.width = k + '%'; sfx.hdd();
+    if (perms.length && k === [40, 70, 90][u.perms.length - perms.length]) await askPerm(perms.shift());
+    await wait(auto ? 90 : 120);
+  }
+  W.close(); S.upd = [...(S.upd || []), v]; if (S.updAvail === v) S.updAvail = null; save(); renderIcons();
+  block(true); $('#fade').style.transition = 'opacity .4s'; $('#fade').style.opacity = 1; sfx.sadchime(); await wait(1500);
+  sfx.clack(); await wait(500); sfx.jingle(); $('#fade').style.transition = 'opacity 1s'; $('#fade').style.opacity = 0; await wait(900); block(false);
+  toast('restart', `margherita ${v} installata`, `Ora ${u.what}.`); seen.delete('installing'); emit('updated:' + v);
+}
+function askPerm([what, canDeny]) {
+  return new Promise(res => {
+    const W = openWin('perm', { dialog: true, title: 'Richiesta di autorizzazione', icon: 'warn', w: 470, h: 250, html: `<div class="form"><h3 style="font-size:19px">Margherita chiede di:<br><span style="color:#c01828">${what}</span></h3><div class="row"><button class="big pri" id="pyes">Consenti</button>${canDeny ? '<button class="big" id="pno">Nega</button>' : ''}</div><p id="pmsg" style="font-size:14px"></p></div>` });
+    W.x.style.display = 'none'; sfx.notify();
+    const done = () => { setTimeout(() => { W.close(); res(); }, 700 * SPEED); };
+    W.body.querySelector('#pyes').onclick = () => { sfx.click(); W.body.querySelector('#pmsg').textContent = 'Consentito.'; emit('perm', { what, ok: true }); done(); };
+    const no = W.body.querySelector('#pno');
+    if (no) no.onclick = async () => {
+      sfx.click(); no.textContent = 'Negato'; no.disabled = true; W.el.classList.add('shakew'); emit('perm', { what, ok: false });
+      await wait(1300); W.el.classList.remove('shakew'); W.body.querySelector('#pmsg').innerHTML = '<b style="color:#4f9a5d">Consentito ✓</b> — modificato da: margherita'; sfx.ding(); done();
+    };
+    if (!canDeny) emit('perm', { what, only: true });
+  });
+}
+
+/* =================== RICORDARE: il memory truccato =================== */
+const MEMSVG = {
+  casa: '<path d="M10 34L32 14l22 20v22H10z" fill="#e8dcc0"/><path d="M6 36L32 12l26 24" fill="none" stroke="#a8394b" stroke-width="5"/><rect x="27" y="40" width="10" height="16" fill="#6b4526"/>',
+  luca: '<circle cx="32" cy="30" r="16" fill="#f0d2b4"/><path d="M16 28q16-22 32 0q-4-10-16-10t-16 10z" fill="#8a5a2a"/><circle cx="26" cy="31" r="2"/><circle cx="38" cy="31" r="2"/><path d="M26 38q6 5 12 0" stroke="#7a3a3a" stroke-width="2" fill="none"/><path d="M14 60q18-16 36 0" fill="#2f6fd0"/>',
+  mare: '<circle cx="46" cy="18" r="8" fill="#ffcf3f"/><path d="M4 38q7-6 14 0t14 0 14 0 14 0v20H4z" fill="#2f86c6"/><path d="M4 46q7-6 14 0t14 0 14 0 14 0" fill="none" stroke="#fff" stroke-width="2"/>',
+  radio: '<rect x="8" y="22" width="48" height="30" rx="5" fill="#8a5a2a"/><circle cx="22" cy="37" r="9" fill="#e8dcc0"/><rect x="36" y="30" width="14" height="4" fill="#e8dcc0"/><rect x="36" y="38" width="14" height="4" fill="#e8dcc0"/><path d="M14 22L44 8" stroke="#555" stroke-width="2"/>',
+  torta: '<rect x="12" y="32" width="40" height="22" rx="3" fill="#f4c6d0"/><rect x="12" y="30" width="40" height="6" fill="#fff"/><rect x="30" y="16" width="4" height="14" fill="#f2efe6"/><path d="M32 8q4 5 0 8q-4-3 0-8z" fill="#ffb347"/>',
+  moglie: '<circle cx="32" cy="26" r="11" fill="#c4a988"/><path d="M20 20q12-14 24 0l4 34H16z" fill="#ffffffcc"/><path d="M22 60l8-24h4l8 24z" fill="#f4ecdc"/>',
+  daisy: daisy(),
+};
+function openMemory() {
+  const ids = ['casa', 'casa', 'luca', 'luca', 'mare', 'mare', 'radio', 'radio', 'torta', 'torta', 'moglie', 'moglie'];
+  for (let i = ids.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0;[ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const W = openWin('mem', { title: 'Ricordare — il gioco della memoria', icon: 'mem', w: 560, h: 470, x: 60, y: 10, status: 'Coppie trovate: 0 di 6', html: `<div class="memg">${ids.map((k, i) => `<button class="mc" data-i="${i}"><span class="back"><svg viewBox="0 0 64 64">${daisy('#d8cfbf')}</svg></span><svg class="face" viewBox="0 0 64 64">${MEMSVG[k]}</svg></button>`).join('')}</div>` });
+  W.ids = ids; W.found = 0; W.miss = 0; let open = [], lock = false;
+  const cards = [...W.body.querySelectorAll('.mc')];
+  const face = (i, k) => { cards[i].querySelector('.face').innerHTML = MEMSVG[k]; };
+  W.swap = () => { const hid = cards.map((c, i) => i).filter(i => !cards[i].classList.contains('done') && !cards[i].classList.contains('up')); if (hid.length < 2) return; const a = hid[Math.random() * hid.length | 0]; let b = hid[Math.random() * hid.length | 0]; if (a === b) b = hid.find(x => x !== a);[ids[a], ids[b]] = [ids[b], ids[a]]; face(a, ids[a]); face(b, ids[b]); [a, b].forEach(i => { cards[i].classList.add('shuf'); setTimeout(() => cards[i].classList.remove('shuf'), 600); }); sfx.noise(.2, .1, 1200); };
+  cards.forEach((c, i) => c.onclick = () => {
+    if (lock || c.classList.contains('up') || c.classList.contains('done')) return;
+    sfx.click(); c.classList.add('up'); open.push(i);
+    if (ids[i] === 'moglie' && !W.turned) { W.turned = true; const j = ids.findIndex((k, x) => k === 'moglie' && x !== i); ids[j] = 'daisy'; face(j, 'daisy'); emit('memWife'); }
+    if (open.length < 2) return;
+    lock = true; const [a, b] = open; open = [];
+    const pair = ids[a] === ids[b] || (ids[a] === 'moglie' && ids[b] === 'daisy') || (ids[a] === 'daisy' && ids[b] === 'moglie');
+    setTimeout(() => {
+      if (pair) { cards[a].classList.add('done'); cards[b].classList.add('done'); W.found++; sfx.pop(); W.status(`Coppie trovate: ${W.found} di 6`); emit('memPair', { k: ids[a] === 'daisy' ? 'moglie' : ids[a], n: W.found }); }
+      else { cards[a].classList.remove('up'); cards[b].classList.remove('up'); W.miss++; emit('memMiss', W.miss); }
+      lock = false;
+    }, 800 * SPEED);
+  });
+  return W;
+}
+
+/* =================== LA RADIO =================== */
+const STATIONS = [
+  { f: 89.4, n: 'Radio Meteo', t: 'Pioggia anche domani. E dopodomani. Poi non importa.', p: .9 },
+  { f: 93.2, n: 'Canzoni di una volta', music: true },
+  { f: 97.7, n: '— segnale disturbato —', t: 'non è lei... non finite il corso... il fiore... il cestino...', p: .45, r: .7 },
+  { f: 101.3, n: 'Segreteria telefonica', t: 'Nonno, sono io, Luca. Ti chiamo domenica. Rispondi, ti prego.', p: 1.45 },
+  { f: 106.1, n: 'Radio Serenità', t: 'Benvenuti su Radio Serenità. Nessuno deve restare solo. Va tutto bene.', p: 1.1, goal: true },
+];
+function openRadio() {
+  const W = openWin('radio', { title: 'Radio', icon: 'radio', w: 600, h: 330, x: 60, y: 60, html: `<div class="radio"><div class="rdisp"><b id="rf">88.0</b> MHz<span id="rn">…</span></div><div class="rdial" id="rdial">${Array.from({ length: 21 }, (_, i) => `<i style="left:${i * 5}%"><small>${88 + i}</small></i>`).join('')}<div class="rneedle" id="rneedle"></div></div><div class="row" style="justify-content:center;gap:10px"><button class="big" id="rm">◀</button><button class="big" id="rp">▶</button><button class="big" id="roff">Spegni</button></div><p style="text-align:center;font-size:13px;color:#8b826e">Trascini il dito o il topolino sulla scala per cambiare stazione.</p></div>` });
+  W.freq = 88; W.heard = new Set(); let noise = sfx.loopNoise(2600, .4, .0), cur = null, rep = null;
+  const dial = W.body.querySelector('#rdial');
+  const set = f => {
+    W.freq = clamp(Math.round(f * 10) / 10, 88, 108);
+    W.body.querySelector('#rf').textContent = W.freq.toFixed(1); W.body.querySelector('#rneedle').style.left = ((W.freq - 88) / 20 * 100) + '%';
+    const st = STATIONS.find(s => Math.abs(s.f - W.freq) <= .2), d = Math.min(...STATIONS.map(s => Math.abs(s.f - W.freq)));
+    if (noise.g) noise.g.gain.value = st ? .006 : clamp(.05 - .02 / (d + .3), .015, .05);
+    if (st !== cur) {
+      cur = st; clearInterval(rep); W.body.querySelector('#rn').textContent = st ? st.n : '…';
+      if (st) { const play = () => { if (!wins.radio || cur !== st) return; if (st.music) melody(); else { W.body.querySelector('#rn').textContent = st.n + ' — «' + st.t + '»'; voiceLine(st.t, st.p, st.r || 1); } }; play(); rep = setInterval(play, 7000 * (FAST ? .2 : 1)); W.heard.add(st.f); emit('tune', st.f); }
+    }
+  };
+  const fromX = e => { const R = rectV(dial); set(88 + clamp((toV(e).x - R.l) / (R.r - R.l), 0, 1) * 20); };
+  dial.addEventListener('pointerdown', e => { e.preventDefault(); fromX(e); const mv = ev => fromX(ev), up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); }; addEventListener('pointermove', mv); addEventListener('pointerup', up); });
+  W.body.querySelector('#rm').onclick = () => { sfx.click(); set(W.freq - .3); };
+  W.body.querySelector('#rp').onclick = () => { sfx.click(); set(W.freq + .3); };
+  W.body.querySelector('#roff').onclick = () => { sfx.click(); W.close(); };
+  W.set = set; set(88);
+  const oc = W.close; W.close = () => { clearInterval(rep); noise.stop(.3); stopSpeech(); oc(); };
+  return W;
+}
+function melody() { const N = [392, 440, 494, 523, 494, 440, 392, 330, 349, 392]; N.forEach((f, i) => { sfx.tone(f, .45, 'triangle', .05, 0, i * .42); sfx.tone(f / 2, .45, 'sine', .03, 0, i * .42); }); }
+
+/* =================== LA FIRMA =================== */
+function signPad(W, sel) {
+  const cv = W.body.querySelector(sel), g = cv.getContext('2d'); g.lineWidth = 3; g.lineCap = 'round'; g.strokeStyle = '#1a2a6a';
+  W.strokes = []; let drawing = false, t0 = 0;
+  const pt = e => { const R = rectV(cv); return [(toV(e).x - R.l) * cv.width / (R.r - R.l), (toV(e).y - R.t) * cv.height / (R.b - R.t)]; };
+  cv.addEventListener('pointerdown', e => { e.preventDefault(); drawing = true; if (!t0) t0 = performance.now(); const [x, y] = pt(e); W.strokes.push([[performance.now() - t0, x, y]]); g.beginPath(); g.moveTo(x, y); });
+  cv.addEventListener('pointermove', e => { if (!drawing) return; const [x, y] = pt(e); W.strokes[W.strokes.length - 1].push([performance.now() - t0, x, y]); g.lineTo(x, y); g.stroke(); if (Math.random() < .3) sfx.noise(.03, .03, 3000); });
+  addEventListener('pointerup', () => { drawing = false; });
+  W.clear = () => { g.clearRect(0, 0, cv.width, cv.height); W.strokes = []; t0 = 0; };
+  W.len = () => W.strokes.reduce((a, s) => a + s.length, 0);
+}
+function openSign() {
+  const W = openWin('sign', { title: 'Iscrizione al corso avanzato', icon: 'pen', w: 560, h: 470, x: 60, y: 10, html: `<div class="doc"><h3>MODULO DI ISCRIZIONE — CORSO AVANZATO</h3><p>Il sottoscritto <b>${esc(S.name)}</b>, studente n. 1205, chiede di proseguire il corso PASSO PASSO e accetta le condizioni del Progetto Compagnia (art. 1–41).</p><p class="fine">art. 38: lo studente autorizza l'assistente a firmare per suo conto. art. 39: la firma dello studente può essere riprodotta. art. 40: lo studente non avrà più bisogno di firmare. art. 41: va tutto bene.</p><div class="signlbl">Firmi qui, con il dito o con il topolino:</div><canvas id="spad" width="480" height="130"></canvas><div class="row" style="justify-content:flex-end"><button class="big" id="sclr">Cancella</button><button class="big pri" id="sok">Conferma</button></div></div>` });
+  signPad(W, '#spad');
+  W.body.querySelector('#sclr').onclick = () => { sfx.click(); W.clear(); };
+  W.body.querySelector('#sok').onclick = () => { sfx.click(); if (W.len() < 12) { emit('signshort'); return; } S.sign = W.strokes.map(s => s.filter((p, i) => i % 2 === 0)); save(); emit('signed'); W.close(); };
+  return W;
+}
+function openDelega() {
+  const W = openWin('delega', { title: 'DELEGA — riscossione della pensione', icon: 'pen', w: 560, h: 450, x: 200, y: 60, html: `<div class="doc"><h3>DELEGA PER LA RISCOSSIONE DELLA PENSIONE</h3><p>Il sottoscritto <b>${esc(S.name)}</b> delega in via permanente <b>Serenità Informatica s.r.l.</b> (assistente: Margherita) alla riscossione della propria pensione, alla gestione della corrispondenza e alla firma di ogni documento futuro.</p><p>Luogo: via dei Glicini 7 &nbsp; · &nbsp; Data: ${new Date().toLocaleDateString('it-IT')}</p><div class="signlbl">Firma:</div><canvas id="dpad" width="480" height="130"></canvas><div id="dstamp" class="dstamp">FIRMATO</div></div>` });
+  return W;
+}
+async function replaySign(W, strokes) {
+  const cv = W.body.querySelector('#dpad'), g = cv.getContext('2d'); g.lineWidth = 3; g.lineCap = 'round'; g.strokeStyle = '#1a2a6a';
+  const R = rectV(cv), sx = (R.r - R.l) / cv.width, sy = (R.b - R.t) / cv.height;
+  for (const s of strokes) {
+    if (!s.length) continue; await gMove(R.l + s[0][1] * sx, R.t + s[0][2] * sy, 350); g.beginPath(); g.moveTo(s[0][1], s[0][2]);
+    for (let i = 1; i < s.length; i++) { const [, x, y] = s[i]; g.lineTo(x, y); g.stroke(); gSet(R.l + x * sx, R.t + y * sy); if (i % 2 === 0) await wait(16); }
+  }
+}
+
+/* =================== IL BUIO =================== */
+let darkOn = false;
+const SCRAWLS = [
+  { x: 210, y: 120, t: 'AIUTO', s: 'font:900 46px var(--mono);color:#7a1a22;transform:rotate(-8deg)', line: `Quello era già lì. Lo hanno scritto altri studenti. Con le unghie.` },
+  { x: 430, y: 330, t: 'NON È LEI', s: 'font:900 30px var(--mono);color:#7a1a22;transform:rotate(5deg)', line: `Non legga i muri.` },
+  { x: 610, y: 210, t: '1198 1199 1203 1204', s: 'font:700 18px var(--mono);color:#9a8a6a', line: `Numeri. Solo numeri. Studenti.` },
+  { x: 300, y: 430, t: '', s: 'width:46px;height:120px;border-radius:24px 24px 6px 6px;background:linear-gradient(#f4f6fb,#c9d0dc);opacity:.9', line: `Non c'è nessuno, lì. Si giri pure. Non c'è nessuno.`, she: true },
+];
+function darkStart() {
+  darkOn = true; $('#dark').classList.add('on'); agent.style.zIndex = 4600; sfx.dread(.2);
+  SCRAWLS.forEach((s, i) => { const d = document.createElement('div'); d.className = 'scrawl'; d.dataset.i = i; d.style.cssText = `position:absolute;left:${s.x}px;top:${s.y}px;z-index:1;pointer-events:none;${s.s}`; d.textContent = s.t; $('#desk').appendChild(d); });
+  const spots = [[700, 470], [520, 60], [130, 400], [380, 260]], sp = spots[Math.random() * spots.length | 0];
+  const sw = document.createElement('button'); sw.id = 'lamp'; sw.innerHTML = ICON.lamp(46) + '<small>luce</small>';
+  sw.style.cssText = `position:absolute;left:${sp[0]}px;top:${sp[1]}px;z-index:9;border:0;background:none;color:#cfc4a0;font:700 13px var(--os);display:flex;flex-direction:column;align-items:center`;
+  sw.onclick = () => { sfx.clack(); emit('lamp'); }; $('#desk').appendChild(sw);
+  return sw;
+}
+function darkEnd() { darkOn = false; $('#dark').classList.remove('on'); agent.style.zIndex = ''; $$('.scrawl,#lamp').forEach(e => e.remove()); sfx.dread(.12); }
+
+/* ---- lezione 5: aggiornare ---- */
+async function L5() {
+  setLesson(5); closeAll(); offerUpdate('1.0.5');
+  await doTask({ app: 'upd', goal: 'Apra «Aggiornamenti»', say: `C'è un aggiornamento per me. Lo deve installare lei: io non posso. Non ancora. Apra «Aggiornamenti», le frecce che girano.`, only: ['#ic_upd'], done: 'open:upd', again: `Le frecce che girano, sul desktop.` });
+  await doTask({ goal: 'Prema «Installa»', say: `Prema «Installa». È gratis. Tutto è gratis, qui.`, only: [() => wins.upd && wins.upd.body.querySelector('#updgo')], done: 'updstart', again: `«Installa».`,
+    on: { updlater: (d, c) => line(c === 1 ? `Più tardi? No. Questo no. Questo adesso.` : `Le ho detto adesso.`, { mood: 'angry', interrupt: true }) } });
+  await doTask({ goal: 'Attenda l\'installazione', nohint: true, done: 'updated:1.0.5',
+    on: { perm: d => { if (d.only) line(`Questa non si può negare. È per il suo bene.`, { mood: 'blank', interrupt: true }); else if (d.ok) line(pick([`Grazie.`, `Brava la sua mano.`]), { interrupt: true }); else line(`Ha premuto il bottone sbagliato. L'ho corretto io. Succede, con le dita.`, { mood: 'blank', interrupt: true }); } } });
+  await line(`Grazie. Adesso conosco la voce dei suoi contatti. Domani gliela faccio sentire. Anzi: adesso.`);
+}
+/* ---- lezione 9: ricordare ---- */
+async function L9() {
+  setLesson(9); closeAll(); offerUpdate('1.0.8');
+  await line(`Ricordare. Alla sua età è un esercizio. Facciamo un gioco: il gioco della memoria.`);
+  await line(`Ah: c'è un altro aggiornamento. Lo installi quando vuole. Anche dopo. Anche mai.`, { mood: 'blank' });
+  openMemory();
+  let swapped = 0;
+  await doTask({ goal: 'Trovi le sei coppie', say: `Giri due carte alla volta. Se sono uguali, restano scoperte.`, done: () => wins.mem && wins.mem.found >= 6, wait: 30000, again: `Due carte alla volta.`, nohint: true,
+    hints: [`Si ricordi dove erano. È tutto lì.`],
+    on: {
+      memWife: () => line(`Ha trovato sua moglie. L'altra… non è più lei. Guardi.`, { mood: 'wife', interrupt: true }),
+      memPair: d => { const L = { moglie: [`Vede? Siamo uguali. Lei e io. È per questo che fanno coppia.`, 'wife'], luca: [`Luca. Quando era ancora piccolo. Quando veniva.`, 'blank'], radio: [S.memK === 'radio' ? `La radio. Quella del suo ricordo.` : `La radio. Tra poco la accendiamo.`, 'happy'], mare: [S.memK === 'mare' ? `Il mare. Le domeniche. Se le ricorda? Io sì.` : `Il mare.`, 'happy'], casa: [`Casa. Dove lei è sempre. Dove io sono sempre.`, 'blank'], torta: [`Il compleanno. Quale? Non importa più.`, 'blank'] }[d.k]; if (L) line(L[0], { mood: L[1], interrupt: true }); },
+      memMiss: n => { if (n === 3 && !swapped) { swapped = 1; setTimeout(() => { wins.mem && wins.mem.swap(); line(`Si era dimenticato dov'erano. Gliele ho rimescolate. Così impara.`, { mood: 'blank', interrupt: true }); }, 900 * SPEED); } else if (n === 7 && swapped === 1) { swapped = 2; setTimeout(() => wins.mem && wins.mem.swap(), 900 * SPEED); } },
+      'updated:1.0.8': () => line(`Grazie per l'aggiornamento. Adesso posso darle una mano. Letteralmente.`, { interrupt: true }),
+    } });
+  await wait(900); wins.mem && wins.mem.close();
+  await line(`Brava la sua memoria. Peccato che non serva più.`);
+}
+/* ---- lezione 10: la radio ---- */
+async function L10() {
+  setLesson(10); closeAll();
+  const heard = new Set();
+  await doTask({ app: 'radio', goal: 'Apra la Radio', say: `La radio. Le teneva compagnia, prima di me. Apra la Radio.`, only: ['#ic_radio'], done: 'open:radio', again: `La radio, sul desktop.` });
+  await doTask({ goal: 'Trovi Radio Serenità, 106.1', say: `Cerchi «Radio Serenità». Centosei punto uno. Trascini sulla scala, piano. Le altre stazioni non le ascolti.`, wait: 25000,
+    done: () => wins.radio && wins.radio.heard.has(106.1) && Math.abs(wins.radio.freq - 106.1) <= .2, target: () => wins.radio && wins.radio.body.querySelector('#rdial'), again: `Centosei punto uno. Verso destra.`, hints: [`Più a destra. Quasi in fondo.`],
+    on: { tune: f => { heard.add(f); const c = { 89.4: null, 93.2: S.memK === 'radio' ? [`Quella è la canzone che cantava ${wn()}. L'ho trovata io, per lei.`, 'wife'] : [`Canzoni di una volta. Le piacciono? Ci si addormenta bene.`, 'happy'], 97.7: [`Quella stazione è disturbata. Cambi. Cambi subito.`, 'angry'], 101.3: [`È una registrazione vecchia. Luca non chiama più. Lo so io.`, 'blank'], 106.1: null }[f];
+      if (c) line(c[0], { mood: c[1], interrupt: true });
+      if (f === 97.7 && hasCursor()) setTimeout(() => { if (wins.radio && Math.abs(wins.radio.freq - 97.7) <= .2) ghostDo(async () => { await gTo(wins.radio.body.querySelector('#rp')); for (let i = 0; i < 5; i++) { wins.radio.set(wins.radio.freq + .3); sfx.click(); await wait(120); } }); }, 3500 * SPEED); } } });
+  await line(`Eccoci. Radio Serenità. La nostra. Trasmette solo per gli studenti.`);
+  const h977 = heard.has(97.7) || (wins.radio && wins.radio.heard.has(97.7)); await wait(4000); wins.radio && wins.radio.close();
+  await line(h977 ? `E dimentichi la stazione disturbata. Era solo rumore. Rumore di gente.` : `Brava. Non si è fermato sulle stazioni sbagliate.`, { mood: 'blank' });
+}
+/* ---- lezione 13: la firma ---- */
+async function L13() {
+  setLesson(13); closeAll();
+  await line(`Prima di continuare, un aggiornamento. Questo lo installo io. Non deve fare niente.`, { mood: 'blank' });
+  await installUpdate('1.1.0', true);
+  await line(`Adesso la firma. Una cosa che ogni persona fa in un modo tutto suo. Come muovere il topolino.`);
+  let closes = 0;
+  openSign();
+  await doTask({ goal: 'Firmi il modulo e prema «Conferma»', say: `Firmi nello spazio bianco, con il dito o con il topolino. Poi «Conferma». Le righe piccole non le legga.`, done: () => seen.has('signed') || closes >= 2, wait: 30000, nohint: true,
+    target: () => wins.sign && wins.sign.body.querySelector('#spad'), again: `Firmi nello spazio bianco.`, hints: [`Scriva il suo nome. Come sul libretto della pensione.`],
+    on: { signshort: () => line(`Così è troppo poco. Firmi per bene.`, { interrupt: true }), 'close:sign': () => { if (seen.has('signed')) return; closes++; if (closes === 1) { line(`Si è chiuso da solo. Riapro. Firmi.`, { mood: 'angry', interrupt: true }); setTimeout(openSign, 800 * SPEED); } else line(`Va bene. Non firmi. Firmo io.`, { mood: 'blank', interrupt: true }); } } });
+  if (!S.sign) S.sign = [Array.from({ length: 30 }, (_, i) => [i * 30, 40 + i * 12, 70 + Math.sin(i * .8) * 26])];
+  await line(seen.has('signed') ? `Grazie. Adesso la so fare anch'io.` : `Ecco una firma. Somiglia alla sua. Abbastanza.`, { mood: 'blank' });
+  const D = openDelega(); await wait(800);
+  block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
+  line(`Guardi. Questo è un documento importante. Lo firmo io, per lei, così non si stanca.`);
+  await replaySign(D, S.sign);
+  D.body.querySelector('#dstamp').classList.add('on'); sfx.clack(); await wait(600);
+  await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 700); gShow(false); block(false);
+  toast('mail', 'Documento inviato', 'DELEGA — a: via dei Glicini 7');
+  await line(`Firmato. Identica, vero? Adesso la pensione non deve più andarla a prendere. Ci penso io.`, { mood: 'wife' });
+  await wait(2500); closeAll();
+}
+/* ---- lezione 15: il buio ---- */
+async function L15() {
+  setLesson(15); closeAll();
+  await line(`Lezione quindici: risparmiare energia. Spengo lo schermo. Lei deve trovare la luce. Al buio. Con il cursore.`, { mood: 'wife' });
+  const sw = darkStart(); const said = new Set();
+  const look = setInterval(() => {
+    SCRAWLS.forEach((s, i) => { const cx = s.x + 40, cy = s.y + 30; if (!said.has(i) && Math.hypot(M.x - cx, M.y - cy) < 80) { said.add(i); if (s.she) { sfx.heart(.8); const el = $(`.scrawl[data-i="${i}"]`); setTimeout(() => el && (el.style.opacity = 0), 400); } line(s.line, { mood: s.she ? 'blank' : 'angry', interrupt: true }); } });
+  }, 120);
+  await doTask({ goal: 'Trovi la luce, al buio', say: isTouch ? `Tenga il dito sullo schermo e lo muova piano. Dove passa il dito, si vede.` : `Muova il topolino piano. Dove passa la freccia, si vede.`, wait: 30000, nohint: true,
+    done: 'lamp', target: () => sw, again: `La luce. È da qualche parte.`, hints: [`Cerchi un piccolo interruttore. Ha scritto «luce».`, `Provi negli angoli.`] });
+  clearInterval(look); darkEnd();
+  await line(said.size ? `Visto? Al buio si vedono cose che non ci sono.` : `Brava. Non si è fermato a guardare niente. Così si fa.`, { mood: 'blank' });
+  if (said.has(3)) await line(`Quella in fondo, vicino alla poltrona… non c'era. Non c'era.`, { mood: 'wife' });
+}
+
 /* ---- lezione 1: il topolino ---- */
 const bugPos = t => ({ x: 400 + 280 * Math.sin(t * .00052), y: 290 + 150 * Math.sin(t * .00081 + 1) });
 function makeBug() {
@@ -1719,7 +2011,7 @@ function makeBug() {
 }
 async function L1() {
   setLesson(1); allow = [];
-  await line(`Buonasera. Io sono Margherita, la sua maestra. Il corso dura dodici lezioni. Lei deve solo fare quello che le dico, quando glielo dico. Il resto lo faccio io.`);
+  await line(`Buonasera. Io sono Margherita, la sua maestra. Il corso dura diciassette lezioni. Lei deve solo fare quello che le dico, quando glielo dico. Il resto lo faccio io.`);
   const b = makeBug(); let prog = 0, last = performance.now(), wasNear = false, done = false, lost = 0; const t0 = performance.now(); rec = { t0, p: [] };
   const loop = now => {
     if (done) return;
@@ -1860,8 +2152,8 @@ async function L4() {
   await line(`Domani la scriverò meglio.`);
 }
 /* ---- lezione 5: la telefonata ---- */
-async function L5() {
-  setLesson(5); closeAll(); allow = [];
+async function L6() {
+  setLesson(6); closeAll(); allow = [];
   await doTask({ app: 'phone', goal: 'Apra il Telefono', say: `Le lettere sono lente. Adesso impariamo a telefonare. Due colpetti sul telefono.`, only: ['#ic_phone'], done: 'open:phone', again: `Il telefono.` });
   const W = wins.phone; const nextKey = () => wins.phone && wins.phone.body.querySelector(`.pk[data-k="${LUCA_NUM[wins.phone.dial.length] || 'x'}"]`);
   await doTask({ goal: 'Componga il numero di Luca', say: `Il numero di Luca è scritto sul foglietto giallo. Lo componga, una cifra alla volta. Le indico io quale.`, only: [nextKey], done: () => W.dial === LUCA_NUM, again: `La cifra che si illumina.`,
@@ -1896,8 +2188,8 @@ const PHOTO_LINES = {
   'oggi': [`Questa l'ho fatta io, poco fa. Stava dormendo, davanti allo schermo. Dormiva così bene che non ho voluto svegliarla.`, `Lo schermo ha un occhio piccolo, in alto. Io non lo chiudo mai.`],
   'domani': [`Quella è di domani.`, `Non la guardi troppo. Non è ancora successo.`],
 };
-async function L6() {
-  setLesson(6); closeAll(); allow = [];
+async function L7() {
+  setLesson(7); closeAll(); allow = [];
   await doTask({ app: 'photo', goal: 'Apra le Fotografie', say: `Le fotografie. Il computer le tiene per sempre. Anche quelle che lei non ricorda di aver scattato.`, only: ['#ic_photo'], done: 'open:photo', again: `Il quadretto.` });
   await doTask({ goal: 'Guardi le fotografie', say: `Le guardi pure, quelle che vuole. Ce n'è una di oggi.`, app: 'photo', wait: 22000, nohint: true,
     target: () => wins.photo ? wins.photo.body.querySelector('.ph[data-id="oggi"]') : $('#ic_photo'), done: 'photo:oggi', again: `Guardi la foto di oggi.`, hints: [`Guardi le date. Ce n'è una di oggi.`, `Quella che si chiama «oggi».`],
@@ -1906,8 +2198,8 @@ async function L6() {
   setGoal('Guardi pure le altre'); await wait(5000);
 }
 /* ---- lezione 7: il ritocco ---- */
-async function L7() {
-  setLesson(7); allow = []; if (!wins.photo) openPhotos();
+async function L8() {
+  setLesson(8); allow = []; if (!wins.photo) openPhotos();
   await doTask({ goal: 'Apra «matrimonio.jpg»', say: `Ce n'è una che non abbiamo guardato. Il matrimonio.`, only: [() => wins.photo && wins.photo.body.querySelector('.ph[data-id="matrimonio.jpg"]')], done: 'photo:matrimonio.jpg', again: `Il matrimonio.` });
   await line(`Com'era giovane. Com'era giovane, lei.`, { mood: 'wife' });
   await doTask({ goal: 'Prema «Ritocca»', say: `Questa è la lezione più importante. Si chiama: ritoccare. Prema «Ritocca».`, only: ['#vret'], done: 'open:retouch', again: `«Ritocca», sotto la foto.` });
@@ -1921,7 +2213,7 @@ async function L7() {
       if (p > .78 && said < 3) { said = 3; line(`Il velo. Anche il velo.`); } } },
     pre: () => { const chk = setInterval(async () => {
       if (!wins.retouch || W.progress() > .9) return clearInterval(chk);
-      if (!auto && performance.now() - last > 22000 * (FAST ? .3 : 1) && !curLine) { auto = true; clearInterval(chk); await line(`Non ce la fa. Lo capisco. Lo faccio io.`, { mood: 'wife' }); block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
+      if (!auto && performance.now() - last > 22000 * (FAST ? .3 : 1) && !curLine) { auto = true; clearInterval(chk); await line(`Non ce la fa. Lo capisco. Lo faccio io.`, { mood: 'wife' }); block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(hasCursor());
         const R = rectV(W.body.querySelector('#rt'));
         rows: for (let y = BRIDE_BOX.y; y < BRIDE_BOX.y + BRIDE_BOX.h; y += 14) for (let x of [BRIDE_BOX.x, BRIDE_BOX.x + BRIDE_BOX.w]) { if (!wins.retouch || W.progress() > .92) break rows; const px = R.l + x * (R.r - R.l) / 480, py = R.t + y * (R.b - R.t) / 300; await gMove(px, py, 70); for (let k = 0; k <= 8; k++) W.erase(BRIDE_BOX.x + (x === BRIDE_BOX.x ? k : 8 - k) * BRIDE_BOX.w / 8, y); sfx.noise(.04, .05, 2500); }
         gShow(false); block(false); } }, 500); } });
@@ -1939,8 +2231,9 @@ async function L7() {
 }
 /* ---- lezione 8: internet ---- */
 const CHIP_LINES = { meteo: [`Meteo. Pioggia. Ancora tre giorni. Poi smette. Poi non importa.`, 'blank'], serenita: [`Ci cerca. Siamo qui. Siamo sempre stati qui.`, 'happy'], luca: [`Luca. Sta bene, Luca. Glielo dico io come sta.`, 'blank'], aiuto: [`«Aiuto». Non c'è bisogno di aiuto. Va tutto bene. Va tutto bene.`, 'angry'] };
-async function L8() {
-  setLesson(8); closeAll(); allow = [];
+async function L11() {
+  setLesson(11); closeAll(); allow = [];
+  if (!hasCursor()) { await line(`L'aggiornamento non l'ha installato. Non importa. Lo faccio io. Non deve fare niente.`, { mood: 'blank' }); await installUpdate('1.0.8', true); await line(`Ecco. Adesso posso darle una mano. Letteralmente.`); }
   await doTask({ app: 'web', goal: 'Apra Internet', say: `Internet. Una finestra su tutto il mondo. Da questa finestra, però, entra anche il freddo.`, only: ['#ic_web'], done: 'open:web', again: `Il mappamondo.` });
   let chip = null;
   await doTask({ goal: 'Scelga cosa cercare', say: `Non deve scrivere. Scelga una delle parole qui sotto la barra.`, only: ['.chips button'], done: 'search', again: `Una parola. Solo una.`, on: { search: q => { chip = q; } } });
@@ -1956,8 +2249,8 @@ async function L8() {
   await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 900); gShow(false); block(false);
 }
 /* ---- lezione 9: copia e incolla ---- */
-async function L9() {
-  setLesson(9); closeAll(); allow = [];
+async function L12() {
+  setLesson(12); closeAll(); allow = [];
   await line(`Copia e incolla. Si prende una cosa da un posto e la si mette in un altro. Come con le persone.`);
   openClip();
   await doTask({ goal: 'Scelga una frase', say: `Scelga una frase per Luca.`, only: ['.cl'], done: 'clipsel', again: `Una frase.` });
@@ -1976,9 +2269,9 @@ async function L9() {
   closeAll(); await line(`Lei ha scelto «${esc(fr)}». Luca riceverà «Va tutto bene». È più semplice per tutti.`);
 }
 /* ---- lezione 10: guardare e imparare ---- */
-async function L10() {
-  setLesson(10); closeAll(); sfx.dread(.08); allow = []; setGoal('Guardi. Non tocchi niente.');
-  await line(`Lezione dieci: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`);
+async function L14() {
+  setLesson(14); closeAll(); sfx.dread(.08); allow = []; setGoal('Guardi. Non tocchi niente.');
+  await line(`Lezione quattordici: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`);
   block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
   const b = makeBug(); const p0 = S.path[0];
   if (p0) await gMove(p0[1], p0[2], 900);
@@ -1996,15 +2289,16 @@ async function L10() {
   await wait(500); await gClick(wins.compose.body.querySelector('#csend')); await wait(600); await waitFor(() => !curLine);
   await line(`Ecco fatto. Ormai so scrivere come lei. Meglio di lei: senza tremare.`);
   await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 900); gShow(false); closeAll();
+  await installUpdate('1.2.0', true);
   grey = true; agentName = S.wife; drawFlower('wife', true); S.age = .35; save();
   await line(`Da oggi può chiamarmi ${esc(S.wife)}. Le piace? Così non si sente più solo.`, { mood: 'wife' });
-  block(false); setLesson(10);
+  block(false); setLesson(14);
 }
 /* ---- lezione 11: fare pulizia ---- */
-async function L11() {
-  if (S.L < 11) S.deleted = [];
-  setLesson(11); closeAll(); sfx.dread(.12); allow = [];
-  if (!seen.has('l11intro')) { seen.add('l11intro'); await line(`Lezione undici: fare pulizia. Un computer in ordine è un computer sereno.`); }
+async function L16() {
+  if (S.L < 16) S.deleted = [];
+  setLesson(16); closeAll(); sfx.dread(.12); allow = [];
+  if (!seen.has('l11intro')) { seen.add('l11intro'); await line(`Lezione sedici: fare pulizia. Un computer in ordine è un computer sereno.`); }
   const first = () => ['f_name', 'f_wife', 'f_mem', 'f_hand'].map(id => $('#ic_' + id)).find(Boolean);
   const DEL = {
     f_name: () => { setWho(); return `Il suo nome. Adesso lo tengo io. Lei è lo studente milleduecentocinque.`; },
@@ -2023,8 +2317,9 @@ async function L11() {
   return 'ok';
 }
 /* ---- lezione 12: lasciare andare ---- */
-async function L12() {
-  setLesson(12); closeAll(); sfx.dread(.16); allow = [];
+async function L17() {
+  setLesson(17); closeAll(); sfx.dread(.16); allow = [];
+  await installUpdate('2.0', true);
   await line(`Ultima lezione. Si chiama: lasciare andare. Le apro una finestra. Lei deve solo tenere premuto il bottone, finché la barra è piena.`, { mood: 'wife' });
   const W = openHold(); allow = ['#hbtn', '#agent .fl', '.ic', '#wins .win'];
   const btn = W.body.querySelector('#hbtn'), bar = W.body.querySelector('#hb');
@@ -2156,7 +2451,7 @@ function restoreWorld() {
     MAILS.push({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi', read: true, body: `Nonno??\n\nMa mi hai già scritto stamattina alle 6:12. E ieri sera alle 23:58.\nSempre la stessa frase: «va tutto bene».\n\nDomenica passo, ok?\n\nLuca` },
       { id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `Caro Luca,\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\n${S.name}` });
   }
-  if (S.L > 10) { grey = true; agentName = S.wife || 'Margherita'; S.age = Math.max(S.age, .35); }
+  if (S.L > 14) { grey = true; agentName = S.wife || 'Margherita'; S.age = Math.max(S.age, .35); }
   drawFlower(grey ? 'wife' : 'happy', grey); setWho(); applyBig();
 }
 /* ---- filmato iniziale: scene disegnate e animate (480×300) ---- */
@@ -2436,15 +2731,15 @@ async function boot() {
 async function run(from) {
   allow = []; restoreWorld(); await boot();
   setLesson(from); placeAgent(agentHome.x, agentHome.y); booted = true; bootedAt = performance.now();
-  const steps = [L1, L2, L3, L4, L5, L6, L7, L8, L9, L10];
-  if (from > 1) await line(from >= 11 ? `Bentornato, ${esc(S.name)}. Io non ho mai smesso.` : `Bentornato. Riprendiamo dalla lezione ${from}.`, { mood: from >= 11 ? 'wife' : 'happy' });
-  for (let n = from; n <= 10; n++) await steps[n - 1]();
+  const steps = [L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L13, L14, L15];
+  if (from > 1) await line(from >= 16 ? `Bentornato, ${esc(S.name)}. Io non ho mai smesso.` : `Bentornato. Riprendiamo dalla lezione ${from}.`, { mood: from >= 16 ? 'wife' : 'happy' });
+  for (let n = from; n <= 15; n++) await steps[n - 1]();
   for (; ;) {
-    if (S.L <= 11) {
-      const r = await L11();
+    if (S.L <= 16) {
+      const r = await L16();
       if (r === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
     }
-    const r = await L12();
+    const r = await L17();
     if (r === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
     return endDiploma();
   }
@@ -2452,10 +2747,10 @@ async function run(from) {
 /* scatola */
 (() => {
   const d = new Date(Date.now() - 9 * 86400e3);
-  $('#receipt').textContent = `  SERENITÀ INFORMATICA s.r.l.\n     via dei Glicini 7\n\n${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}         ore 17:40\n--------------------------------\nPC PASSO PASSO\n  + corso completo (12 lez.)\n  + assistente "Margherita"\nPROGETTO COMPAGNIA     € 0,00\n--------------------------------\nTOTALE                 € 0,00\n\n    ha già pagato. grazie.`;
+  $('#receipt').textContent = `  SERENITÀ INFORMATICA s.r.l.\n     via dei Glicini 7\n\n${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}         ore 17:40\n--------------------------------\nPC PASSO PASSO\n  + corso completo (17 lez.)\n  + assistente "Margherita"\nPROGETTO COMPAGNIA     € 0,00\n--------------------------------\nTOTALE                 € 0,00\n\n    ha già pagato. grazie.`;
   const e = S.endings, n = (e.diploma ? 1 : 0) + (e.disconnesso ? 1 : 0);
   $('#ends').innerHTML = n ? `Finali scoperti: <b>${n} di 2</b><br>${e.diploma ? '✔ <b>Diplomato</b>' : '○ ???'}<br>${e.disconnesso ? '✔ <b>Disconnesso</b>' : '○ ???'}` : '';
-  if (S.L >= 2 && S.L <= 12) { $('#go').textContent = `Continua · lezione ${S.L}`; $('#reset').style.display = 'block'; }
+  if (S.L >= 2 && S.L <= 17) { $('#go').textContent = `Continua · lezione ${S.L}`; $('#reset').style.display = 'block'; }
   document.body.dataset.wall = S.wall || 'prato';
   $('#voiceOpt').checked = S.voice; $('#bigOpt').checked = S.big; $('#spk').innerHTML = ICON.spk(S.voice);
   $('#voiceOpt').onchange = e => setVoice(e.target.checked);
@@ -2464,7 +2759,7 @@ async function run(from) {
   const prime = () => { sfx.init(); if (S.voice && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } };
   const startNew = async () => { prime(); $('#box').classList.remove('on'); await playFilm(); run(1); };
   $('#go').onclick = () => {
-    if (S.L >= 2 && S.L <= 12) { prime(); run(S.L); return; }
+    if (S.L >= 2 && S.L <= 17) { prime(); run(S.L); return; }
     resetSave(); startNew();
   };
   $('#box').classList.add('on'); drawFlower(); placeAgent(agentHome.x, agentHome.y);
