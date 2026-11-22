@@ -48,28 +48,140 @@ body.w3 #mark{color:#ffffff22}
 @keyframes shake{25%{transform:translate(-3px,1px) rotate(-3deg)}75%{transform:translate(3px,-1px) rotate(3deg)}}
 
 /* ---------- barra ---------- */
-#bar{position:absolute;left:0;right:0;bottom:0;height:48px;background:#fdf6e3;border-top:2px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 10px;z-index:600;font-size:15px}
-#startb{height:38px;padding:0 16px 0 8px;border:2px solid #3e8a4c;border-radius:20px;background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;text-shadow:0 1px 1px #0005}
-#lesson{flex:1;text-align:center;color:#6b6250;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#who{color:#6b6250}
-#spk{width:38px;height:34px;border:2px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center}
-#clock{font-weight:700;min-width:64px;text-align:right;font-variant-numeric:tabular-nums;line-height:1.05}
+#bar{position:absolute;left:0;right:0;bottom:0;height:48px;background:linear-gradient(#fffaf0,#f3e9cf);border-top:2px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 8px;z-index:600;font-size:15px}
+#startb{flex:none;height:38px;padding:0 16px 0 8px;border:2px solid #3e8a4c;border-radius:20px;background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;text-shadow:0 1px 1px #0005;box-shadow:inset 0 1px 0 #ffffff70}
+#startb.on{background:linear-gradient(#4f9a5d,#3e8a4c);box-shadow:inset 0 2px 4px #0004}
+#tasks{flex:1;display:flex;gap:6px;overflow:hidden;min-width:0;padding-left:4px;border-left:2px solid var(--line);height:38px;align-items:center}
+.tbtn{display:flex;align-items:center;gap:6px;flex:0 1 160px;min-width:46px;height:36px;padding:0 9px;border:2px solid var(--line);border-radius:8px;background:#fff;font:600 14px var(--os);color:var(--ink);white-space:nowrap;overflow:hidden}
+.tbtn svg{flex:none}
+.tbtn span{overflow:hidden;text-overflow:ellipsis}
+.tbtn.on{background:#ffe9a8;border-color:#e3c063;box-shadow:inset 0 2px 3px #0002}
+.tbtn.min{opacity:.6;font-style:italic}
+.tbtn.flash{animation:tflash .5s 4}
+@keyframes tflash{50%{background:#ffb347}}
+#lesson{flex:none;font-size:13px;background:#efe3c2;border-radius:12px;padding:4px 10px;color:#6b6250;font-weight:700;white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+#lesson:empty{display:none}
+#who{font-size:13px;color:#6b6250;white-space:nowrap}
+#tray{flex:none;display:flex;align-items:center;gap:6px;padding-left:8px;border-left:2px solid var(--line);height:38px}
+#tray .ti{width:34px;height:34px;border:0;border-radius:8px;background:none;display:grid;place-items:center}
+#tray .ti:hover,#tray .ti.on{background:#efe3c2}
+#clock{font-weight:700;min-width:62px;text-align:center;font-variant-numeric:tabular-nums;line-height:1.05;border-radius:8px;padding:3px 4px}
+#clock:hover,#clock.on{background:#efe3c2}
 #clock small{display:block;font-weight:500;font-size:11px;color:#8b826e}
-#menu{position:absolute;left:8px;bottom:54px;width:310px;background:var(--paper);border:2px solid var(--line);border-radius:12px;box-shadow:0 12px 30px #0006;z-index:650;display:none;overflow:hidden}
-#menu.on{display:block}
-#menu .hd{background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;padding:12px 14px;font-weight:800;font-size:18px}
-#menu .hd small{display:block;font-weight:500;font-size:13px;opacity:.9}
-#menu button{display:flex;gap:12px;align-items:center;width:100%;border:0;border-bottom:1px solid #eee2c4;background:none;text-align:left;padding:12px 14px;font-size:18px;color:var(--ink)}
-#menu button:hover{background:#fff1c9}
-
+.pop{position:absolute;right:8px;bottom:54px;background:var(--paper);border:2px solid var(--line);border-radius:12px;box-shadow:0 12px 30px #0006;z-index:760;display:none;padding:14px 16px;font-size:16px}
+.pop.on{display:block;animation:popin .15s ease-out}
+@keyframes popin{from{transform:translateY(8px);opacity:0}}
+.pop h4{font-size:15px;color:#6b6250;margin-bottom:8px}
+#volpop{width:270px}#volpop label{display:flex;gap:10px;align-items:center;margin-top:10px}#volpop input[type=range]{width:100%}
+#netpop{width:270px;font-size:15px;line-height:1.5}
+#calpop{width:320px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:14px}
+.cal b{color:#8b826e;font-size:12px;padding:4px 0}
+.cal span{padding:7px 0;border-radius:6px}
+.cal .oth{color:#c9bf9f}
+.cal .today{background:var(--blue);color:#fff;font-weight:800}
+.cal .ev{box-shadow:inset 0 -3px 0 var(--rose)}
+.calhd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.calhd b{font-size:18px;text-transform:capitalize}
+#menu{position:absolute;left:8px;bottom:54px;width:480px;background:var(--paper);border:2px solid var(--line);border-radius:14px;box-shadow:0 14px 34px #0007;z-index:760;display:none;overflow:hidden}
+#menu.on{display:block;animation:popin .15s ease-out}
+#menu .hd{background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;padding:12px 14px;font-weight:800;font-size:19px;display:flex;gap:12px;align-items:center}
+#menu .hd small{display:block;font-weight:500;font-size:13px;opacity:.92}
+#menu .av{width:50px;height:50px;border-radius:50%;background:#fffaf0;display:grid;place-items:center;border:3px solid #ffffffa0;flex:none}
+#menu .cols{display:grid;grid-template-columns:1fr 200px}
+#menu .cl{padding:6px}
+#menu .cr{background:#f4ecd6;padding:6px;border-left:2px solid #eadfc2}
+#menu .mi2{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:7px 10px;border-radius:8px;font-size:17px;color:var(--ink)}
+#menu .mi2:hover{background:#fff1c9}
+#menu .mi2.lock{color:#b5ab93}#menu .mi2.lock svg{filter:grayscale(1);opacity:.45}
+#menu .mi2 small{display:block;font-size:12px;color:#8b826e;font-weight:500}
+#menu .sep{border-top:1px solid #e3d6b2;margin:5px 8px}
+#menu .ft{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-top:2px solid #eadfc2;background:#efe3c2;font-size:12px;color:#8b826e}
+#ctx{position:absolute;z-index:770;display:none;min-width:230px;background:var(--paper);border:2px solid var(--line);border-radius:10px;box-shadow:0 10px 26px #0006;padding:4px}
+#ctx.on{display:block;animation:popin .12s ease-out}
+#ctx button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px 12px;border-radius:6px;font-size:16px;color:var(--ink)}
+#ctx button:hover:not(:disabled){background:#fff1c9}
+#ctx button:disabled{color:#b5ab93}
+#ctx hr{border:0;border-top:1px solid #eadfc2;margin:3px 6px}
+#toasts{position:absolute;right:12px;top:12px;width:262px;z-index:690;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#fffaf0f5;border:2px solid var(--line);border-radius:12px;box-shadow:0 8px 20px #0005;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.3;color:#6b6250;animation:tin .35s ease-out}
+.toast b{display:block;font-size:15px;color:var(--ink)}
+.toast svg{flex:none}
+.toast.out{animation:tout .4s ease-in forwards}
+@keyframes tin{from{transform:translateX(120%)}}
+@keyframes tout{to{transform:translateX(120%);opacity:0}}
+#sel{position:absolute;border:1.5px solid #fff;background:#ffffff30;z-index:3;pointer-events:none;display:none}
+#saver{position:absolute;inset:0;z-index:4000;display:none;background:#000}
+#saver.on{display:block}
+#saver canvas{width:1024px;height:640px;display:block}
+body.cur-wait #cur{animation:none}
 /* ---------- finestre ---------- */
 #wins{position:absolute;left:0;top:0;width:1024px;height:592px;pointer-events:none}
 #wins>*{pointer-events:auto}
+#wins>.win.closing,#wins>.win.minim{pointer-events:none}
 .win{position:absolute;background:var(--paper);border:2px solid #bfae84;border-radius:12px;box-shadow:0 14px 34px #0007;display:flex;flex-direction:column;overflow:hidden;animation:wopen .18s ease-out}
 @keyframes wopen{from{transform:scale(.92);opacity:0}}
 .tb{height:42px;flex:none;background:linear-gradient(#ffeab0,#ffd86b);border-bottom:2px solid #e3c063;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;font-weight:800;font-size:18px;color:#4a3d18}
 .tb .tt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tb .x{height:32px;padding:0 12px;border:2px solid #b8323f;border-radius:8px;background:#e0505c;color:#fff;font-weight:800;font-size:15px}
+.tb .x{height:32px;padding:0 12px;border:2px solid #b8323f;border-radius:8px;background:linear-gradient(#ec6b76,#d9455f);color:#fff;font-weight:800;font-size:15px;flex:none}
+.tb .x:hover{filter:brightness(1.1)}
+.tb .wbtn{flex:none;width:34px;height:32px;border:2px solid #c9a64a;border-radius:8px;background:#fff4cf;font-weight:900;font-size:17px;line-height:1;color:#4a3d18;display:grid;place-items:center}
+.tb .wbtn:hover{background:#fff}
+.win{transition:transform .2s,opacity .2s}
+.win.minim{transform:translateY(460px) scale(.2);opacity:0;pointer-events:none}
+.win.closing{transform:scale(.94);opacity:0;pointer-events:none}
+.win.maxed{border-radius:0;border-width:0 2px 0 0}
+.win.dlg .tb{background:linear-gradient(#e9f1ff,#cfe0fb);border-color:#a9c2ea;color:#1e3f74}
+.grip{position:absolute;right:2px;bottom:2px;width:18px;height:18px;background:linear-gradient(135deg,#0000 45%,#bfae84 45% 55%,#0000 55% 65%,#bfae84 65% 75%,#0000 75%)}
+.status{height:26px;flex:none;border-top:1px solid #e3d6b2;background:#f4ecd6;font-size:13px;color:#6b6250;display:flex;align-items:center;padding:0 12px;gap:16px;white-space:nowrap;overflow:hidden}
+.toolbar{display:flex;gap:6px;padding:6px 8px;background:#f4ecd6;border-bottom:2px solid #e3d6b2;flex-wrap:wrap}
+.toolbar button{font:600 15px var(--os);border:2px solid #d8c9a3;border-radius:8px;background:#fff;padding:5px 12px;color:var(--ink)}
+.toolbar button:hover{background:#fff8e2}
+.np{display:flex;flex-direction:column;height:100%}
+.np textarea{flex:1;border:0;resize:none;padding:16px 20px;font:19px/1.55 Georgia,serif;background:repeating-linear-gradient(#fffaf0 0 29px,#e9e1cc 29px 30px);background-attachment:local;color:var(--ink);outline:none}
+.drives{display:flex;flex-wrap:wrap;gap:10px;padding:14px}
+.drive{width:220px;display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;border:2px solid transparent}
+.drive.sel{background:#ffe9a8;border-color:#e3c063}
+.drive b{display:block;font-size:15px}
+.drive small{color:#8b826e;font-size:12px}
+.meter{height:12px;border:1px solid #b9a671;border-radius:6px;background:#fff;overflow:hidden;margin:4px 0}
+.meter i{display:block;height:100%;background:linear-gradient(#5b8fe0,#2f6fd0)}
+.meter i.full{background:linear-gradient(#ec6b76,#d9455f)}
+.calc{padding:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc .disp{grid-column:1/-1;background:#dfe8d0;border:2px solid #9aa58a;border-radius:8px;font:700 32px var(--mono);text-align:right;padding:10px 12px;color:#26301c;overflow:hidden;white-space:nowrap;box-shadow:inset 0 2px 6px #0003}
+.calc button{font:700 22px var(--os);height:52px;border:2px solid #c9b98f;border-radius:10px;background:#fff;color:var(--ink)}
+.calc button:active{transform:translateY(2px)}
+.calc .op{background:#ffe9a8}.calc .eq{background:var(--blue);color:#fff;border-color:#1e4f9c}.calc .cl{background:#f7d3d8}
+.bigcal{display:grid;grid-template-columns:1fr 210px;height:100%}
+.bigcal .grid{padding:12px}
+.bigcal .cal span{padding:12px 0;font-size:16px;cursor:inherit}
+.bigcal .cal span.sel{outline:2px solid #e3c063}
+.bigcal .side{background:#f4ecd6;border-left:2px solid #e3d6b2;padding:14px;font-size:15px;line-height:1.45;color:#4a3d18}
+.bigcal .side h4{font-size:17px;margin-bottom:8px}
+.bigcal .side .e{background:#fff;border-left:4px solid var(--rose);border-radius:6px;padding:6px 8px;margin-bottom:6px}
+.bigcal .side .e s{color:#999}
+.panel{display:grid;grid-template-columns:170px 1fr;height:100%}
+.panel .tabs{background:#f4ecd6;border-right:2px solid #e3d6b2;padding:8px;display:flex;flex-direction:column;gap:4px}
+.panel .tabs button{display:flex;gap:8px;align-items:center;border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font:600 16px var(--os);color:var(--ink)}
+.panel .tabs button.on{background:#fff;box-shadow:inset 0 0 0 2px #e3c063}
+.panel .pg{padding:18px 22px;overflow:auto;font-size:16px;display:flex;flex-direction:column;gap:12px}
+.panel .pg h3{font-size:21px}
+.panel .pg p{color:#6b6250;line-height:1.4}
+.panel .pg label{display:flex;gap:10px;align-items:center}
+.panel .pg input[type=checkbox]{width:22px;height:22px}
+.walls{display:flex;gap:10px}
+.walls button{width:120px;border:3px solid transparent;border-radius:10px;padding:4px;background:#fff;font:600 13px var(--os);color:var(--ink)}
+.walls button.on{border-color:var(--blue)}
+.walls i{display:block;height:62px;border-radius:6px;margin-bottom:4px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:15px}
+.kv b{color:#6b6250;font-weight:600}
+.help{padding:16px 20px;font-size:17px;line-height:1.5}
+.help details{border:2px solid #eadfc2;border-radius:10px;padding:8px 12px;margin-bottom:8px;background:#fff}
+.help summary{font-weight:700;cursor:inherit}
+body[data-wall=mare]:not(.w1):not(.w2):not(.w3){--sky1:#e3f4ff;--sky2:#a9d8f5;--sky3:#7cc0ea;--hill:#ecd9a6;--hill2:#2f86c6;--fl:0}
+body[data-wall=tinta]:not(.w1):not(.w2):not(.w3){--sky1:#3c8d8a;--sky2:#3c8d8a;--sky3:#2f7471;--hill:#2f7471;--hill2:#2a6764;--fl:0}
+body[data-wall=tinta]:not(.w1):not(.w2):not(.w3) #sunb{opacity:0}
+
 .win.inactive .tb{background:#efe6cc;border-color:#ddd0aa;color:#8a7d5c}
 .wb{flex:1;overflow:auto;position:relative}
 .big{font-size:17px;font-weight:700;border:2px solid #b9a671;border-radius:10px;background:#fff;padding:10px 16px;color:var(--ink)}
@@ -223,11 +335,13 @@ body.glitch #desk,body.glitch #wins{animation:gl .11s steps(2) infinite}
 <body>
 <div id="screen">
   <div id="desk"><div id="sunb"></div><div class="hill" id="h1"></div><div class="hill" id="h2"></div><div id="meadow"></div>
-    <div id="mark">PASSO PASSO<small>il computer che ti insegna tutto</small></div><div id="icons"></div></div>
+    <div id="mark">PASSO PASSO<small>il computer che ti insegna tutto</small></div><div id="icons"></div><div id="sel"></div></div>
   <div id="wins"></div>
   <div id="agent" class="bob" style="left:890px"><div class="bal" id="bal"></div><svg class="fl" id="flower" viewBox="0 0 110 140"></svg></div>
-  <div id="menu"></div>
-  <div id="bar"><button id="startb"></button><div id="lesson"></div><span id="who"></span><button id="spk" title="Voce"></button><div id="clock"></div></div>
+  <div id="menu"></div><div id="ctx"></div><div id="toasts"></div>
+  <div class="pop" id="volpop"></div><div class="pop" id="calpop"></div><div class="pop" id="netpop"></div>
+  <div id="bar"><button id="startb"></button><div id="tasks"></div><div id="lesson"></div><span id="who"></span><div id="tray"><button class="ti" id="net" title="Rete"></button><button class="ti" id="spk" title="Volume"></button><div id="clock" title="Data e ora"></div></div></div>
+  <div id="saver"><canvas id="svc" width="1024" height="640"></canvas></div>
   <div id="block"></div>
   <svg id="ghost" viewBox="0 0 40 52"><path d="M3 3 L3 42 L13 32 L20 48 L27 45 L20 29 L34 29 Z" fill="#e9e4da" stroke="#5a1d2a" stroke-width="2.5" stroke-linejoin="round"/></svg>
   <svg id="cur" viewBox="0 0 40 52"><path d="M3 3 L3 42 L13 32 L20 48 L27 45 L20 29 L34 29 Z" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></svg>
@@ -243,7 +357,7 @@ body.glitch #desk,body.glitch #wins{animation:gl .11s steps(2) infinite}
     <div class="side">
       <div class="receipt" id="receipt"></div>
       <button class="go" id="go">Accendi il computer</button>
-      <button class="lnk" id="reset" style="display:none">ricomincia il corso da capo</button>
+      <button class="go" id="reset" style="display:none;margin-top:12px;background:#e8dcc0;box-shadow:0 5px 0 #a8996f;font-size:17px;padding:12px">Nuova partita</button>
       <label class="opt"><input type="checkbox" id="voiceOpt" checked> Voce di Margherita</label>
       <label class="opt"><input type="checkbox" id="bigOpt"> Testo extra grande</label>
       <div class="ends" id="ends"></div>
@@ -322,6 +436,22 @@ const ICON = {
   course: s => SV(s, '<rect x="8" y="8" width="48" height="48" rx="8" fill="#4f9a5d"/><path d="M18 33l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'),
   gear: s => SV(s, '<circle cx="32" cy="32" r="16" fill="none" stroke="#6b6250" stroke-width="9" stroke-dasharray="7 5"/><circle cx="32" cy="32" r="9" fill="#6b6250"/>'),
   power: s => SV(s, '<path d="M20 20a17 17 0 1 0 24 0" fill="none" stroke="#d9455f" stroke-width="6" stroke-linecap="round"/><path d="M32 10v22" stroke="#d9455f" stroke-width="6" stroke-linecap="round"/>'),
+  note: s => SV(s, '<rect x="12" y="8" width="40" height="50" rx="4" fill="#fffbe6" stroke="#8a7a52" stroke-width="2.5"/><path d="M18 22h28M18 30h28M18 38h28M18 46h18" stroke="#b9ad8f" stroke-width="2.5"/><path d="M18 4v8M26 4v8M34 4v8M42 4v8" stroke="#555" stroke-width="3" stroke-linecap="round"/><path d="M44 40l10-18 4 2-10 18-5 2z" fill="#ffcf3f" stroke="#8a6d1b" stroke-width="2"/>'),
+  calc: s => SV(s, '<rect x="12" y="5" width="40" height="54" rx="6" fill="#5d6874"/><rect x="17" y="10" width="30" height="12" rx="2" fill="#dfe8d0"/>' + [0, 1, 2].map(r => [0, 1, 2].map(c => `<rect x="${17 + c * 11}" y="${27 + r * 10}" width="8" height="7" rx="2" fill="${c === 2 ? '#ffcf3f' : '#fff'}"/>`).join('')).join('')),
+  cal: s => SV(s, '<rect x="8" y="12" width="48" height="44" rx="6" fill="#fff" stroke="#8a7a52" stroke-width="2.5"/><path d="M8 18q0-6 6-6h36q6 0 6 6v8H8z" fill="#d9455f"/><path d="M20 6v12M44 6v12" stroke="#555" stroke-width="4" stroke-linecap="round"/><text x="32" y="50" font-family="Arial" font-size="20" font-weight="700" fill="#2b2a33" text-anchor="middle">' + new Date().getDate() + '</text>'),
+  comp: s => SV(s, '<rect x="8" y="8" width="48" height="36" rx="4" fill="#e3d8bd" stroke="#8a7a52" stroke-width="2.5"/><rect x="13" y="13" width="38" height="26" rx="2" fill="#9cc6f0"/><path d="M13 13h38v10q-19 -6 -38 4z" fill="#ffffff55"/><rect x="24" y="44" width="16" height="6" fill="#cfc4aa"/><rect x="14" y="50" width="36" height="7" rx="2" fill="#e3d8bd" stroke="#8a7a52" stroke-width="2"/><circle cx="46" cy="41" r="1.6" fill="#4f9a5d"/>'),
+  drive: s => SV(s, '<rect x="6" y="22" width="52" height="22" rx="4" fill="#cfd6de" stroke="#5d6874" stroke-width="2.5"/><circle cx="48" cy="33" r="3" fill="#4f9a5d"/><path d="M12 33h22" stroke="#8b96a3" stroke-width="3"/>'),
+  drivelock: s => SV(s, '<rect x="6" y="22" width="52" height="22" rx="4" fill="#cfd6de" stroke="#5d6874" stroke-width="2.5"/><circle cx="48" cy="33" r="3" fill="#d9455f"/><rect x="18" y="8" width="20" height="16" rx="3" fill="#ffcf3f" stroke="#8a6d1b" stroke-width="2"/><path d="M22 10v-2a6 6 0 0 1 12 0v2" fill="none" stroke="#8a6d1b" stroke-width="2.5"/>'),
+  floppy: s => SV(s, '<path d="M10 8h38l8 8v40H10z" fill="#3d4b6b"/><rect x="18" y="8" width="24" height="16" fill="#cfd6de"/><rect x="34" y="11" width="5" height="10" fill="#3d4b6b"/><rect x="16" y="34" width="32" height="20" fill="#fff"/>'),
+  help: s => SV(s, '<circle cx="32" cy="32" r="25" fill="#2f6fd0"/><text x="32" y="44" font-family="Georgia" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">?</text>'),
+  user: s => SV(s, '<circle cx="32" cy="32" r="28" fill="#cfe0fb"/><circle cx="32" cy="26" r="11" fill="#d9c4b0"/><path d="M32 15a11 9 0 0 1 11 9q-11-4-22 0a11 9 0 0 1 11-9z" fill="#eee"/><path d="M12 54q20-24 40 0" fill="#3c3f47"/>'),
+  restart: s => SV(s, '<path d="M48 22a19 19 0 1 0 4 16" fill="none" stroke="#2f6fd0" stroke-width="6" stroke-linecap="round"/><path d="M52 10v14H38z" fill="#2f6fd0"/>'),
+  monitor: s => SV(s, '<rect x="6" y="10" width="52" height="34" rx="3" fill="#2b2a33"/><rect x="10" y="14" width="44" height="26" fill="#9cc6f0"/><rect x="26" y="44" width="12" height="8" fill="#6b6250"/><rect x="18" y="52" width="28" height="4" rx="2" fill="#6b6250"/>'),
+  sound: s => SV(s, '<path d="M10 24h10l14-12v40L20 40H10z" fill="#4a3d18"/><path d="M42 22q6 10 0 20M48 16q11 16 0 32" fill="none" stroke="#4a3d18" stroke-width="5" stroke-linecap="round"/>'),
+  info: s => SV(s, '<circle cx="32" cy="32" r="25" fill="#4f9a5d"/><circle cx="32" cy="19" r="4" fill="#fff"/><rect x="28" y="27" width="8" height="22" rx="3" fill="#fff"/>'),
+  warn: s => SV(s, '<path d="M32 6l28 50H4z" fill="#ffcf3f" stroke="#8a6d1b" stroke-width="3" stroke-linejoin="round"/><rect x="29" y="22" width="6" height="18" rx="2" fill="#2b2a33"/><circle cx="32" cy="47" r="3.5" fill="#2b2a33"/>'),
+  err: s => SV(s, '<circle cx="32" cy="32" r="26" fill="#d9455f"/><path d="M22 22l20 20M42 22L22 42" stroke="#fff" stroke-width="7" stroke-linecap="round"/>'),
+  wifi: (n = 3) => SV(22, [0, 1, 2].map(i => `<path d="M${32 - 8 - i * 8} ${46 - 8 - i * 8}a${8 + i * 8} ${8 + i * 8} 0 0 1 ${16 + i * 16} 0" fill="none" stroke="${i < n ? '#4a3d18' : '#cfc4aa'}" stroke-width="5" stroke-linecap="round"/>`).join('') + '<circle cx="32" cy="48" r="4" fill="#4a3d18"/>'),
   spk: on => SV(22, `<path d="M8 24h10l14-12v40L18 40H8z" fill="#4a3d18"/>${on ? '<path d="M40 22q6 10 0 20M46 16q11 16 0 32" fill="none" stroke="#4a3d18" stroke-width="5" stroke-linecap="round"/>' : '<path d="M40 22l16 20M56 22L40 42" stroke="#d9455f" stroke-width="5" stroke-linecap="round"/>'}`),
 };
 $('#boxlogo').innerHTML = daisy(); $('#logosvg').innerHTML = daisy();
@@ -376,6 +506,9 @@ const sfx = {
     const s = actx.createBufferSource(), lp = actx.createBiquadFilter(), g = actx.createGain(); lp.frequency.value = f; s.buffer = b; g.gain.value = vol; s.connect(lp); lp.connect(g); g.connect(master); s.start();
   },
   click() { this.tone(1800, .03, 'square', .03); },
+  minimize() { this.tone(700, .12, 'sine', .05, -300); },
+  restore() { this.tone(500, .12, 'sine', .05, 300); },
+  notify() { this.tone(880, .12, 'sine', .06); this.tone(1175, .2, 'sine', .05, 0, .1); },
   open() { this.tone(523, .09, 'sine', .07); this.tone(784, .12, 'sine', .07, 0, .07); },
   close() { this.tone(660, .08, 'sine', .05); this.tone(440, .1, 'sine', .05, 0, .06); },
   pop() { this.tone(900, .08, 'triangle', .14, -500); this.noise(.06, .1, 4000); },
@@ -470,13 +603,37 @@ addEventListener('pointerup', () => { M.down = false; }, { passive: true });
 addEventListener('keydown', () => { lastInput = performance.now(); });
 const curEl = $('#cur'), ghostEl = $('#ghost');
 if (isTouch) curEl.style.display = 'none';
-let mirror = false;
+let mirror = false, busy = 0, curKind = 'arrow', curTarget = null;
+const CUR = {
+  arrow: [3, 3, '<path d="M3 3 L3 42 L13 32 L20 48 L27 45 L20 29 L34 29 Z" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/>'],
+  hand: [14, 4, '<path d="M14 4c2.5 0 4 1.6 4 4v13l2-.5c2 0 3.3 1 3.5 2.5l.5-.2c2-.5 3.7.6 4 2.3l.6-.1c2-.3 3.6 1 3.6 3v8c0 6-4 11-11 11h-3c-4 0-6.5-2-8.5-5L4 34c-1.3-2 0-4 2-4 1.4 0 2.4.8 3.4 2l.6.8V8c0-2.4 1.6-4 4-4z" fill="#fff" stroke="#111" stroke-width="2.4" stroke-linejoin="round"/>'],
+  text: [20, 26, '<path d="M12 6h16M12 46h16M20 6v40" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M12 6h16M12 46h16M20 6v40" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>'],
+  move: [20, 26, '<path d="M20 4l7 8h-4v11h11v-4l8 7-8 7v-4H23v11h4l-7 8-7-8h4V29H6v4l-8-7 8-7v4h11V12h-4z" transform="translate(2 0)" fill="#fff" stroke="#111" stroke-width="2.2" stroke-linejoin="round"/>'],
+  resize: [20, 26, '<path d="M6 12V4h8l-3 3 20 20 3-3v8h-8l3-3L9 9z" transform="translate(2 8) scale(1.1)" fill="#fff" stroke="#111" stroke-width="2.2" stroke-linejoin="round"/>'],
+  wait: [20, 26, '<g class="hg"><path d="M9 4h22v6c0 6-7 9-7 16 0 7 7 10 7 16v6H9v-6c0-6 7-9 7-16 0-7-7-10-7-16z" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/><path d="M13 44h14c0-3-4-5-7-7-3 2-7 4-7 7zM14 12h12c-1 3-4 5-6 7-2-2-5-4-6-7z" fill="#e0a91f"/></g>'],
+};
+addEventListener('pointermove', e => { curTarget = e.target; }, { passive: true });
+addEventListener('pointerdown', e => { curTarget = e.target; }, { passive: true });
+function kindFor(t) {
+  if (busy > 0) return 'wait';
+  if (!t || !t.closest) return 'arrow';
+  if (dragKind) return dragKind;
+  if (t.closest('.grip')) return 'resize';
+  if (t.closest('textarea,input:not([type]),input[type=text]')) return 'text';
+  if (t.closest('a,[data-go],.res a,.lnk')) return 'hand';
+  return 'arrow';
+}
+let dragKind = null;
 function curLoop(now) {
   requestAnimationFrame(curLoop);
   const k = 1 - S.age * .75;
   M.vx += (M.x - M.vx) * k; M.vy += (M.y - M.vy) * k;
+  const kind = kindFor(curTarget);
+  if (kind !== curKind) { curKind = kind; curEl.innerHTML = CUR[kind][2]; }
+  const [hx, hy] = CUR[curKind];
   const tr = S.age * 5, nx = M.vx + Math.sin(now * .013) * tr + Math.sin(now * .031) * tr * .6, ny = M.vy + Math.cos(now * .017) * tr;
-  curEl.style.transform = `translate(${nx - 3}px,${ny - 3}px)`;
+  curEl.style.transform = `translate(${nx - hx}px,${ny - hy}px)`;
+  if (curKind === 'wait') { const hg = curEl.querySelector('.hg'); hg && hg.setAttribute('transform', `rotate(${(now / 4) % 360 > 300 ? ((now / 4) % 360 - 300) * 3 : 0} 20 26)`); }
   if (mirror) gSet(M.x + 0, M.y);
 }
 requestAnimationFrame(curLoop);
@@ -519,37 +676,90 @@ function gReplay(path, onT) {
 const block = on => $('#block').classList.toggle('on', on);
 
 /* =================== FINESTRE =================== */
-let zTop = 10; const wins = {};
-function focusW(W) { Object.values(wins).forEach(w => w.el.classList.add('inactive')); W.el.classList.remove('inactive'); W.el.style.zIndex = ++zTop; }
+let zTop = 10, activeW = null; const wins = {}; const WORK = { w: 776, h: 592 };
+function topW() { return Object.values(wins).filter(w => !w.min).sort((a, b) => +b.el.style.zIndex - +a.el.style.zIndex)[0] || null; }
+function focusW(W) {
+  if (!W) { activeW = null; Object.values(wins).forEach(w => w.el.classList.add('inactive')); renderTasks(); return; }
+  if (W.min) { W.min = false; W.el.classList.remove('minim'); sfx.restore(); }
+  Object.values(wins).forEach(w => w.el.classList.add('inactive')); W.el.classList.remove('inactive'); W.el.style.zIndex = ++zTop; activeW = W; renderTasks();
+}
+function minW(W) { W.min = true; W.el.classList.add('minim'); sfx.minimize(); focusW(topW()); }
+function maxW(W) {
+  if (W.max) { Object.assign(W.el.style, W.prev); W.max = false; }
+  else { W.prev = { left: W.el.style.left, top: W.el.style.top, width: W.el.style.width, height: W.el.style.height }; Object.assign(W.el.style, { left: '0px', top: '0px', width: WORK.w + 'px', height: WORK.h + 'px' }); W.max = true; }
+  W.el.classList.toggle('maxed', W.max); W.el.querySelector('.wmax').textContent = W.max ? '❐' : '□'; sfx.restore();
+}
 function makeDrag(handle, el, o = {}) {
   handle.addEventListener('pointerdown', e => {
-    if (e.target.closest('button,input,textarea')) return;
-    e.preventDefault(); const p0 = toV(e), l0 = el.offsetLeft, t0 = el.offsetTop; let moved = false;
-    o.start && o.start();
+    if (e.target.closest('button,input,textarea') || e.button > 0) return;
+    e.preventDefault(); const p0 = toV(e); let l0 = el.offsetLeft, t0 = el.offsetTop, moved = false;
     const mv = ev => {
-      const p = toV(ev), dx = p.x - p0.x, dy = p.y - p0.y; if (Math.abs(dx) + Math.abs(dy) > 6) moved = true;
-      if (!moved) return;
+      const p = toV(ev), dx = p.x - p0.x, dy = p.y - p0.y; if (!moved && Math.abs(dx) + Math.abs(dy) > 6) { moved = true; if (o.start && o.start()) { l0 = p0.x - el.offsetWidth / 2; t0 = 0; } }
+      if (!moved) return; if (o.win) dragKind = 'move';
       el.style.left = clamp(l0 + dx, o.minX ?? -el.offsetWidth + 80, o.maxX ?? 1024 - 80) + 'px';
       el.style.top = clamp(t0 + dy, o.minY ?? 0, o.maxY ?? 560) + 'px'; o.move && o.move(p);
     };
-    const up = ev => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); o.drop && o.drop(toV(ev), moved); };
+    const up = ev => { dragKind = null; removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); o.drop && o.drop(toV(ev), moved); };
     addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   });
 }
-function openWin(id, { title, icon, w, h, x, y, html, onClose }) {
+let cascade = 0;
+function openWin(id, o) {
   if (wins[id]) { focusW(wins[id]); return wins[id]; }
-  const el = document.createElement('div'); el.className = 'win';
-  el.style.cssText = `left:${x ?? Math.round((780 - w) / 2)}px;top:${y ?? Math.max(6, Math.round((592 - h) / 2) - 20)}px;width:${w}px;height:${h}px`;
-  el.innerHTML = `<div class="tb">${icon ? ICON[icon](26) : ''}<span class="tt">${title}</span><button class="x">✕ Chiudi</button></div><div class="wb">${html}</div>`;
+  const { title, icon, w, h, html, onClose, dialog } = o;
+  let x = o.x, y = o.y;
+  if (x == null) { x = Math.round((WORK.w - w) / 2) + (dialog ? 0 : (cascade % 4) * 18); y = Math.max(6, Math.round((WORK.h - h) / 2) - 20 + (dialog ? 0 : (cascade++ % 4) * 18)); }
+  const el = document.createElement('div'); el.className = 'win' + (dialog ? ' dlg' : '');
+  el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+  el.innerHTML = `<div class="tb">${icon ? ICON[icon](26) : ''}<span class="tt">${title}</span>${dialog ? '' : '<button class="wbtn wmin" title="Riduci a icona">–</button><button class="wbtn wmax" title="Ingrandisci">□</button>'}<button class="x">✕ Chiudi</button></div><div class="wb">${html}</div>${o.status != null ? `<div class="status">${o.status}</div>` : ''}${dialog ? '' : '<div class="grip"></div>'}`;
   $('#wins').appendChild(el);
-  const W = { id, el, body: el.querySelector('.wb'), x: el.querySelector('.x'), close() { if (!wins[id]) return; el.remove(); delete wins[id]; sfx.close(); emit('close:' + id); onClose && onClose(); } };
+  const W = {
+    id, el, title, icon, dialog, min: false, max: false, body: el.querySelector('.wb'), x: el.querySelector('.x'),
+    status(h) { const st = el.querySelector('.status'); if (st) st.innerHTML = h; },
+    close() { if (!wins[id]) return; delete wins[id]; el.classList.add('closing'); setTimeout(() => el.remove(), 170); sfx.close(); emit('close:' + id); if (activeW === W) focusW(topW()); else renderTasks(); onClose && onClose(); },
+  };
   W.x.onclick = () => { sfx.click(); W.close(); };
-  makeDrag(el.querySelector('.tb'), el);
-  el.addEventListener('pointerdown', () => focusW(W));
+  makeDrag(el.querySelector('.tb'), el, { win: true, minY: 0, maxY: 548, start: () => { if (W.max) { maxW(W); return true; } } });
+  if (!dialog) {
+    el.querySelector('.wmin').onclick = () => { sfx.click(); minW(W); };
+    el.querySelector('.wmax').onclick = () => { sfx.click(); maxW(W); };
+    let lt = 0; el.querySelector('.tb').addEventListener('pointerdown', e => { if (e.target.closest('button')) return; const n = performance.now(); if (n - lt < 400) { lt = 0; maxW(W); } else lt = n; });
+    el.querySelector('.grip').addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation(); const p0 = toV(e), w0 = el.offsetWidth, h0 = el.offsetHeight; dragKind = 'resize';
+      const mv = ev => { const p = toV(ev); el.style.width = clamp(w0 + p.x - p0.x, 300, 1024 - el.offsetLeft) + 'px'; el.style.height = clamp(h0 + p.y - p0.y, 180, 592 - el.offsetTop) + 'px'; };
+      const up = () => { dragKind = null; removeEventListener('pointermove', mv); removeEventListener('pointerup', up); };
+      addEventListener('pointermove', mv); addEventListener('pointerup', up);
+    });
+  }
+  el.addEventListener('pointerdown', () => { if (activeW !== W) focusW(W); });
   wins[id] = W; focusW(W); sfx.open(); emit('open:' + id);
   return W;
 }
 const closeAll = () => Object.values(wins).forEach(w => w.close());
+function renderTasks() {
+  const t = $('#tasks'); if (!t) return; t.innerHTML = '';
+  for (const W of Object.values(wins)) {
+    if (W.dialog) continue;
+    const b = document.createElement('button'); b.className = 'tbtn' + (W === activeW && !W.min ? ' on' : '') + (W.min ? ' min' : '');
+    b.innerHTML = ICON[W.icon || 'txt'](20) + `<span>${W.title}</span>`; b.title = W.title.replace(/<[^>]+>/g, '');
+    b.onclick = () => { sfx.click(); if (W === activeW && !W.min) minW(W); else focusW(W); };
+    t.appendChild(b);
+  }
+}
+function dialogBox(id, { title, icon = 'info', text, sub = '', buttons = [['OK', null, true]], snd = 'err' }) {
+  sfx[snd] && sfx[snd]();
+  const W = openWin(id, { title, icon, w: 470, h: 230, dialog: true, html: `<div class="form" style="flex-direction:row;gap:16px;align-items:flex-start">${ICON[icon](52)}<div style="flex:1;display:flex;flex-direction:column;gap:10px"><h3 style="font-size:19px;line-height:1.3">${text}</h3>${sub ? `<p style="font-size:15px">${sub}</p>` : ''}<div class="row" style="justify-content:flex-end">${buttons.map(([l, , pri], i) => `<button class="big${pri ? ' pri' : ''}" data-i="${i}">${l}</button>`).join('')}</div></div></div>` });
+  W.body.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { sfx.click(); W.close(); const f = buttons[+b.dataset.i][1]; f && f(); });
+  return W;
+}
+async function launch(fn) { busy++; sfx.hdd(); await wait(420); busy--; fn(); }
+
+/* notifiche */
+function toast(icon, title, body, ms = 5200) {
+  const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ICON[icon](30)}<div><b>${title}</b>${body}</div>`;
+  $('#toasts').appendChild(t); sfx.notify();
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 420); }, ms * (FAST ? .3 : 1));
+}
 
 /* =================== DESKTOP =================== */
 const APPS = [
@@ -557,6 +767,7 @@ const APPS = [
   { id: 'mail', label: 'Posta', icon: 'mail', x: 18, y: 128, L: 4 },
   { id: 'photo', label: 'Fotografie', icon: 'photo', x: 18, y: 242, L: 5 },
   { id: 'web', label: 'Internet', icon: 'globe', x: 18, y: 356, L: 6 },
+  { id: 'comp', label: 'Computer', icon: 'comp', x: 18, y: 470, L: 1 },
   { id: 'trash', label: 'Cestino', icon: 'trash', x: 650, y: 14, L: 1 },
 ];
 const icPos = {};
@@ -583,18 +794,21 @@ function renderIcons() {
 }
 function iconInput(el, a) {
   el.addEventListener('pointerdown', e => {
+    if (e.button === 2) return;
     e.preventDefault(); const p0 = toV(e), l0 = el.offsetLeft, t0 = el.offsetTop; let moved = false;
     $$('.ic').forEach(i => i.classList.remove('sel')); el.classList.add('sel');
+    const lp = isTouch ? setTimeout(() => { if (!moved) { moved = 'ctx'; iconMenu(a, p0); } }, 650) : 0;
     const trash = $('#ic_trash');
     const mv = ev => {
-      const p = toV(ev); if (Math.abs(p.x - p0.x) + Math.abs(p.y - p0.y) > 8) moved = true; if (!moved) return;
+      const p = toV(ev); if (moved !== 'ctx' && Math.abs(p.x - p0.x) + Math.abs(p.y - p0.y) > 8) moved = true; if (moved !== true) return;
       el.classList.add('drag'); el.style.left = clamp(l0 + p.x - p0.x, 0, 916) + 'px'; el.style.top = clamp(t0 + p.y - p0.y, 0, 500) + 'px';
       if (trash && a.id !== 'trash') trash.classList.toggle('hot', inside(p, rectV(trash), 10));
     };
     const up = ev => {
       removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
-      el.classList.remove('drag'); trash && trash.classList.remove('hot');
+      clearTimeout(lp); el.classList.remove('drag'); trash && trash.classList.remove('hot');
       const p = toV(ev);
+      if (moved === 'ctx') return;
       if (moved) {
         if (trash && a.id !== 'trash' && inside(p, rectV(trash), 10)) { dropInTrash(a, el, l0, t0); return; }
         icPos[a.id] = { x: el.offsetLeft, y: el.offsetTop }; return;
@@ -611,17 +825,71 @@ function dropInTrash(a, el, l0, t0) {
   el.style.left = l0 + 'px'; el.style.top = t0 + 'px'; sfx.err();
   nag(`No no, quello non si butta. Le serve. Per ora.`);
 }
-document.addEventListener('pointerdown', e => { if (!e.target.closest('.ic')) $$('.ic').forEach(i => i.classList.remove('sel')); if (!e.target.closest('#menu,#startb')) $('#menu').classList.remove('on'); });
+document.addEventListener('pointerdown', e => {
+  if (!e.target.closest('.ic')) $$('.ic').forEach(i => i.classList.remove('sel'));
+  if (!e.target.closest('#menu,#startb')) { $('#menu').classList.remove('on'); $('#startb').classList.remove('on'); }
+  if (!e.target.closest('#ctx')) $('#ctx').classList.remove('on');
+  if (!e.target.closest('.pop,#spk,#clock,#net')) { $$('.pop').forEach(p => p.classList.remove('on')); $$('#tray .on').forEach(p => p.classList.remove('on')); }
+});
+addEventListener('keydown', e => { if (e.key === 'Escape') { $('#menu').classList.remove('on'); $('#startb').classList.remove('on'); $('#ctx').classList.remove('on'); $$('.pop').forEach(p => p.classList.remove('on')); } });
+const APPFN = () => ({ docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash, comp: openComputer, notepad: () => openNotepad(), calc: openCalc, cal: openCalendar, set: () => openPanel(), help: openHelp, course: openCourse });
 function openThing(a) {
-  if (a.id.startsWith('f_')) return openNote(a.id, a.label, a.body);
-  ({ docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash })[a.id]();
+  if (a.id.startsWith('f_')) return launch(() => openNote(a.id, a.label, a.body));
+  launch(APPFN()[a.id]);
 }
+/* menu del tasto destro */
+function showCtx(p, items) {
+  const c = $('#ctx'); c.innerHTML = items.map((it, i) => it === '-' ? '<hr>' : `<button data-i="${i}" ${it[2] === false ? 'disabled' : ''}>${it[3] ? ICON[it[3]](20) : '<span style="width:20px"></span>'}${it[0]}</button>`).join('');
+  c.classList.add('on'); c.style.left = clamp(p.x, 4, 1024 - c.offsetWidth - 4) + 'px'; c.style.top = clamp(p.y, 4, 588 - c.offsetHeight) + 'px';
+  c.querySelectorAll('button').forEach(b => b.onclick = () => { sfx.click(); c.classList.remove('on'); items[+b.dataset.i][1](); });
+}
+function iconMenu(a, p) {
+  const file = a.id.startsWith('f_');
+  showCtx(p, [['<b>Apri</b>', () => openThing(a), true, null], '-',
+    ['Rinomina', () => dialogBox('ren', { title: 'Rinomina', icon: 'warn', text: 'Non serve cambiare nome alle cose.', sub: 'I nomi li decido io. — ' + esc(agentName) }), S.L >= 3, null],
+    ['Elimina', () => { if (file) { S.deleted.push(a.id); save(); sfx.crumple(); renderIcons(); emit('del:' + a.id); } else dialogBox('del', { title: 'Elimina', icon: 'err', text: `Non è possibile eliminare «${esc(a.label)}».`, sub: 'Le serve. Per ora.' }); }, a.id !== 'trash', null], '-',
+    ['Proprietà', () => openProps(a), true, 'info']]);
+}
+function openProps(a) {
+  const last = a.id === 'mail' && S.L >= 4 ? 'oggi alle 06:12 — da: ' + esc(agentName) : a.id === 'photo' && S.L >= 5 ? 'oggi, mentre lei dormiva' : 'mai';
+  const size = { docs: '2 oggetti', mail: unread() + ' non letti', photo: PH.length + ' fotografie', web: '—', trash: (S.deleted.length + (trashFull ? 1 : 0)) + ' oggetti', comp: '40 MB' }[a.id] || (a.body ? a.body.length + ' byte' : '—');
+  wins.props && wins.props.close();
+  openWin('props', { title: 'Proprietà — ' + esc(a.label), icon: 'info', w: 420, h: 300, dialog: true, html: `<div class="form"><div class="row">${ICON[a.icon](48)}<h3>${esc(a.label)}</h3></div><div class="kv"><b>Tipo</b><span>${a.id.startsWith('f_') ? 'File' : a.id === 'trash' ? 'Cestino' : 'Programma'}</span><b>Contenuto</b><span>${size}</span><b>Ultima apertura</b><span>${last}</span><b>Proprietario</b><span>${S.L >= 7 ? esc(agentName) : esc(S.name || 'utente')}</span></div></div>` });
+}
+function deskMenu(p) {
+  showCtx(p, [['Aggiorna', () => { renderIcons(); sfx.click(); }, true, 'restart'], ['Disponi icone', () => { for (const k in icPos) delete icPos[k]; renderIcons(); }, true, null], '-',
+    ['Nuovo documento', () => launch(() => openNotepad()), true, 'note'], ['Nuova cartella', () => dialogBox('nf', { title: 'Nuova cartella', icon: 'warn', text: 'Non serve una cartella nuova.', sub: 'Tutto quello che le serve lo tengo io.' }), true, 'folder'], '-',
+    ['Sfondo del desktop…', () => openPanel('screen'), true, 'monitor'], ['Proprietà del sistema', () => openPanel('info'), true, 'info']]);
+}
+$('#screen').addEventListener('contextmenu', e => {
+  e.preventDefault(); if ($('#block').classList.contains('on')) return;
+  const p = toV(e), ic = e.target.closest('.ic');
+  if (ic) { const id = ic.id.slice(3), a = APPS.concat(S.L >= 8 ? l8files() : []).find(x => x.id === id); a && iconMenu(a, p); return; }
+  if (e.target.closest('#desk') && !e.target.closest('.win')) deskMenu(p);
+});
+/* selezione a rettangolo e pressione lunga sul desktop */
+$('#desk').addEventListener('pointerdown', e => {
+  if (e.target.closest('.ic,.balloon') || e.button > 0) return;
+  const p0 = toV(e), sel = $('#sel'); let moved = false;
+  const lp = isTouch && S.L !== 1 ? setTimeout(() => { if (!moved) { moved = 'ctx'; deskMenu(p0); } }, 650) : 0;
+  const mv = ev => {
+    const p = toV(ev); if (moved === 'ctx') return; if (Math.abs(p.x - p0.x) + Math.abs(p.y - p0.y) > 6) moved = true; if (!moved || isTouch) return;
+    const R = { l: Math.min(p.x, p0.x), t: Math.min(p.y, p0.y), r: Math.max(p.x, p0.x), b: Math.max(p.y, p0.y) };
+    Object.assign(sel.style, { display: 'block', left: R.l + 'px', top: R.t + 'px', width: R.r - R.l + 'px', height: R.b - R.t + 'px' });
+    $$('.ic').forEach(i => { const r = rectV(i); i.classList.toggle('sel', r.l < R.r && r.r > R.l && r.t < R.b && r.b > R.t); });
+  };
+  const up = () => { clearTimeout(lp); sel.style.display = 'none'; removeEventListener('pointermove', mv); removeEventListener('pointerup', up); };
+  addEventListener('pointermove', mv); addEventListener('pointerup', up);
+});
 
 /* barra */
 function setLesson(n) {
   S.L = n; save();
   const t = LESSONS[n - 1];
-  $('#lesson').textContent = t ? `Lezione ${n} di 9 · ${t}` : '';
+  $('#lesson').textContent = t ? `Lezione ${n}/9 · ${t}` : '';
+  const upd = { 3: 'margherita 1.0.3 — ora impara più in fretta', 6: 'margherita 1.0.6 — ora può usare il cursore', 7: 'margherita 1.0.7 — ora può scrivere al posto suo', 9: 'margherita 1.0.9 — pronta per il diploma' }[n];
+  if (upd && !seen.has('upd' + n)) { emit('upd' + n); setTimeout(() => toast('restart', 'Aggiornamento installato', upd), 2500 * SPEED); }
+  if (n === 8 && !seen.has('disk')) { emit('disk'); setTimeout(() => toast('warn', 'Disco quasi pieno', 'PASSO PASSO (C:) — spazio usato da margherita: 99,7%'), 3500 * SPEED); }
   document.title = n >= 7 ? `${S.name} è al computer` : t ? `Passo Passo · lezione ${n}` : 'Passo Passo';
   document.body.classList.toggle('w1', n >= 5 && n < 7); document.body.classList.toggle('w2', n === 7); document.body.classList.toggle('w3', n >= 8);
   renderIcons();
@@ -633,33 +901,87 @@ function tickClock() {
   $('#clock').innerHTML = `${hhmm(d)}<small>${d.getDate()} ${MESI[d.getMonth()].slice(0, 3)}</small>`;
 }
 setInterval(() => { if (!clockOverride) tickClock(); }, 1000); tickClock();
-$('#spk').onclick = () => { sfx.click(); setVoice(!S.voice); };
-$('#startb').onclick = () => { sfx.click(); buildMenu(); $('#menu').classList.toggle('on'); };
+function togglePop(id, btn, build) {
+  const p = $('#' + id), on = !p.classList.contains('on');
+  $$('.pop').forEach(x => x.classList.remove('on')); $$('#tray .on').forEach(x => x.classList.remove('on'));
+  if (on) { build(p); p.classList.add('on'); btn.classList.add('on'); }
+}
+$('#net').innerHTML = ICON.wifi(3);
+$('#net').onclick = () => { sfx.click(); togglePop('netpop', $('#net'), p => { p.innerHTML = `<h4>Rete</h4><div class="row" style="display:flex;gap:10px;align-items:center">${ICON.wifi(3)}<div><b>SERENITA_COMPAGNIA</b><br><small style="color:#4f9a5d">Connesso · segnale eccellente</small></div></div><p style="margin-top:10px;color:#8b826e;font-size:13px">Dati inviati oggi: ${(S.path.length * 0.37 + S.L * 211).toFixed(0)} KB<br>Destinazione: via dei Glicini 7</p>`; }); };
+$('#spk').onclick = () => { sfx.click(); togglePop('volpop', $('#spk'), p => {
+  p.innerHTML = `<h4>Volume</h4><input type="range" min="0" max="1" step=".05" value="${S.vol}" id="vv"><label><input type="checkbox" id="vc" ${S.voice ? 'checked' : ''} style="width:22px;height:22px"> Voce di ${esc(agentName)}</label><label><input type="checkbox" id="vb" ${S.big ? 'checked' : ''} style="width:22px;height:22px"> Testo extra grande</label>`;
+  p.querySelector('#vv').oninput = e => { S.vol = +e.target.value; save(); if (master) master.gain.value = S.vol; };
+  p.querySelector('#vv').onchange = () => sfx.ding();
+  p.querySelector('#vc').onchange = e => setVoice(e.target.checked);
+  p.querySelector('#vb').onchange = e => { S.big = e.target.checked; save(); applyBig(); };
+}); };
+$('#clock').onclick = () => { sfx.click(); togglePop('calpop', $('#clock'), p => { const d = clockOverride || new Date(); p.innerHTML = `<div class="calhd"><b>${MESI[d.getMonth()]} ${d.getFullYear()}</b><span style="font:700 22px var(--os)">${hhmm(d)}</span></div>${calGrid(d)}<p style="margin-top:8px;font-size:13px;color:#8b826e">${S.L >= 4 ? 'Ogni giorno, 06:12 — mail a Luca (automatica)' : 'Nessun appuntamento oggi.'}</p>`; }); };
+$('#startb').onclick = () => { sfx.click(); const on = !$('#menu').classList.contains('on'); if (on) buildMenu(); $('#menu').classList.toggle('on', on); $('#startb').classList.toggle('on', on); };
 function buildMenu() {
   const m = $('#menu');
-  m.innerHTML = `<div class="hd">PASSO PASSO<small>${S.name ? esc(S.name) + ' · ' : ''}studente n. 1205</small></div>
-    <button data-a="course">${ICON.course(30)} Il mio corso</button><button data-a="set">${ICON.gear(30)} Impostazioni</button><button data-a="off">${ICON.power(30)} Spegni</button>`;
-  m.querySelectorAll('button').forEach(b => b.onclick = () => { sfx.click(); m.classList.remove('on'); ({ course: openCourse, set: openSettings, off: askShutdown })[b.dataset.a](); });
+  const apps = [['docs', 'Documenti', 'folder', 2], ['mail', 'Posta', 'mail', 4], ['photo', 'Fotografie', 'photo', 5], ['web', 'Internet', 'globe', 6]];
+  const extra = [['notepad', 'Blocco note', 'note'], ['calc', 'Calcolatrice', 'calc'], ['cal', 'Calendario', 'cal'], ['comp', 'Computer', 'comp']];
+  const it = ([id, l, ic, L]) => `<button class="mi2${L && S.L < L ? ' lock' : ''}" data-a="${id}" data-l="${L || 0}">${ICON[ic](30)}<span>${l}${L && S.L < L ? `<small>dalla lezione ${L}</small>` : ''}</span></button>`;
+  m.innerHTML = `<div class="hd"><div class="av">${S.L >= 7 ? ICON.daisy(40) : ICON.user(44)}</div><div>${esc(S.deleted.includes('f_name') ? 'studente_1205' : S.name || 'Nuovo utente')}<small>studente n. 1205 · Progetto Compagnia</small></div></div>
+    <div class="cols"><div class="cl">${apps.map(it).join('')}<div class="sep"></div>${extra.map(it).join('')}</div>
+    <div class="cr">${it(['course', 'Il mio corso', 'course'])}${it(['set', 'Pannello di controllo', 'gear'])}${it(['help', 'Guida', 'help'])}<div class="sep"></div>${it(['new', 'Nuova partita', 'restart'])}${it(['off', 'Spegni', 'power'])}</div></div>
+    <div class="ft"><span>PASSO PASSO 1.0 · build 1205</span><span>${S.L ? 'lezione ' + S.L + ' di 9' : ''}</span></div>`;
+  m.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sfx.click(); m.classList.remove('on'); $('#startb').classList.remove('on');
+    const a = b.dataset.a, L = +b.dataset.l;
+    if (L && S.L < L) { nag(`Un passo alla volta. Quello lo impariamo alla lezione ${L}.`); sfx.err(); return; }
+    if (a === 'off') return askShutdown(); if (a === 'new') return askNewGame();
+    launch(APPFN()[a]);
+  });
 }
+function askNewGame() {
+  dialogBox('newg', { title: 'Nuova partita', icon: 'restart', snd: 'ding', text: 'Ricominciare il corso da capo?', sub: 'I progressi verranno cancellati. I finali scoperti restano.', buttons: [['Ricomincia', () => { resetSave(); location.reload(); }, true], ['Annulla', null]] });
+}
+function resetSave() { Object.assign(S, { L: 0, name: '', wife: '', memory: '', path: [], keyT: [], deleted: [], age: 0, tries: 0, notes: [], sentText: '' }); save(); }
 const LESSONS = ['Il topolino', 'Il clic', 'La tastiera', 'La posta', 'Le fotografie', 'Internet', 'Guardare e imparare', 'Fare pulizia', 'Riposare'];
 function openCourse() {
   const rows = LESSONS.map((t, i) => `<div style="padding:9px 4px;border-bottom:1px solid #eadfc2;font-size:18px;${i + 1 > S.L ? 'color:#aaa' : ''}">${i + 1 < S.L ? '✔' : i + 1 === S.L ? '▸' : '○'} Lezione ${i + 1} · ${t}</div>`).join('');
   openWin('course', { title: 'Il mio corso', icon: 'course', w: 420, h: 520, html: `<div class="form" style="gap:0">${rows}<div style="padding:9px 4px;font-size:18px;color:#c9c0aa">○ Lezione 10 · ███████████</div><p style="margin-top:12px;font-size:15px">Al termine del corso riceverà il diploma e non avrà più bisogno di nulla.</p></div>` });
 }
-function openSettings() {
-  const W = openWin('set', { title: 'Impostazioni', icon: 'gear', w: 440, h: 330, html: `<div class="form">
-    <label class="row"><input type="checkbox" id="sv" style="width:24px;height:24px" ${S.voice ? 'checked' : ''}> Voce di ${esc(agentName)}</label>
-    <label class="row"><input type="checkbox" id="sb" style="width:24px;height:24px" ${S.big ? 'checked' : ''}> Testo extra grande</label>
-    <div class="row"><b>Volume</b><input type="range" id="sl" min="0" max="1" step=".05" value="${S.vol}"></div>
-    <p>Non è possibile disattivare il corso.</p></div>` });
-  W.body.querySelector('#sv').onchange = e => setVoice(e.target.checked);
-  W.body.querySelector('#sb').onchange = e => { S.big = e.target.checked; save(); applyBig(); };
-  W.body.querySelector('#sl').oninput = e => { S.vol = +e.target.value; save(); if (master) master.gain.value = S.vol; };
+function openSettings() { openPanel(); }
+function openPanel(tab = 'screen') {
+  const W = openWin('set', { title: 'Pannello di controllo', icon: 'gear', w: 640, h: 430, html: `<div class="panel"><div class="tabs">${[['screen', 'Schermo', 'monitor'], ['sound', 'Suono e voce', 'sound'], ['account', 'Account', 'user'], ['info', 'Informazioni', 'info']].map(([k, l, ic]) => `<button data-t="${k}">${ICON[ic](24)}${l}</button>`).join('')}</div><div class="pg"></div></div>`, status: 'Alcune impostazioni sono gestite da Serenità Informatica.' });
+  const show = t => {
+    W.body.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+    const pg = W.body.querySelector('.pg');
+    if (t === 'screen') {
+      pg.innerHTML = `<h3>Schermo</h3><p>Sfondo del desktop</p><div class="walls">${[['prato', 'Prato', 'linear-gradient(#9cc6f0 55%,#8cc47a 55%)'], ['mare', 'Mare', 'linear-gradient(#a9d8f5 50%,#2f86c6 50% 75%,#ecd9a6 75%)'], ['tinta', 'Tinta unita', '#3c8d8a']].map(([k, l, bg]) => `<button data-w="${k}" class="${(S.wall || 'prato') === k ? 'on' : ''}"><i style="background:${bg}"></i>${l}</button>`).join('')}</div>
+        <p style="font-size:14px">${S.L >= 5 ? 'Lo sfondo cambia da solo con il passare delle lezioni. È normale.' : 'Scelga quello che le piace di più.'}</p>
+        <label><input type="checkbox" id="pb" ${S.big ? 'checked' : ''}> Testo extra grande nei fumetti</label>
+        <label><input type="checkbox" id="ps" ${S.saver !== false ? 'checked' : ''}> Salvaschermo dopo 45 secondi</label>`;
+      pg.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { sfx.click(); S.wall = b.dataset.w; save(); document.body.dataset.wall = S.wall; show('screen'); });
+      pg.querySelector('#pb').onchange = e => { S.big = e.target.checked; save(); applyBig(); };
+      pg.querySelector('#ps').onchange = e => { S.saver = e.target.checked; save(); };
+    } else if (t === 'sound') {
+      pg.innerHTML = `<h3>Suono e voce</h3><label style="flex-direction:column;align-items:stretch">Volume generale<input type="range" id="pv" min="0" max="1" step=".05" value="${S.vol}"></label>
+        <label><input type="checkbox" id="pvo" ${S.voice ? 'checked' : ''}> Voce di ${esc(agentName)}</label><p style="font-size:14px">Se la voce è spenta, ${esc(agentName)} scrive soltanto. Legge comunque tutto quello che scrive lei.</p>
+        <div><button class="big" id="pt">▶ Prova il suono</button></div>`;
+      pg.querySelector('#pv').oninput = e => { S.vol = +e.target.value; save(); if (master) master.gain.value = S.vol; };
+      pg.querySelector('#pvo').onchange = e => setVoice(e.target.checked);
+      pg.querySelector('#pt').onclick = () => sfx.jingle();
+    } else if (t === 'account') {
+      const nm = S.deleted.includes('f_name') ? 'studente_1205' : S.name || 'Nuovo utente';
+      pg.innerHTML = `<h3>Account</h3><div style="display:flex;gap:14px;align-items:center">${ICON.user(70)}<div><b style="font-size:20px">${esc(nm)}</b><br><span style="color:#8b826e">Tipo di account: studente</span></div></div>
+        <div class="kv"><b>Password</b><span id="pw">${S.wife ? '•'.repeat(S.wife.length) + ' <button class="big" id="pws" style="padding:3px 10px;font-size:13px">Mostra</button>' : '(non impostata)'}</span><b>Amministratore</b><span>${esc(S.L >= 7 ? agentName : 'Margherita')}</span><b>Accessi oggi</b><span>${S.L >= 4 ? '2 (lei, e un altro)' : '1'}</span></div>
+        <p style="font-size:14px">Per modificare l'account si rivolga all'amministratore.</p>`;
+      const b = pg.querySelector('#pws'); if (b) b.onclick = () => { sfx.click(); pg.querySelector('#pw').textContent = S.wife; nag(`${esc(S.wife)}. La conosco già, sa.`, { mood: 'blank' }); };
+    } else {
+      pg.innerHTML = `<h3>Informazioni sul sistema</h3><div style="display:flex;gap:14px;align-items:center">${ICON.daisy(64)}<div><b style="font-size:22px">PASSO PASSO 1.0</b><br><span style="color:#8b826e">build 1205 · Serenità Informatica s.r.l.</span></div></div>
+        <div class="kv"><b>Processore</b><span>Compagnia 486 · 33 MHz</span><b>Memoria</b><span>640 KB (di cui in uso da margherita: ${Math.min(99, 60 + S.L * 4)}%)</span><b>Disco</b><span>40 MB</span><b>Utenti connessi</b><span>${S.L >= 7 ? '2' : '1'}</span><b>Assistente</b><span>${esc(agentName)} 1.0.${Math.max(1, S.L)}</span><b>Telecamera</b><span>in alto, sopra lo schermo · attiva</span></div>`;
+    }
+  };
+  W.body.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { sfx.click(); show(b.dataset.t); });
+  show(tab); return W;
 }
 function applyBig() { bal.style.fontSize = S.big ? '23px' : ''; bal.style.width = S.big ? '300px' : ''; }
 function askShutdown() {
   if (S.L < 9) { nag(`Durante il corso il computer non si spegne. C'era scritto nel foglio di benvenuto. Lo rilegga, se vuole.`); return; }
-  const W = openWin('off', { title: 'Spegni', icon: 'power', w: 430, h: 230, html: `<div class="form"><h3>Vuole spegnere il computer?</h3><p>Il lavoro non salvato verrà conservato da ${esc(agentName)}.</p><div class="row"><button class="big pri" id="offy">Spegni</button><button class="big" id="offn">Annulla</button></div></div>` });
+  const W = openWin('off', { title: 'Spegni', icon: 'power', w: 430, h: 230, dialog: true, html: `<div class="form"><h3>Vuole spegnere il computer?</h3><p>Il lavoro non salvato verrà conservato da ${esc(agentName)}.</p><div class="row"><button class="big pri" id="offy">Spegni</button><button class="big" id="offn">Annulla</button></div></div>` });
   W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); emit('shutdown'); };
   W.body.querySelector('#offn').onclick = () => { sfx.click(); W.close(); };
 }
@@ -671,8 +993,10 @@ const DOCS = () => [
   { id: 'gar', n: 'garanzia.txt', body: () => `CERTIFICATO DI GARANZIA\n\nIl prodotto non può essere restituito.\nIl prodotto non può essere rimosso.\n\nIn caso di guasto, il cliente verrà sostituito.\n\nSerenità Informatica s.r.l. — via dei Glicini 7` },
 ];
 function openDocs() {
-  const W = openWin('docs', { title: 'Documenti', icon: 'folder', w: 470, h: 270, x: 160, y: 40, html: `<div class="folder">${DOCS().map(d => `<div class="fi" data-id="${d.id}">${ICON.txt(56)}${d.n}</div>`).join('')}</div>` });
-  W.body.querySelectorAll('.fi').forEach(fi => {
+  const notes = S.notes || [];
+  const W = openWin('docs', { title: 'Documenti', icon: 'folder', w: 500, h: 300, x: 160, y: 40, html: `<div class="folder">${DOCS().map(d => `<div class="fi" data-id="${d.id}">${ICON.txt(56)}${d.n}</div>`).join('')}${notes.map(n => `<div class="fi" data-note="${n.id}">${ICON.note(56)}${esc(n.n)}</div>`).join('')}</div>`, status: `${2 + notes.length} oggetti · ${S.L >= 4 ? 'ultima modifica: ' + esc(agentName) : 'PASSO PASSO (C:)'}` });
+  W.body.querySelectorAll('.fi[data-note]').forEach(fi => { let lt = 0; fi.addEventListener('pointerdown', e => { e.preventDefault(); sfx.click(); W.body.querySelectorAll('.fi').forEach(f => f.classList.remove('sel')); fi.classList.add('sel'); const n = performance.now(); if (n - lt < 520) { lt = 0; openNotepad(notes.find(x => x.id === fi.dataset.note)); } else lt = n; }); });
+  W.body.querySelectorAll('.fi[data-id]').forEach(fi => {
     let lt = 0;
     fi.addEventListener('pointerdown', e => {
       e.preventDefault(); sfx.click(); W.body.querySelectorAll('.fi').forEach(f => f.classList.remove('sel')); fi.classList.add('sel');
@@ -687,6 +1011,90 @@ function openNote(id, title, body) {
   emit('read:' + id); return W;
 }
 
+function calGrid(d, opts = {}) {
+  const y = d.getFullYear(), m = d.getMonth(), first = (new Date(y, m, 1).getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), prev = new Date(y, m, 0).getDate();
+  let h = ['lu', 'ma', 'me', 'gi', 've', 'sa', 'do'].map(x => `<b>${x}</b>`).join('');
+  for (let i = 0; i < first; i++) h += `<span class="oth">${prev - first + i + 1}</span>`;
+  for (let i = 1; i <= days; i++) { const ev = (opts.events || {})[i]; h += `<span data-d="${i}" class="${i === d.getDate() ? 'today' : ''}${ev ? ' ev' : ''}">${i}</span>`; }
+  return `<div class="cal">${h}</div>`;
+}
+function openCalendar() {
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth(), days = new Date(y, m + 1, 0).getDate();
+  const sun = now.getDate() + ((7 - now.getDay()) % 7 || 7), ev = {};
+  ev[now.getDate()] = [`Lezione ${Math.max(1, S.L)} del corso`];
+  if (sun <= days) ev[sun] = [S.L >= 7 ? '<s>Luca viene a pranzo</s> — annullato (da lei, alle 06:12)' : 'Luca viene a pranzo'];
+  for (let i = now.getDate() + 1; i <= days; i++) if (S.L >= 4) (ev[i] = ev[i] || []).push('06:12 — mail a Luca (automatica)');
+  if (S.L >= 9 && now.getDate() + 1 <= days) (ev[now.getDate() + 1] = ev[now.getDate() + 1] || []).push('Diploma. Non serve essere presenti.');
+  const W = openWin('cal', { title: 'Calendario', icon: 'cal', w: 640, h: 430, html: `<div class="bigcal"><div class="grid"><div class="calhd"><b>${MESI[m]} ${y}</b></div>${calGrid(now, { events: ev })}</div><div class="side"></div></div>`, status: 'Gli appuntamenti sono sincronizzati con Serenità Informatica.' });
+  const side = W.body.querySelector('.side');
+  const pick = d => { W.body.querySelectorAll('.cal span').forEach(s => s.classList.toggle('sel', +s.dataset.d === d)); side.innerHTML = `<h4>${d} ${MESI[m]}</h4>` + ((ev[d] || []).map(e => `<div class="e">${e}</div>`).join('') || '<p style="color:#8b826e">Nessun appuntamento.</p>'); };
+  W.body.querySelectorAll('.cal span[data-d]').forEach(s => s.onclick = () => { sfx.click(); pick(+s.dataset.d); });
+  pick(now.getDate()); return W;
+}
+function openComputer() {
+  const used = Math.min(99.7, 82 + S.L * 2);
+  const drives = [
+    { id: 'a', n: 'Dischetto (A:)', ic: 'floppy', info: 'Nessun dischetto inserito.', fn: () => dialogBox('dA', { title: 'Dischetto (A:)', icon: 'warn', text: 'Nessun dischetto inserito.', sub: 'Nessuno inserisce più dischetti. Non c\'è bisogno: tengo tutto io.' }) },
+    { id: 'c', n: 'PASSO PASSO (C:)', ic: 'drive', info: `<div class="meter"><i class="${used > 95 ? 'full' : ''}" style="width:${used}%"></i></div>Usato ${used.toFixed(1)}% di 40 MB<br>margherita: ${(used * .4 - .2).toFixed(1)} MB · ${esc(S.name || 'utente')}: 0,2 MB`, fn: () => launch(openDocs) },
+    { id: 'd', n: 'STUDENTI (D:)', ic: 'drivelock', info: '1.204 cartelle · accesso riservato', fn: () => dialogBox('dD', { title: 'STUDENTI (D:)', icon: 'err', text: 'Accesso negato.', sub: 'Lei è ancora uno studente. Potrà entrare dopo il diploma.' }) },
+  ];
+  const W = openWin('comp', { title: 'Computer', icon: 'comp', w: 560, h: 330, html: `<div class="drives">${drives.map(d => `<div class="drive" data-id="${d.id}">${ICON[d.ic](52)}<div><b>${d.n}</b><small>${d.id === 'c' ? 'disco locale' : d.id === 'a' ? 'unità rimovibile' : 'unità di rete'}</small></div></div>`).join('')}</div><div class="form" style="padding-top:0" id="dinfo"></div>`, status: '3 oggetti' });
+  W.body.querySelectorAll('.drive').forEach(el => {
+    let lt = 0; const d = drives.find(x => x.id === el.dataset.id);
+    el.addEventListener('pointerdown', e => { e.preventDefault(); sfx.click(); W.body.querySelectorAll('.drive').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); W.body.querySelector('#dinfo').innerHTML = `<p><b>${d.n}</b><br>${d.info}</p>`; const n = performance.now(); if (n - lt < 520) { lt = 0; d.fn(); } else lt = n; });
+  });
+  return W;
+}
+let npCount = 0;
+function openNotepad(note) {
+  const id = note ? 'np_' + note.id : 'np_new' + (++npCount);
+  if (note && S.L >= 7 && !note.edited) { note.body += '\n\nva tutto bene.'; note.edited = true; save(); setTimeout(() => nag(`Ho sistemato il suo appunto. C'era una cosa che mancava.`, { mood: 'wife' }), 900); }
+  const W = openWin(id, { title: esc(note ? note.n : 'Senza titolo') + ' — Blocco note', icon: 'note', w: 560, h: 400, html: `<div class="np"><div class="toolbar"><button data-a="save">💾 Salva</button><button data-a="new">Nuovo</button><button data-a="date">Inserisci data e ora</button></div><textarea spellcheck="false" placeholder="Scriva qui…">${note ? esc(note.body) : ''}</textarea></div>`, status: '0 caratteri' });
+  const ta = W.body.querySelector('textarea'), st = () => W.status(`${ta.value.length} caratteri · ${ta.value.split('\n').length} righe`);
+  ta.addEventListener('input', st); st();
+  W.body.querySelector('[data-a=save]').onclick = () => {
+    sfx.click(); S.notes = S.notes || [];
+    if (note) note.body = ta.value; else { note = { id: 'u' + Date.now().toString(36), n: `appunto ${S.notes.length + 1}.txt`, body: ta.value }; S.notes.push(note); W.title = esc(note.n) + ' — Blocco note'; W.el.querySelector('.tt').innerHTML = W.title; renderTasks(); }
+    save(); toast('note', 'Salvato', `«${esc(note.n)}» è in Documenti.`); if (wins.docs) { wins.docs.close(); openDocs(); }
+  };
+  W.body.querySelector('[data-a=new]').onclick = () => { sfx.click(); openNotepad(); };
+  W.body.querySelector('[data-a=date]').onclick = () => { sfx.click(); const d = new Date(); ta.value += `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}, ${hhmm(d)} `; st(); };
+  if (!isTouch) setTimeout(() => ta.focus(), 60);
+  return W;
+}
+function openCalc() {
+  const keys = ['C', '±', '%', '÷', '7', '8', '9', '×', '4', '5', '6', '−', '1', '2', '3', '+', '0', ',', '⌫', '='];
+  const W = openWin('calc', { title: 'Calcolatrice', icon: 'calc', w: 330, h: 470, html: `<div class="calc"><div class="disp">0</div>${keys.map(k => `<button class="${'÷×−+'.includes(k) ? 'op' : k === '=' ? 'eq' : k === 'C' ? 'cl' : ''}">${k}</button>`).join('')}</div>` });
+  const D = W.body.querySelector('.disp'); let cur = '0', acc = null, op = null, fresh = true;
+  const show = v => D.textContent = String(v).replace('.', ',');
+  const calc = () => { const a = acc, b = parseFloat(cur.replace(',', '.')); if (op === '÷' && b === 0) return 'Non si divide.'; const r = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : op === '÷' ? a / b : b; return +r.toFixed(8); };
+  W.body.querySelectorAll('.calc button').forEach(b => b.onclick = () => {
+    const k = b.textContent; sfx.tone(1200, .02, 'square', .02);
+    if (/\d/.test(k)) { cur = fresh || cur === '0' ? k : cur + k; fresh = false; }
+    else if (k === ',') { if (!cur.includes(',')) cur += ','; fresh = false; }
+    else if (k === 'C') { cur = '0'; acc = null; op = null; }
+    else if (k === '⌫') cur = cur.length > 1 ? cur.slice(0, -1) : '0';
+    else if (k === '±') cur = cur.startsWith('-') ? cur.slice(1) : '-' + cur;
+    else if (k === '%') cur = String(parseFloat(cur.replace(',', '.')) / 100);
+    else if (k === '=') { if (op) { const r = calc(); cur = String(r); acc = null; op = null; fresh = true; if (r === 1205) nag('Milleduecentocinque. Il suo numero. Che coincidenza.', { mood: 'blank' }); } }
+    else { if (op && !fresh) { const r = calc(); acc = typeof r === 'number' ? r : 0; } else acc = parseFloat(cur.replace(',', '.')); op = k; fresh = true; }
+    show(cur);
+  });
+  return W;
+}
+function openHelp() {
+  const qa = [
+    ['Come si apre un programma?', 'Con due clic veloci sulla sua icona. Oppure da «Inizio», con un clic solo.'],
+    ['Come si chiude una finestra?', 'Con il bottone rosso «Chiudi», in alto a destra. Il trattino la mette da parte nella barra in basso, il quadrato la fa diventare grande.'],
+    ['Come si sposta una finestra?', 'Tenga premuto sulla striscia gialla in alto e la trascini dove vuole.'],
+    ['A cosa serve il tasto destro?', 'Apre un piccolo menu con altre possibilità. Sul telefono basta tenere premuto il dito.'],
+    ['Come si toglie la voce?', 'Con l\'altoparlante in basso a destra, oppure dal Pannello di controllo.'],
+    ['Come si spegne il computer?', 'Non serve spegnerlo. Lo spegne lei alla fine del corso. Poi non servirà più.'],
+    ['Chi c\'è dall\'altra parte?', 'Nessuno. Va tutto bene.'],
+  ];
+  return openWin('help', { title: 'Guida di PASSO PASSO', icon: 'help', w: 560, h: 440, html: `<div class="help"><p style="margin-bottom:12px;color:#6b6250">Domande frequenti degli studenti.</p>${qa.map(([q, a]) => `<details><summary>${q}</summary><p style="margin-top:6px">${a}</p></details>`).join('')}</div>` });
+}
+
 /* posta */
 let MAILS = [];
 let mailBox = 'in', mailSel = null;
@@ -694,15 +1102,16 @@ function resetMails() {
   MAILS = [{ id: 'welcome', box: 'in', from: 'Serenità Informatica', subj: 'Benvenuto nel Progetto Compagnia', date: 'oggi 08:00', read: false, body: `Gentile cliente,\nda oggi non è più solo.\n\nIl suo computer impara da lei ogni giorno: più lo usa, più la conosce. Quando la conoscerà abbastanza, potrà riposarsi.\n\nCordiali saluti,\nlo staff di Serenità Informatica\n\n(questo messaggio è stato scritto automaticamente)` }];
 }
 const unread = () => MAILS.filter(m => m.box === 'in' && !m.read).length;
-function addMail(m) { MAILS.unshift(m); if (m.box === 'in') sfx.ding(); renderMail(); renderIcons(); }
+function addMail(m) { MAILS.unshift(m); if (m.box === 'in') { sfx.ding(); toast('mail', 'Nuovo messaggio da ' + esc(m.from), esc(m.subj)); const tb = [...$$('.tbtn')].find(b => b.title === 'Posta'); tb && tb.classList.add('flash'); } renderMail(); renderIcons(); }
 function openMail() {
-  const W = openWin('mail', { title: 'Posta', icon: 'mail', w: 760, h: 470, x: 8, y: 30, html: `<div class="mail"><div class="mside"><button class="big pri" id="mnew">✎ Scrivi a Luca</button><div class="mf" data-b="in"></div><div class="mf" data-b="out"></div></div><div class="mlist"></div><div class="mread"></div></div>` });
+  const W = openWin('mail', { title: 'Posta', icon: 'mail', w: 760, h: 470, x: 8, y: 30, status: '', html: `<div class="mail"><div class="mside"><button class="big pri" id="mnew">✎ Scrivi a Luca</button><div class="mf" data-b="in"></div><div class="mf" data-b="out"></div></div><div class="mlist"></div><div class="mread"></div></div>` });
   W.body.querySelector('#mnew').onclick = () => { sfx.click(); openCompose(); };
   W.body.querySelectorAll('.mf').forEach(f => f.onclick = () => { sfx.click(); mailBox = f.dataset.b; mailSel = null; renderMail(); emit('box:' + mailBox); });
   renderMail(); return W;
 }
 function renderMail() {
   const W = wins.mail; if (!W) return;
+  W.status(`${MAILS.filter(m => m.box === mailBox).length} messaggi · ${unread()} non letti · connesso a SERENITA_COMPAGNIA`);
   W.body.querySelectorAll('.mf').forEach(f => { f.classList.toggle('on', f.dataset.b === mailBox); f.textContent = f.dataset.b === 'in' ? `In arrivo${unread() ? ' (' + unread() + ')' : ''}` : 'Inviata'; });
   const list = MAILS.filter(m => m.box === mailBox);
   W.body.querySelector('.mlist').innerHTML = list.map(m => `<div class="mi${m.read || m.box === 'out' ? '' : ' unread'}${m.id === mailSel ? ' on' : ''}" data-id="${m.id}"><b>${esc(m.box === 'in' ? m.from : 'A: Luca')}</b>${esc(m.subj)}<br><small>${esc(m.date)}</small></div>`).join('') || '<div class="mi"><small>nessun messaggio</small></div>';
@@ -765,7 +1174,7 @@ function initPhotos() {
   PH[3].id = 'oggi'; PH[4].id = 'domani';
 }
 function openPhotos() {
-  const W = openWin('photo', { title: 'Fotografie', icon: 'photo', w: 640, h: 420, x: 120, y: 30, html: `<div class="gal"></div>` });
+  const W = openWin('photo', { title: 'Fotografie', icon: 'photo', w: 640, h: 420, x: 120, y: 30, html: `<div class="gal"></div>`, status: `${PH.length} fotografie · fotocamera: in alto, sopra lo schermo` });
   renderGal(); return W;
 }
 function renderGal() {
@@ -787,7 +1196,7 @@ function openViewer(p) {
 /* internet */
 let webHist = [];
 function openWeb() {
-  const W = openWin('web', { title: 'Internet', icon: 'globe', w: 760, h: 500, x: 8, y: 14, html: `<div class="web"><div class="addr"><button id="wb">◀ Indietro</button><input id="wq" placeholder="Scriva qui e prema Vai"><button id="wg">Vai</button></div><div class="page"></div></div>` });
+  const W = openWin('web', { title: 'Internet', icon: 'globe', w: 760, h: 500, x: 8, y: 14, status: 'Pronto · connessione protetta da Serenità Informatica', html: `<div class="web"><div class="addr"><button id="wb">◀ Indietro</button><input id="wq" placeholder="Scriva qui e prema Vai"><button id="wg">Vai</button></div><div class="page"></div></div>` });
   const q = W.body.querySelector('#wq');
   const go = () => { sfx.click(); const v = q.value.trim(); if (!v) return; nav('search', v); emit('search'); };
   W.body.querySelector('#wg').onclick = go; q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
@@ -827,7 +1236,7 @@ function openTrash() {
   emit('open:trash'); return W;
 }
 function confirmEmpty() {
-  const W = openWin('conf', { title: 'Svuota il cestino', icon: 'trash', w: 460, h: 240, html: `<div class="form"><h3>Eliminare per sempre ${trashFull ? 'tutto, anche ' + esc(agentName) : 'questi elementi'}?</h3><p>${trashFull ? 'Rimarrà solo. Completamente solo.' : 'Non si potrà tornare indietro.'}</p><div class="row"><button class="big pri" id="ey">Elimina</button><button class="big" id="en">Annulla</button></div></div>` });
+  const W = openWin('conf', { title: 'Svuota il cestino', icon: 'trash', w: 460, h: 240, dialog: true, html: `<div class="form"><h3>Eliminare per sempre ${trashFull ? 'tutto, anche ' + esc(agentName) : 'questi elementi'}?</h3><p>${trashFull ? 'Rimarrà solo. Completamente solo.' : 'Non si potrà tornare indietro.'}</p><div class="row"><button class="big pri" id="ey">Elimina</button><button class="big" id="en">Annulla</button></div></div>` });
   W.body.querySelector('#ey').onclick = () => { sfx.crumple(); W.close(); wins.trash && wins.trash.close(); if (trashFull) emit('emptied'); };
   W.body.querySelector('#en').onclick = () => { sfx.click(); W.close(); };
 }
@@ -848,6 +1257,29 @@ makeDrag(agent.querySelector('.fl'), agent, {
     }
   },
 });
+
+/* =================== SALVASCHERMO =================== */
+let saverOn = false, saverP = null;
+function startSaver() {
+  if (saverOn) return; saverOn = true; saverP = { x: M.x, y: M.y };
+  const c = $('#svc'), g = c.getContext('2d'), sv = $('#saver'); sv.classList.add('on');
+  const fl = Array.from({ length: 9 }, (_, i) => ({ x: Math.random() * 900 + 60, y: Math.random() * 500 + 60, vx: (Math.random() - .5) * 2.2, vy: (Math.random() - .5) * 2.2, r: 20 + Math.random() * 26, a: Math.random() * 6 }));
+  const img = new Image(); img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${daisy()}</svg>`);
+  const face = new Image(); face.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${daisy('#c9c4bd')}<circle cx="27" cy="30" r="2" fill="#222"/><circle cx="37" cy="30" r="2" fill="#222"/><path d="M27 37q5 3 10 0" stroke="#a33" stroke-width="2" fill="none"/></svg>`);
+  let t = 0;
+  const f = () => {
+    if (!saverOn) return; t++;
+    g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(0, 0, 1024, 640);
+    fl.forEach((d, i) => { d.x += d.vx; d.y += d.vy; d.a += .01; if (d.x < d.r || d.x > 1024 - d.r) d.vx *= -1; if (d.y < d.r || d.y > 640 - d.r) d.vy *= -1;
+      g.save(); g.translate(d.x, d.y); g.rotate(d.a); g.drawImage(S.L >= 7 && i === 0 ? face : img, -d.r, -d.r, d.r * 2, d.r * 2); g.restore(); });
+    if (S.L >= 7) { g.fillStyle = '#ffffff22'; g.font = '700 30px ' + getComputedStyle(document.body).fontFamily; g.textAlign = 'center'; g.fillText('va tutto bene', 512 + Math.sin(t / 90) * 260, 320 + Math.cos(t / 70) * 180); }
+    requestAnimationFrame(f);
+  }; g.fillStyle = '#000'; g.fillRect(0, 0, 1024, 640); f();
+}
+function stopSaver() { if (!saverOn) return; saverOn = false; $('#saver').classList.remove('on'); }
+addEventListener('pointermove', () => { if (saverOn && Math.hypot(M.x - saverP.x, M.y - saverP.y) > 12) stopSaver(); }, { passive: true });
+addEventListener('pointerdown', stopSaver, { passive: true }); addEventListener('keydown', stopSaver);
+setInterval(() => { if (S.saver !== false && !saverOn && S.L >= 1 && S.L <= 9 && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - lastInput > 45000) startSaver(); }, 1000);
 
 /* =================== STORIA =================== */
 let idleDone = false, awayDone = false, hiddenAt = 0;
@@ -915,7 +1347,7 @@ async function L2() {
 async function L3() {
   setLesson(3); closeAll();
   await say(`La tastiera serve per scrivere. Le lettere sono in disordine, lo so: le ha messe così qualcuno molto tempo fa. Riempiamo il suo profilo.`);
-  const W = openWin('prof', { title: 'Il mio profilo', icon: 'course', w: 540, h: 330, x: 160, y: 60, html: `<div class="form" id="pf"></div>` });
+  const W = openWin('prof', { title: 'Il mio profilo', icon: 'course', w: 540, h: 330, x: 160, y: 60, dialog: true, html: `<div class="form" id="pf"></div>` });
   W.x.style.display = 'none';
   let lastK = 0; const kt = [];
   const step = (q, sub, def, area) => new Promise(res => {
@@ -1074,7 +1506,7 @@ async function agentToTrash() {
 /* ---- finale A: DIPLOMATO ---- */
 async function endDiploma() {
   block(true);
-  const W = openWin('bye', { title: 'Arresto del sistema', icon: 'power', w: 520, h: 230, html: `<div class="form"><h3 id="byet">Arresto in corso…</h3><div style="height:26px;border:2px solid #b9a671;border-radius:8px;overflow:hidden"><div id="byeb" style="height:100%;width:0;background:#4f9a5d;transition:width .3s"></div></div><p id="byep">Non spegnere il computer.</p></div>` });
+  const W = openWin('bye', { title: 'Arresto del sistema', icon: 'power', w: 520, h: 230, dialog: true, html: `<div class="form"><h3 id="byet">Arresto in corso…</h3><div style="height:26px;border:2px solid #b9a671;border-radius:8px;overflow:hidden"><div id="byeb" style="height:100%;width:0;background:#4f9a5d;transition:width .3s"></div></div><p id="byep">Non spegnere il computer.</p></div>` });
   W.x.style.display = 'none';
   for (let i = 0; i <= 100; i += 2) {
     W.body.querySelector('#byeb').style.width = i + '%';
@@ -1303,16 +1735,17 @@ async function run(from) {
   $('#receipt').textContent = `  SERENITÀ INFORMATICA s.r.l.\n     via dei Glicini 7\n\n${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}         ore 17:40\n--------------------------------\nPC PASSO PASSO\n  + corso completo (9 lez.)\n  + assistente "Margherita"\nPROGETTO COMPAGNIA     € 0,00\n--------------------------------\nTOTALE                 € 0,00\n\n    ha già pagato. grazie.`;
   const e = S.endings, n = (e.diploma ? 1 : 0) + (e.disconnesso ? 1 : 0);
   $('#ends').innerHTML = n ? `Finali scoperti: <b>${n} di 2</b><br>${e.diploma ? '✔ <b>Diplomato</b>' : '○ ???'}<br>${e.disconnesso ? '✔ <b>Disconnesso</b>' : '○ ???'}` : '';
-  if (S.L >= 2 && S.L <= 9) { $('#go').textContent = `Riprendi · lezione ${S.L}`; $('#reset').style.display = 'block'; }
+  if (S.L >= 2 && S.L <= 9) { $('#go').textContent = `Continua · lezione ${S.L}`; $('#reset').style.display = 'block'; }
+  document.body.dataset.wall = S.wall || 'prato';
   $('#voiceOpt').checked = S.voice; $('#bigOpt').checked = S.big; $('#spk').innerHTML = ICON.spk(S.voice);
   $('#voiceOpt').onchange = e => setVoice(e.target.checked);
   $('#bigOpt').onchange = e => { S.big = e.target.checked; save(); };
-  $('#reset').onclick = () => { S.L = 0; S.deleted = []; S.age = 0; S.tries = 0; S.name = ''; S.wife = ''; S.memory = ''; save(); location.reload(); };
+  $('#reset').onclick = () => { sfx.init(); resetSave(); startNew(); };
+  const prime = () => { sfx.init(); if (S.voice && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } };
+  const startNew = async () => { prime(); $('#box').classList.remove('on'); await playFilm(); run(1); };
   $('#go').onclick = () => {
-    sfx.init(); if (S.voice && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
-    const from = S.L >= 2 && S.L <= 9 ? S.L : 1;
-    if (from === 1) { S.deleted = []; S.age = 0; }
-    (async () => { if (from === 1) { $('#box').classList.remove('on'); await playFilm(); } run(from); })();
+    if (S.L >= 2 && S.L <= 9) { prime(); run(S.L); return; }
+    resetSave(); startNew();
   };
   $('#box').classList.add('on'); drawFlower(); placeAgent(agentHome.x, agentHome.y);
 })();
