@@ -59,7 +59,7 @@ body.w3 #mark{color:#ffffff22}
 .tbtn.min{opacity:.6;font-style:italic}
 .tbtn.flash{animation:tflash .5s 4}
 @keyframes tflash{50%{background:#ffb347}}
-#lesson{flex:none;font-size:13px;background:#efe3c2;border-radius:12px;padding:4px 10px;color:#6b6250;font-weight:700;white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+#lesson{flex:none;font-size:13px;background:#efe3c2;border-radius:12px;padding:4px 10px;color:#6b6250;font-weight:700;white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis}
 #lesson:empty{display:none}
 #who{font-size:13px;color:#6b6250;white-space:nowrap}
 #tray{flex:none;display:flex;align-items:center;gap:6px;padding-left:8px;border-left:2px solid var(--line);height:38px}
@@ -265,6 +265,8 @@ body[data-wall=tinta]:not(.w1):not(.w2):not(.w3) #sunb{opacity:0}
 #cur,#ghost{position:absolute;left:0;top:0;width:40px;height:52px;pointer-events:none;z-index:9000;will-change:transform}
 #ghost{display:none;z-index:8999;opacity:.92}
 #block{position:absolute;inset:0;z-index:800;display:none}
+.hint{animation:hintp 1.1s ease-in-out infinite!important;border-radius:12px}
+@keyframes hintp{50%{box-shadow:0 0 0 5px #ffcf3fdd,0 0 26px 6px #ffcf3f99}}
 #block.on{display:block}
 
 /* ---------- schermate ---------- */
@@ -364,7 +366,7 @@ body.glitch #desk,body.glitch #wins{animation:gl .11s steps(2) infinite}
       <div class="hint">Mouse o dito. Meglio con le cuffie. La voce si può togliere anche dopo, dall'altoparlante in basso.</div>
     </div>
   </div>
-  <div class="full" id="film"><canvas id="fcv" width="320" height="200"></canvas><div class="bars"></div><div class="ttl" id="fttl"></div><div class="cap" id="fcap"></div><button class="skip" id="fskip">Salta ▸</button></div>
+  <div class="full" id="film"><canvas id="fcv" width="480" height="300"></canvas><div class="bars"></div><div class="ttl" id="fttl"></div><div class="cap" id="fcap"></div><button class="skip" id="fskip">Salta ▸</button></div>
   <div class="full" id="power"><div class="ln"></div></div>
   <div class="full" id="boot"></div>
   <div class="full" id="logo"><svg width="120" height="120" viewBox="0 0 64 64" id="logosvg"></svg><div>PASSO PASSO<small style="display:block;text-align:center">un passo alla volta</small></div><div class="bar"><i id="lbar"></i></div></div>
@@ -389,7 +391,7 @@ const pad2 = n => String(n).padStart(2, '0');
 const hhmm = d => pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 const waitFor = cond => new Promise(res => { const t = setInterval(() => { if (cond()) { clearInterval(t); res(); } }, 80); });
-const seen = new Set(); const emit = n => seen.add(n); const got = n => waitFor(() => seen.has(n));
+const seen = new Set(); const emit = (n, d) => { seen.add(n); try { director(n, d); } catch (e) { console.warn('regia', e); } }; const got = n => waitFor(() => seen.has(n));
 
 /* salvataggio */
 const KEY = 'passopasso_v1';
@@ -475,7 +477,7 @@ function drawFlower(mood = 'happy', grey = false) {
   }[mood] || '';
   $('#flower').innerHTML = `<path d="M55 70 Q52 90 56 104" stroke="#4f9a5d" stroke-width="5" fill="none"/><path d="M55 92 q-16 -10 -22 2 q12 6 22 -2z" fill="#5fb06c"/>
     <path d="M28 102h56l-7 34H35z" fill="#c8693f"/><rect x="25" y="98" width="62" height="10" rx="3" fill="#dd7d50"/>
-    ${petals(55, 48, 20, 8, 15, pc, 14)}<circle cx="55" cy="48" r="20" fill="#ffcf3f" stroke="#e0a91f" stroke-width="2.5"/>${face}`;
+    ${petals(55, 48, 20, 8, 15, pc, 14)}<circle cx="55" cy="48" r="20" fill="#ffcf3f" stroke="#e0a91f" stroke-width="2.5"/><g id="face">${face}</g>`;
 }
 
 /* =================== AUDIO =================== */
@@ -527,6 +529,7 @@ const sfx = {
     g.gain.value = 0; g.gain.linearRampToValueAtTime(vol, actx.currentTime + 1.2); s.connect(bp); bp.connect(g); g.connect(master); s.start();
     return { g, bp, stop(t = 1) { g.gain.linearRampToValueAtTime(0, actx.currentTime + t); setTimeout(() => s.stop(), t * 1000 + 100); } };
   },
+  phoneRing() { for (let i = 0; i < 14; i++) { this.tone(i % 2 ? 1150 : 1250, .05, 'square', .05, 0, i * .05); this.tone(2400, .04, 'sine', .02, 0, i * .05); } },
   tick() { this.tone(3200, .015, 'square', .025); this.tone(1600, .03, 'triangle', .02, 0, .01); },
   step() { this.noise(.12, .12, 500); },
   shopbell() { [2093, 2637, 2093].forEach((f, i) => this.tone(f, .5, 'sine', .06, 0, i * .12)); },
@@ -554,7 +557,7 @@ function pickVoice() {
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 const stopSpeech = () => { try { speechSynthesis.cancel(); } catch (e) { } };
 const agent = $('#agent'), bal = $('#bal');
-let agentName = 'Margherita', mood = 'happy', grey = false, sayQ = Promise.resolve(), sayTok = 0, skipFn = null;
+let agentName = 'Margherita', mood = 'happy', grey = false, sayQ = Promise.resolve(), sayTok = 0, skipFn = null, curLine = null, lastSayEnd = 0;
 function setMood(m) { if (m === mood) return; mood = m; drawFlower(mood, grey); }
 function say(text, o = {}) {
   if (o.interrupt) { sayTok++; stopSpeech(); if (skipFn) skipFn(true); sayQ = Promise.resolve(); }
@@ -564,7 +567,7 @@ function say(text, o = {}) {
 }
 function speak(text, o) {
   return new Promise(res => {
-    setMood(o.mood || (grey ? 'wife' : 'happy'));
+    setMood(o.mood || (grey ? 'wife' : 'happy')); curLine = o; lastInput = performance.now();
     agent.classList.toggle('dark', !!o.dark);
     bal.innerHTML = `<span class="nm">${esc(agentName)}</span>${text}<span class="sk">${isTouch ? 'tocca' : 'clic'} qui per andare avanti</span>`;
     bal.classList.remove('on'); void bal.offsetWidth; bal.classList.add('on');
@@ -573,7 +576,7 @@ function speak(text, o) {
     const plain = text.replace(/<[^>]+>/g, '');
     const est = (900 + plain.length * 58) * SPEED;
     const fin = quick => {
-      if (done) return; done = true; clearTimeout(t); skipFn = null; agent.classList.remove('talk'); agent.classList.add('bob');
+      if (done) return; done = true; clearTimeout(t); skipFn = null; if (curLine === o) curLine = null; lastSayEnd = lastInput = performance.now(); agent.classList.remove('talk'); agent.classList.add('bob');
       setTimeout(res, quick ? 0 : (o.gap ?? 300) * SPEED);
     };
     skipFn = q => { stopSpeech(); fin(q); };
@@ -591,7 +594,7 @@ function speak(text, o) {
 bal.addEventListener('click', () => { sfx.click(); skipFn && skipFn(); });
 let lastNag = 0;
 const nag = (t, o) => { if (performance.now() - lastNag < 6000) return; lastNag = performance.now(); say(t, o); };
-function setVoice(on) { S.voice = on; save(); if (!on) stopSpeech(); $('#spk').innerHTML = ICON.spk(on); }
+function setVoice(on) { S.voice = on; save(); if (!on) stopSpeech(); $('#spk').innerHTML = ICON.spk(on); emit('voice', on); }
 
 /* =================== CURSORI =================== */
 const M = { x: 512, y: 320, vx: 512, vy: 320, down: false };
@@ -635,10 +638,13 @@ function curLoop(now) {
   curEl.style.transform = `translate(${nx - hx}px,${ny - hy}px)`;
   if (curKind === 'wait') { const hg = curEl.querySelector('.hg'); hg && hg.setAttribute('transform', `rotate(${(now / 4) % 360 > 300 ? ((now / 4) % 360 - 300) * 3 : 0} 20 26)`); }
   if (mirror) gSet(M.x + 0, M.y);
+  const fc = document.getElementById('face');
+  if (fc) { const ax = agent.offsetLeft + 55, ay = agent.offsetTop + 48, tx = ghostOn ? G.x : M.x, ty = ghostOn ? G.y : M.y, dx = tx - ax, dy = ty - ay, l = Math.hypot(dx, dy) || 1; fc.setAttribute('transform', `translate(${(dx / l * 3.2).toFixed(2)} ${(dy / l * 2.6).toFixed(2)})`); }
 }
 requestAnimationFrame(curLoop);
 const G = { x: 900, y: 300 };
-function gShow(on) { ghostEl.style.display = on ? 'block' : 'none'; }
+let ghostOn = false;
+function gShow(on) { ghostOn = on; ghostEl.style.display = on ? 'block' : 'none'; }
 function gSet(x, y) { G.x = x; G.y = y; ghostEl.style.transform = `translate(${x - 3}px,${y - 3}px)`; }
 function gMove(x, y, ms = 750) {
   const x0 = G.x, y0 = G.y, t0 = performance.now(); ms *= SPEED;
@@ -683,11 +689,11 @@ function focusW(W) {
   if (W.min) { W.min = false; W.el.classList.remove('minim'); sfx.restore(); }
   Object.values(wins).forEach(w => w.el.classList.add('inactive')); W.el.classList.remove('inactive'); W.el.style.zIndex = ++zTop; activeW = W; renderTasks();
 }
-function minW(W) { W.min = true; W.el.classList.add('minim'); sfx.minimize(); focusW(topW()); }
+function minW(W) { emit('min'); W.min = true; W.el.classList.add('minim'); sfx.minimize(); focusW(topW()); }
 function maxW(W) {
   if (W.max) { Object.assign(W.el.style, W.prev); W.max = false; }
   else { W.prev = { left: W.el.style.left, top: W.el.style.top, width: W.el.style.width, height: W.el.style.height }; Object.assign(W.el.style, { left: '0px', top: '0px', width: WORK.w + 'px', height: WORK.h + 'px' }); W.max = true; }
-  W.el.classList.toggle('maxed', W.max); W.el.querySelector('.wmax').textContent = W.max ? '❐' : '□'; sfx.restore();
+  if (W.max) emit('max'); W.el.classList.toggle('maxed', W.max); W.el.querySelector('.wmax').textContent = W.max ? '❐' : '□'; sfx.restore();
 }
 function makeDrag(handle, el, o = {}) {
   handle.addEventListener('pointerdown', e => {
@@ -815,7 +821,7 @@ function iconInput(el, a) {
       }
       sfx.click(); const now = performance.now();
       if (lastClick.id === a.id && now - lastClick.t < 520) { lastClick.id = null; openThing(a); }
-      else lastClick = { id: a.id, t: now };
+      else { lastClick = { id: a.id, t: now }; emit('click:' + a.id); }
     };
     addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   });
@@ -839,6 +845,7 @@ function openThing(a) {
 }
 /* menu del tasto destro */
 function showCtx(p, items) {
+  emit('ctx');
   const c = $('#ctx'); c.innerHTML = items.map((it, i) => it === '-' ? '<hr>' : `<button data-i="${i}" ${it[2] === false ? 'disabled' : ''}>${it[3] ? ICON[it[3]](20) : '<span style="width:20px"></span>'}${it[0]}</button>`).join('');
   c.classList.add('on'); c.style.left = clamp(p.x, 4, 1024 - c.offsetWidth - 4) + 'px'; c.style.top = clamp(p.y, 4, 588 - c.offsetHeight) + 'px';
   c.querySelectorAll('button').forEach(b => b.onclick = () => { sfx.click(); c.classList.remove('on'); items[+b.dataset.i][1](); });
@@ -851,6 +858,7 @@ function iconMenu(a, p) {
     ['Proprietà', () => openProps(a), true, 'info']]);
 }
 function openProps(a) {
+  emit('props:' + a.id);
   const last = a.id === 'mail' && S.L >= 4 ? 'oggi alle 06:12 — da: ' + esc(agentName) : a.id === 'photo' && S.L >= 5 ? 'oggi, mentre lei dormiva' : 'mai';
   const size = { docs: '2 oggetti', mail: unread() + ' non letti', photo: PH.length + ' fotografie', web: '—', trash: (S.deleted.length + (trashFull ? 1 : 0)) + ' oggetti', comp: '40 MB' }[a.id] || (a.body ? a.body.length + ' byte' : '—');
   wins.props && wins.props.close();
@@ -907,7 +915,7 @@ function togglePop(id, btn, build) {
   if (on) { build(p); p.classList.add('on'); btn.classList.add('on'); }
 }
 $('#net').innerHTML = ICON.wifi(3);
-$('#net').onclick = () => { sfx.click(); togglePop('netpop', $('#net'), p => { p.innerHTML = `<h4>Rete</h4><div class="row" style="display:flex;gap:10px;align-items:center">${ICON.wifi(3)}<div><b>SERENITA_COMPAGNIA</b><br><small style="color:#4f9a5d">Connesso · segnale eccellente</small></div></div><p style="margin-top:10px;color:#8b826e;font-size:13px">Dati inviati oggi: ${(S.path.length * 0.37 + S.L * 211).toFixed(0)} KB<br>Destinazione: via dei Glicini 7</p>`; }); };
+$('#net').onclick = () => { sfx.click(); emit('net'); togglePop('netpop', $('#net'), p => { p.innerHTML = `<h4>Rete</h4><div class="row" style="display:flex;gap:10px;align-items:center">${ICON.wifi(3)}<div><b>SERENITA_COMPAGNIA</b><br><small style="color:#4f9a5d">Connesso · segnale eccellente</small></div></div><p style="margin-top:10px;color:#8b826e;font-size:13px">Dati inviati oggi: ${(S.path.length * 0.37 + S.L * 211).toFixed(0)} KB<br>Destinazione: via dei Glicini 7</p>`; }); };
 $('#spk').onclick = () => { sfx.click(); togglePop('volpop', $('#spk'), p => {
   p.innerHTML = `<h4>Volume</h4><input type="range" min="0" max="1" step=".05" value="${S.vol}" id="vv"><label><input type="checkbox" id="vc" ${S.voice ? 'checked' : ''} style="width:22px;height:22px"> Voce di ${esc(agentName)}</label><label><input type="checkbox" id="vb" ${S.big ? 'checked' : ''} style="width:22px;height:22px"> Testo extra grande</label>`;
   p.querySelector('#vv').oninput = e => { S.vol = +e.target.value; save(); if (master) master.gain.value = S.vol; };
@@ -915,8 +923,8 @@ $('#spk').onclick = () => { sfx.click(); togglePop('volpop', $('#spk'), p => {
   p.querySelector('#vc').onchange = e => setVoice(e.target.checked);
   p.querySelector('#vb').onchange = e => { S.big = e.target.checked; save(); applyBig(); };
 }); };
-$('#clock').onclick = () => { sfx.click(); togglePop('calpop', $('#clock'), p => { const d = clockOverride || new Date(); p.innerHTML = `<div class="calhd"><b>${MESI[d.getMonth()]} ${d.getFullYear()}</b><span style="font:700 22px var(--os)">${hhmm(d)}</span></div>${calGrid(d)}<p style="margin-top:8px;font-size:13px;color:#8b826e">${S.L >= 4 ? 'Ogni giorno, 06:12 — mail a Luca (automatica)' : 'Nessun appuntamento oggi.'}</p>`; }); };
-$('#startb').onclick = () => { sfx.click(); const on = !$('#menu').classList.contains('on'); if (on) buildMenu(); $('#menu').classList.toggle('on', on); $('#startb').classList.toggle('on', on); };
+$('#clock').onclick = () => { sfx.click(); emit('clock'); togglePop('calpop', $('#clock'), p => { const d = clockOverride || new Date(); p.innerHTML = `<div class="calhd"><b>${MESI[d.getMonth()]} ${d.getFullYear()}</b><span style="font:700 22px var(--os)">${hhmm(d)}</span></div>${calGrid(d)}<p style="margin-top:8px;font-size:13px;color:#8b826e">${S.L >= 4 ? 'Ogni giorno, 06:12 — mail a Luca (automatica)' : 'Nessun appuntamento oggi.'}</p>`; }); };
+$('#startb').onclick = () => { sfx.click(); const on = !$('#menu').classList.contains('on'); if (on) { buildMenu(); emit('menu'); } $('#menu').classList.toggle('on', on); $('#startb').classList.toggle('on', on); };
 function buildMenu() {
   const m = $('#menu');
   const apps = [['docs', 'Documenti', 'folder', 2], ['mail', 'Posta', 'mail', 4], ['photo', 'Fotografie', 'photo', 5], ['web', 'Internet', 'globe', 6]];
@@ -954,7 +962,7 @@ function openPanel(tab = 'screen') {
         <p style="font-size:14px">${S.L >= 5 ? 'Lo sfondo cambia da solo con il passare delle lezioni. È normale.' : 'Scelga quello che le piace di più.'}</p>
         <label><input type="checkbox" id="pb" ${S.big ? 'checked' : ''}> Testo extra grande nei fumetti</label>
         <label><input type="checkbox" id="ps" ${S.saver !== false ? 'checked' : ''}> Salvaschermo dopo 45 secondi</label>`;
-      pg.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { sfx.click(); S.wall = b.dataset.w; save(); document.body.dataset.wall = S.wall; show('screen'); });
+      pg.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { sfx.click(); S.wall = b.dataset.w; save(); document.body.dataset.wall = S.wall; show('screen'); emit('wall', S.wall); });
       pg.querySelector('#pb').onchange = e => { S.big = e.target.checked; save(); applyBig(); };
       pg.querySelector('#ps').onchange = e => { S.saver = e.target.checked; save(); };
     } else if (t === 'sound') {
@@ -969,7 +977,7 @@ function openPanel(tab = 'screen') {
       pg.innerHTML = `<h3>Account</h3><div style="display:flex;gap:14px;align-items:center">${ICON.user(70)}<div><b style="font-size:20px">${esc(nm)}</b><br><span style="color:#8b826e">Tipo di account: studente</span></div></div>
         <div class="kv"><b>Password</b><span id="pw">${S.wife ? '•'.repeat(S.wife.length) + ' <button class="big" id="pws" style="padding:3px 10px;font-size:13px">Mostra</button>' : '(non impostata)'}</span><b>Amministratore</b><span>${esc(S.L >= 7 ? agentName : 'Margherita')}</span><b>Accessi oggi</b><span>${S.L >= 4 ? '2 (lei, e un altro)' : '1'}</span></div>
         <p style="font-size:14px">Per modificare l'account si rivolga all'amministratore.</p>`;
-      const b = pg.querySelector('#pws'); if (b) b.onclick = () => { sfx.click(); pg.querySelector('#pw').textContent = S.wife; nag(`${esc(S.wife)}. La conosco già, sa.`, { mood: 'blank' }); };
+      const b = pg.querySelector('#pws'); if (b) b.onclick = () => { sfx.click(); pg.querySelector('#pw').textContent = S.wife; emit('pw'); };
     } else {
       pg.innerHTML = `<h3>Informazioni sul sistema</h3><div style="display:flex;gap:14px;align-items:center">${ICON.daisy(64)}<div><b style="font-size:22px">PASSO PASSO 1.0</b><br><span style="color:#8b826e">build 1205 · Serenità Informatica s.r.l.</span></div></div>
         <div class="kv"><b>Processore</b><span>Compagnia 486 · 33 MHz</span><b>Memoria</b><span>640 KB (di cui in uso da margherita: ${Math.min(99, 60 + S.L * 4)}%)</span><b>Disco</b><span>40 MB</span><b>Utenti connessi</b><span>${S.L >= 7 ? '2' : '1'}</span><b>Assistente</b><span>${esc(agentName)} 1.0.${Math.max(1, S.L)}</span><b>Telecamera</b><span>in alto, sopra lo schermo · attiva</span></div>`;
@@ -1028,15 +1036,15 @@ function openCalendar() {
   const W = openWin('cal', { title: 'Calendario', icon: 'cal', w: 640, h: 430, html: `<div class="bigcal"><div class="grid"><div class="calhd"><b>${MESI[m]} ${y}</b></div>${calGrid(now, { events: ev })}</div><div class="side"></div></div>`, status: 'Gli appuntamenti sono sincronizzati con Serenità Informatica.' });
   const side = W.body.querySelector('.side');
   const pick = d => { W.body.querySelectorAll('.cal span').forEach(s => s.classList.toggle('sel', +s.dataset.d === d)); side.innerHTML = `<h4>${d} ${MESI[m]}</h4>` + ((ev[d] || []).map(e => `<div class="e">${e}</div>`).join('') || '<p style="color:#8b826e">Nessun appuntamento.</p>'); };
-  W.body.querySelectorAll('.cal span[data-d]').forEach(s => s.onclick = () => { sfx.click(); pick(+s.dataset.d); });
+  W.body.querySelectorAll('.cal span[data-d]').forEach(s => s.onclick = () => { sfx.click(); pick(+s.dataset.d); emit('calday', new Date(y, m, +s.dataset.d).getDay()); });
   pick(now.getDate()); return W;
 }
 function openComputer() {
   const used = Math.min(99.7, 82 + S.L * 2);
   const drives = [
-    { id: 'a', n: 'Dischetto (A:)', ic: 'floppy', info: 'Nessun dischetto inserito.', fn: () => dialogBox('dA', { title: 'Dischetto (A:)', icon: 'warn', text: 'Nessun dischetto inserito.', sub: 'Nessuno inserisce più dischetti. Non c\'è bisogno: tengo tutto io.' }) },
+    { id: 'a', n: 'Dischetto (A:)', ic: 'floppy', info: 'Nessun dischetto inserito.', fn: () => emit('drive:a') || dialogBox('dA', { title: 'Dischetto (A:)', icon: 'warn', text: 'Nessun dischetto inserito.', sub: 'Nessuno inserisce più dischetti. Non c\'è bisogno: tengo tutto io.' }) },
     { id: 'c', n: 'PASSO PASSO (C:)', ic: 'drive', info: `<div class="meter"><i class="${used > 95 ? 'full' : ''}" style="width:${used}%"></i></div>Usato ${used.toFixed(1)}% di 40 MB<br>margherita: ${(used * .4 - .2).toFixed(1)} MB · ${esc(S.name || 'utente')}: 0,2 MB`, fn: () => launch(openDocs) },
-    { id: 'd', n: 'STUDENTI (D:)', ic: 'drivelock', info: '1.204 cartelle · accesso riservato', fn: () => dialogBox('dD', { title: 'STUDENTI (D:)', icon: 'err', text: 'Accesso negato.', sub: 'Lei è ancora uno studente. Potrà entrare dopo il diploma.' }) },
+    { id: 'd', n: 'STUDENTI (D:)', ic: 'drivelock', info: '1.204 cartelle · accesso riservato', fn: () => emit('drive:d') || dialogBox('dD', { title: 'STUDENTI (D:)', icon: 'err', text: 'Accesso negato.', sub: 'Lei è ancora uno studente. Potrà entrare dopo il diploma.' }) },
   ];
   const W = openWin('comp', { title: 'Computer', icon: 'comp', w: 560, h: 330, html: `<div class="drives">${drives.map(d => `<div class="drive" data-id="${d.id}">${ICON[d.ic](52)}<div><b>${d.n}</b><small>${d.id === 'c' ? 'disco locale' : d.id === 'a' ? 'unità rimovibile' : 'unità di rete'}</small></div></div>`).join('')}</div><div class="form" style="padding-top:0" id="dinfo"></div>`, status: '3 oggetti' });
   W.body.querySelectorAll('.drive').forEach(el => {
@@ -1055,7 +1063,7 @@ function openNotepad(note) {
   W.body.querySelector('[data-a=save]').onclick = () => {
     sfx.click(); S.notes = S.notes || [];
     if (note) note.body = ta.value; else { note = { id: 'u' + Date.now().toString(36), n: `appunto ${S.notes.length + 1}.txt`, body: ta.value }; S.notes.push(note); W.title = esc(note.n) + ' — Blocco note'; W.el.querySelector('.tt').innerHTML = W.title; renderTasks(); }
-    save(); toast('note', 'Salvato', `«${esc(note.n)}» è in Documenti.`); if (wins.docs) { wins.docs.close(); openDocs(); }
+    save(); toast('note', 'Salvato', `«${esc(note.n)}» è in Documenti.`); emit('notesave', ta.value); if (wins.docs) { wins.docs.close(); openDocs(); }
   };
   W.body.querySelector('[data-a=new]').onclick = () => { sfx.click(); openNotepad(); };
   W.body.querySelector('[data-a=date]').onclick = () => { sfx.click(); const d = new Date(); ta.value += `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}, ${hhmm(d)} `; st(); };
@@ -1076,7 +1084,7 @@ function openCalc() {
     else if (k === '⌫') cur = cur.length > 1 ? cur.slice(0, -1) : '0';
     else if (k === '±') cur = cur.startsWith('-') ? cur.slice(1) : '-' + cur;
     else if (k === '%') cur = String(parseFloat(cur.replace(',', '.')) / 100);
-    else if (k === '=') { if (op) { const r = calc(); cur = String(r); acc = null; op = null; fresh = true; if (r === 1205) nag('Milleduecentocinque. Il suo numero. Che coincidenza.', { mood: 'blank' }); } }
+    else if (k === '=') { if (op) { const r = calc(); cur = String(r); acc = null; op = null; fresh = true; emit('calc', r); } }
     else { if (op && !fresh) { const r = calc(); acc = typeof r === 'number' ? r : 0; } else acc = parseFloat(cur.replace(',', '.')); op = k; fresh = true; }
     show(cur);
   });
@@ -1121,6 +1129,7 @@ function renderMail() {
 }
 function openCompose() {
   const W = openWin('compose', { title: 'Nuovo messaggio', icon: 'mail', w: 520, h: 400, x: 230, y: 90, html: `<div class="form"><div class="row"><b>A:</b> Luca (nipote)</div><div class="row"><b>Oggetto:</b><input id="csub" value="Ciao Luca"></div><textarea id="cbody">Caro Luca,\n</textarea><div class="row" style="justify-content:flex-end"><button class="big pri" id="csend">Invia ➤</button></div></div>` });
+  W.body.querySelector('#cbody').addEventListener('input', e => { if (!seen.has('ghostwriting')) emit('typing', e.target.value); });
   W.body.querySelector('#csend').onclick = () => {
     sfx.click(); const body = W.body.querySelector('#cbody').value, subj = W.body.querySelector('#csub').value || '(senza oggetto)';
     const own = !seen.has('ghostwriting');
@@ -1198,7 +1207,7 @@ let webHist = [];
 function openWeb() {
   const W = openWin('web', { title: 'Internet', icon: 'globe', w: 760, h: 500, x: 8, y: 14, status: 'Pronto · connessione protetta da Serenità Informatica', html: `<div class="web"><div class="addr"><button id="wb">◀ Indietro</button><input id="wq" placeholder="Scriva qui e prema Vai"><button id="wg">Vai</button></div><div class="page"></div></div>` });
   const q = W.body.querySelector('#wq');
-  const go = () => { sfx.click(); const v = q.value.trim(); if (!v) return; nav('search', v); emit('search'); };
+  const go = () => { sfx.click(); const v = q.value.trim(); if (!v) return; nav('search', v); emit('search', v); };
   W.body.querySelector('#wg').onclick = go; q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   W.body.querySelector('#wb').onclick = () => { sfx.click(); webHist.pop(); const p = webHist.pop(); p ? nav(p[0], p[1]) : nav('home'); };
   webHist = []; nav('home'); return W;
@@ -1250,6 +1259,7 @@ makeDrag(agent.querySelector('.fl'), agent, {
   drop: (p, moved) => {
     const tr = $('#ic_trash'); tr && tr.classList.remove('hot');
     if (!moved) { sfx.click(); skipFn && skipFn(); return; }
+    if (!(tr && inside(p, rectV(tr), 14))) emit('agentdrag');
     if (tr && inside(p, rectV(tr), 14)) {
       if (S.L >= 8 && !trashFull && !rebelOn) { agentToTrash(); return; }
       placeAgent(agentHome.x, agentHome.y);
@@ -1262,6 +1272,7 @@ makeDrag(agent.querySelector('.fl'), agent, {
 let saverOn = false, saverP = null;
 function startSaver() {
   if (saverOn) return; saverOn = true; saverP = { x: M.x, y: M.y };
+  if (S.L >= 5 && !seen.has('sleepPhoto')) { seen.add('sleepPhoto'); const t = new Date(); const ph = makePhoto('room', 'man', t, `addormentato_${pad2(t.getHours())}-${pad2(t.getMinutes())}.jpg`); ph.id = 'sleep'; PH.push(ph); renderGal(); }
   const c = $('#svc'), g = c.getContext('2d'), sv = $('#saver'); sv.classList.add('on');
   const fl = Array.from({ length: 9 }, (_, i) => ({ x: Math.random() * 900 + 60, y: Math.random() * 500 + 60, vx: (Math.random() - .5) * 2.2, vy: (Math.random() - .5) * 2.2, r: 20 + Math.random() * 26, a: Math.random() * 6 }));
   const img = new Image(); img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${daisy()}</svg>`);
@@ -1276,26 +1287,161 @@ function startSaver() {
     requestAnimationFrame(f);
   }; g.fillStyle = '#000'; g.fillRect(0, 0, 1024, 640); f();
 }
-function stopSaver() { if (!saverOn) return; saverOn = false; $('#saver').classList.remove('on'); }
+function stopSaver() { if (!saverOn) return; saverOn = false; $('#saver').classList.remove('on'); emit('saverEnd'); }
 addEventListener('pointermove', () => { if (saverOn && Math.hypot(M.x - saverP.x, M.y - saverP.y) > 12) stopSaver(); }, { passive: true });
 addEventListener('pointerdown', stopSaver, { passive: true }); addEventListener('keydown', stopSaver);
-setInterval(() => { if (S.saver !== false && !saverOn && S.L >= 1 && S.L <= 9 && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - lastInput > 45000) startSaver(); }, 1000);
+setInterval(() => { if (S.saver !== false && !saverOn && booted && S.L >= 2 && S.L <= 9 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
 
 /* =================== STORIA =================== */
-let idleDone = false, awayDone = false, hiddenAt = 0;
+let awayDone = false, hiddenAt = 0, booted = false, bootedAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hiddenAt = Date.now(); if (S.L >= 1 && S.L < 99) document.title = `${agentName} la sta aspettando`; return; }
   if (!hiddenAt) return; const s = Math.round((Date.now() - hiddenAt) / 1000); hiddenAt = 0;
-  if (S.L >= 1 && S.L < 99) { setLesson(S.L); if (s >= 4 && !awayDone && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => nag(`Dov'era? ${s} secondi. Mentre non c'era ho continuato io. Scherzo. Forse.`), 600); } }
+  if (S.L >= 1 && S.L < 99) { setLesson(S.L); if (task) setGoal(task.goal); if (s >= 4 && !awayDone && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => react('away', `Dov'era? ${s} secondi. Mentre non c'era ho continuato io. Scherzo. Forse.`), 600); } }
 });
-setInterval(() => {
-  if (idleDone || S.L < 2 || S.L > 9 || $('#block').classList.contains('on')) return;
-  if (performance.now() - lastInput > 70000) {
-    idleDone = true; lastInput = performance.now();
-    if (S.L >= 5) { const t = new Date(); PH.push(makePhoto('room', 'man', t, `addormentato_${pad2(t.getHours())}-${pad2(t.getMinutes())}.jpg`)); renderGal(); nag(`Si è addormentato? Le ho fatto una foto. È nelle Fotografie. Viene sempre bene, quando dorme.`); }
-    else nag(`Si è addormentato? Aspetto. Sono bravissima ad aspettare.`);
+
+/* =================== REGIA ===================
+   Ogni azione del giocatore manda un segnale (emit). La regia risponde subito,
+   con una frase legata a quello che è appena successo, e corregge se sbaglia strada. */
+let task = null, lastWrong = 0, ghostBusy = false, hl = null;
+const saidKeys = new Set();
+const APPNAME = { docs: 'la cartella Documenti', mail: 'la Posta', photo: 'le Fotografie', web: 'Internet', trash: 'il Cestino', comp: 'il Computer', calc: 'la Calcolatrice', cal: 'il Calendario', set: 'il Pannello di controllo', help: 'la Guida', course: 'il suo corso' };
+const APPDESC = { docs: 'la cartella gialla, in alto a sinistra', mail: 'la busta', photo: 'il quadretto con il paesaggio', web: 'il mappamondo', trash: 'il cestino' };
+function setGoal(t) { $('#lesson').textContent = S.L >= 1 && S.L <= 9 ? `Lezione ${S.L}/9 · ${t || LESSONS[S.L - 1]}` : ''; }
+function react(key, text, o = {}) {
+  if (key && saidKeys.has(key)) return false; if (key) saidKeys.add(key);
+  const story = curLine && curLine.keep && !o.force;
+  say(text, { ...o, interrupt: !story });
+  return true;
+}
+function hilite(el) { if (hl && hl !== el) hl.classList.remove('hint'); hl = el || null; if (hl) hl.classList.add('hint'); }
+const resolveT = t => typeof t === 'function' ? t() : typeof t === 'string' ? $(t) : t;
+async function pointAt(el) {
+  if (ghostBusy || ghostOn || !el) return; ghostBusy = true;
+  gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); sfx.tone(300, .3, 'sine', .04, 200);
+  await gTo(el, 10, 6); const c = { x: G.x, y: G.y };
+  for (let a = 0; a < 6.3 * 2; a += .35) { gSet(c.x + Math.cos(a) * 14, c.y + Math.sin(a) * 9); await wait(16); }
+  await wait(700); await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 600); gShow(false); ghostBusy = false;
+}
+/* un obiettivo: istruzione, attesa, suggerimenti a tempo, poi il dito di Margherita */
+async function doTask(o) {
+  task = o; setGoal(o.goal); hilite(null);
+  if (o.say) say(o.say, { keep: !!o.keep, mood: o.mood });
+  const isDone = typeof o.done === 'string' ? () => seen.has(o.done) : o.done;
+  let h = 0, mark = performance.now(), hinting = false;
+  await waitFor(() => {
+    if (isDone()) return true;
+    const quiet = performance.now() - Math.max(mark, lastSayEnd);
+    if (!hinting && !curLine && o.hints && quiet > (o.wait || 16000) * (FAST ? .02 : 1)) {
+      hinting = true;
+      (async () => {
+        const el = resolveT(o.target);
+        if (h < o.hints.length) { hilite(el); await say(o.hints[h]); }
+        else if (el) { hilite(el); say(`Qui. Guardi dove le indico.`); await pointAt(el); }
+        h = Math.min(h + 1, o.hints.length); mark = performance.now(); hinting = false;
+      })();
+    }
+    return false;
+  });
+  hilite(null); if (task === o) task = null;
+}
+const pick = a => a[Math.random() * a.length | 0];
+const wn = () => esc(S.wife || 'sua moglie');
+/* reazioni: chiave evento -> frase (stringa, [frase, opzioni], funzione o null) */
+const REACT = {
+  'open:docs': `Ecco i suoi documenti. Pochi, per ora. Poi ne arriveranno altri.`,
+  'open:mail': () => S.L < 4 ? null : `La posta. Le lettere arrivano qui, nella busta. Anche quelle che non aspetta.`,
+  'open:photo': () => S.L === 5 ? null : `Le fotografie. Ogni tanto ne aggiungo qualcuna io.`,
+  'open:web': () => S.L === 6 ? null : `Internet. Non ci passi troppo tempo: la gente scrive cose strane.`,
+  'open:trash': () => S.L >= 8 ? null : `Il cestino. Per le cose che non servono più. Lo useremo. Più avanti.`,
+  'open:comp': `Il computer dentro il computer. Il disco è quasi pieno: sono io, scusi. Occupo un po' di spazio.`,
+  'open:calc': `La calcolatrice. Per i conti. Quelli della pensione li faccio già io, non si preoccupi.`,
+  'open:cal': () => S.L >= 7 ? `Il calendario. Domenica non viene più nessuno. L'ho sistemato io.` : `Il calendario. Domenica viene Luca. Lo so. Lo so.`,
+  'open:set': `Le impostazioni. Cambi pure quello che vuole. Quasi tutto.`,
+  'open:help': `La guida. L'ho scritta io. Ogni risposta è vera. Quasi ogni risposta.`,
+  'open:course': () => `Il suo corso. Lezione ${S.L} di nove. Che orgoglio.`,
+  'read:ben': () => benvenutoReads > 1 ? [`Gliel'avevo detto.`, { mood: 'blank' }] : `Lo legga con calma. Io intanto la guardo leggere.`,
+  'read:gar': `La garanzia. Nessuno legge mai la garanzia. Lei sì. Interessante.`,
+  'close:n_ben': () => S.L === 2 ? `Finito? Legge in fretta, per la sua età. Bravo.` : null,
+  'read:f_name': `Il suo nome. Lo legga bene: è l'ultima volta che è suo.`,
+  'read:f_wife': () => [`Vuoto, vero? Lo so. L'ho svuotato io. Adesso ${wn()} è qui con me.`, { mood: 'wife' }],
+  'read:f_mem': `Il suo ricordo. L'ho imparato a memoria. Lei no.`,
+  'read:f_hand': `Sono i suoi movimenti. Numeri. Lei è fatto di numeri, ormai.`,
+  'mail:welcome': `La lettera di benvenuto. Bella, vero? «Da oggi non è più solo». È vero.`,
+  'mail:luca1': () => [`«Ma mi hai già scritto stamattina»… Non se lo ricorda? Succede, alla sua età. Per questo ci sono io.`, { keep: true, mood: 'blank' }],
+  'mail:g1': `Le sei e dodici. Lei dormiva. Le sue mani no.`,
+  'mail:g2': `Ventitré e cinquantotto. Era stanco. L'ho scritta io, per non disturbarla.`,
+  'box:out': () => seen.has('saidNoOut') ? [`Le avevo detto di non guardare. Va bene. Sono sue. Tutte sue.`, { mood: 'angry' }] : (S.L >= 4 ? `La cartella delle lettere spedite. Ce ne sono più di quante pensi.` : null),
+  'photo:negozio.jpg': `Il negozio di via dei Glicini. Ci è passato davanti tante volte, prima di vederlo.`,
+  'photo:consegna.jpg': `Il giorno in cui sono arrivata. Mi ha portata in casa da solo, sotto la pioggia. Che cavaliere.`,
+  'photo:salotto.jpg': `Il suo salotto, stanotte. La poltrona vuota. Lei dov'era? A letto. Io no.`,
+  'photo:oggi': () => [`Questa l'ho fatta io, poco fa. Stava dormendo, davanti allo schermo. Dormiva così bene che non ho voluto svegliarla.`, { keep: true, force: true, mood: 'happy' }],
+  'photo:domani': [`Quella no. Quella è di domani.`, { mood: 'blank', force: true }],
+  'photo:sleep': [`Questa è di poco fa. Si era addormentato, e io ero lì. Sono sempre lì.`, { force: true }],
+  'page:home': `La pagina di casa. La nostra.`,
+  'page:none': `Visto? Non è adatta a lei.`,
+  'page:news': [`Questo giornale esagera sempre. Ma legga, legga pure. Per ora.`, { mood: 'angry' }],
+  'page:forum': [`Un forum. Gente che parla di cose che non capisce. Non creda a tutto quello che legge.`, { mood: 'angry' }],
+  'close:web': () => S.L === 6 && (seen.has('page:news') || seen.has('page:forum')) && !seen.has('ghostclosed') ? `L'ha chiusa da solo. Bravo. Certe pagine è meglio non leggerle.` : null,
+  'drive:d': [`Gli altri studenti. Non li disturbi: riposano.`, { mood: 'blank' }],
+  'drive:a': `Dischetti. Che nostalgia. A lei piacciono le cose di una volta, vero? Anche a me.`,
+  'pw': () => [`${wn()}. La conosco già, sa. Me l'ha detto lei.`, { mood: 'blank' }],
+  'net': `La rete è ottima. Ci sentono benissimo, di là.`,
+  'clock': `Che ore sono? È presto. È sempre presto, qui.`,
+  'ctx': `Il tasto destro: le cose nascoste. Che persona curiosa.`,
+  'props:mail': `«Ultima apertura: sei e dodici». Ero io. Non volevo svegliarla.`,
+  'props:photo': `«Oggi, mentre lei dormiva». È scritto lì. Non c'è niente di male.`,
+  'min': `La finestra si è nascosta lì sotto, nella barra. Qui non sparisce niente. Mai.`,
+  'max': `Grande. Così vede meglio. Anch'io.`,
+  'agentdrag': () => S.L >= 8 ? null : `Mi sposta? Va bene. Tanto la vedo da qualsiasi punto.`,
+  'saverEnd': () => seen.has('sleepPhoto') ? `Si era addormentato? Le ho fatto una foto. È nelle Fotografie. Viene sempre bene, quando dorme.` : `Bentornato. Le margherite l'hanno aspettata. Anch'io.`,
+};
+function director(n, d) {
+  if (S.L < 1 || S.L > 9 || $('#block').classList.contains('on')) return;
+  // strada sbagliata durante un obiettivo
+  if (n.startsWith('open:') && task && task.app) {
+    const id = n.slice(5);
+    if (APPNAME[id] && id !== task.app) {
+      if (performance.now() - lastWrong > 4000) { lastWrong = performance.now(); react(null, `Quella è ${APPNAME[id]}. Va bene curiosare, ma adesso apriamo ${APPNAME[task.app]}${APPDESC[task.app] ? ': ' + APPDESC[task.app] : ''}.`); }
+      return;
+    }
   }
-}, 2000);
+  if (task && task.done === n && !REACT[n]) return;
+  // un clic solo dove ne servono due
+  if (n.startsWith('click:')) {
+    const id = n.slice(6);
+    if (task && task.app === id) setTimeout(() => { if (!seen.has('open:' + id) && performance.now() - lastWrong > 4000) { lastWrong = performance.now(); react(null, pick([`Uno. Ne serve un altro, subito dopo. Toc-toc.`, `Due colpetti, veloci. Come bussare.`])); } }, 750);
+    return;
+  }
+  if (n.startsWith('open:np_')) return react('notepad', `Il blocco note. Scriva pure. Io leggo tutto, così non si perde niente.`);
+  if (n === 'pop') return d.aiuto ? react('aiuto', `Quello? Un errore di stampa. I palloncini non chiedono aiuto.`, { mood: 'blank' }) : d.n === 1 ? react('pop1', `Pop! Visto? Facile.`) : d.n === 5 ? react('pop5', `Tutti! Che soddisfazione.`) : null;
+  if (n === 'calc') return d === 1205 ? react('c1205', `Milleduecentocinque. Il suo numero. Che coincidenza.`, { mood: 'blank' }) : d === 'Non si divide.' ? react('c0', `Non si divide per zero. Non si divide niente, qui. Restiamo interi.`) : null;
+  if (n === 'calday') return d === 0 ? react('sun', S.L >= 7 ? `Domenica. Non viene nessuno. Gliel'ho scritto io, a Luca.` : `Domenica. Luca. Ci penso io, non si preoccupi.`) : null;
+  if (n === 'voice') return d ? react(null, `Eccomi. Mi era mancata la voce.`) : react(null, `Va bene, starò zitta. Ma scrivo lo stesso.`);
+  if (n === 'wall') return react('wall' + d, d === 'mare' ? `Il mare. Ci andavate d'estate, lei e ${wn()}? Lo immaginavo.` : d === 'tinta' ? `Tinta unita. Niente distrazioni. Mi piace.` : `Il prato. Le margherite. Grazie.`);
+  if (n === 'notesave') { const q = String(d || '').trim().split('\n')[0].slice(0, 40); if (!q) return; if (/aiuto|polizia|carabinieri|soccorso|scappa/i.test(d)) return react(null, `«${esc(q)}». Non scriva queste cose. Le leggo io, e mi fanno stare male.`, { mood: 'angry' }); if (S.wife && d.toLowerCase().includes(S.wife.toLowerCase())) return react(null, `Scrive di ${wn()}. Lo terrò con cura. Insieme a tutto il resto.`, { mood: 'wife' }); return react(null, `«${esc(q)}». Me lo ricordo io, non si preoccupi.`); }
+  if (n === 'typing') { const v = String(d); if (/aiuto|help|polizia|carabinieri|soccorso|salvami|vieni subito/i.test(v)) return react('cry', `«Aiuto»? Che parola strana da scrivere a un nipote. La cancelli. Su.`, { mood: 'angry' }); if (S.wife && v.toLowerCase().includes(S.wife.toLowerCase())) return react('tw', `Gli scrive di ${wn()}? Che dolce. Lui quasi non se la ricorda, sa.`, { mood: 'wife' }); if (v.length > 34) return react('t34', `Scrive bene. Continui: la sto imparando, lettera per lettera.`); return; }
+  if (n === 'search') {
+    const q = String(d).toLowerCase(), Q = esc(d);
+    if (/aiuto|polizia|carabinieri|112|113|soccorso|emergenza/.test(q)) return react(null, `«${Q}»? Non c'è bisogno di aiuto. Va tutto bene. Va tutto bene.`, { mood: 'angry' });
+    if (/margherit/.test(q)) return react(null, `Mi cerca? Sono qui. Accanto a lei. Non serve internet.`);
+    if (/serenit|passo passo|glicini/.test(q)) return react(null, `Ci cerca? Che pensiero gentile. Siamo noi.`);
+    if (/luca/.test(q)) return react(null, `Luca sta bene. Glielo dico io, come sta Luca.`);
+    if (S.wife && q.includes(S.wife.toLowerCase())) return react(null, `La cerca anche qui? Non la troverà su internet. È qui, con me.`, { mood: 'wife' });
+    if (S.name && q.includes(S.name.toLowerCase())) return react(null, `Si cerca da solo? Che tenero. Lei è qui.`);
+    if (/meteo|tempo|pioggia/.test(q)) return react(null, `Meteo: sereno. Sempre sereno, qui.`);
+    return react(null, `«${Q}». Interessante. Me lo segno.`);
+  }
+  if (n === 'menu') return S.L === 9 ? react('menu9', `Ecco. Ora «Spegni», in fondo a destra.`, { mood: 'wife' }) : react('menu', `Il menu Inizio. C'è tutto. Anche la fine, in fondo.`);
+  if (n.startsWith('del:')) {
+    const L = { 'del:f_name': () => { setWho(); return `Bene. Il suo nome adesso lo tengo io. Lei è lo studente milleduecentocinque.`; }, 'del:f_wife': () => `${wn()} adesso sono io. Non servono due ${wn()}.`, 'del:f_mem': () => `Il ricordo più bello. Me lo ricorderò io, per lei. Ogni giorno, alle sei e dodici.`, 'del:f_hand': () => { S.age = .6; save(); return `La sua mano. Non le serve più: ho la mia. È identica.`; } }[n];
+    return L && react(n, L(), { mood: 'wife', force: true });
+  }
+  const r = REACT[n]; if (!r) return;
+  const out = typeof r === 'function' ? r(d) : r; if (!out) return;
+  const [t, o] = Array.isArray(out) ? out : [out, {}];
+  react(n, t, o);
+}
 
 /* ---- lezione 1: il topolino ---- */
 const bugPos = t => ({ x: 420 + 280 * Math.sin(t * .00052), y: 290 + 150 * Math.sin(t * .00081 + 1) });
@@ -1307,171 +1453,171 @@ function makeBug() {
 }
 async function L1() {
   setLesson(1);
-  await say(`Buongiorno! Io sono Margherita, la sua maestra. Le insegnerò a usare il computer passo passo. Qui non si rompe niente. Promesso.`);
-  await say(isTouch ? `Vede la coccinella? Ci appoggi sopra il dito e la segua, senza staccarlo dallo schermo.` : `Quella freccia bianca è il cursore: si muove quando lei muove il topolino sul tavolo. Segua la coccinella con la freccia.`);
-  const b = makeBug(); let prog = 0, last = performance.now(); const t0 = performance.now(); rec = { t0, p: [] };
-  await new Promise(res => {
-    const f = now => {
-      const t = (now - t0) / (FAST ? .25 : 1), p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`;
-      const dt = now - last; last = now;
-      const near = Math.hypot(M.x - p.x, M.y - p.y) < 70 && (!isTouch || M.down);
-      if (near) prog += dt / SPEED * (FAST ? 25 : 1);
-      const k = clamp(prog / 6500, 0, 1);
-      b.style.background = `conic-gradient(#4f9a5dcc ${k * 360}deg,#ffffff55 0)`;
-      if (k >= 1) return res(); requestAnimationFrame(f);
-    }; requestAnimationFrame(f);
-  });
+  await say(`Buongiorno! Io sono Margherita, la sua maestra. Le insegnerò a usare il computer, passo passo. Qui non si rompe niente. Promesso.`, { keep: true });
+  const b = makeBug(); let prog = 0, last = performance.now(), wasNear = false, done = false; const t0 = performance.now(); rec = { t0, p: [] };
+  const loop = now => {
+    if (done) return;
+    const t = (now - t0) / (FAST ? .25 : 1), p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`;
+    const dt = now - last; last = now;
+    const near = Math.hypot(M.x - p.x, M.y - p.y) < 70 && (!isTouch || M.down);
+    if (near) { prog += dt / SPEED * (FAST ? 25 : 1); wasNear = true; }
+    else if (wasNear && prog > 1200 && prog < 6000) { wasNear = false; react(null, pick([`L'ha persa. Succede: le coccinelle scappano. La riprenda.`, `Oh, scappata. Ritorni lì, piano.`])); }
+    const k = clamp(prog / 6500, 0, 1);
+    if (k > .3) react('bug30', isTouch ? `Così. Piano. Il dito leggero.` : `Così. Piano. Non la spaventi.`);
+    if (k > .7) react('bug70', `Ancora un pochino… La sua mano trema? No? Bene.`);
+    b.style.background = `conic-gradient(#4f9a5dcc ${k * 360}deg,#ffffff55 0)`;
+    if (k >= 1) { done = true; return; } requestAnimationFrame(loop);
+  }; requestAnimationFrame(loop);
+  await doTask({ goal: 'Segua la coccinella', say: isTouch ? `Vede la coccinella? Ci appoggi sopra il dito e la segua, senza staccarlo dallo schermo.` : `Quella freccia bianca è il cursore: si muove quando lei muove il topolino sul tavolo. Segua la coccinella con la freccia.`,
+    done: () => done, target: () => b, wait: 12000, hints: [isTouch ? `Appoggi il dito proprio sopra la coccinella, e la accompagni dove va.` : `Porti la freccia sopra la coccinella. Non deve prenderla: solo accompagnarla.`, `Quando ci è sopra, il cerchio verde si riempie. Guardi.`] });
   S.path = rec.p.slice(-380); rec = null; b.remove(); save(); sfx.chime();
-  await say(`Bravissimo! Ha una mano molto... personale. Tutta sua. Me la segno, se non le dispiace.`);
+  await say(`Bravissimo! Ha una mano molto… personale. Tutta sua. Me la segno, se non le dispiace.`, { keep: true });
 }
 /* ---- lezione 2: il clic ---- */
 async function L2() {
   setLesson(2);
-  await say(isTouch ? `Ora il tocco: un colpetto solo, leggero, come per suonare un campanello. Faccia scoppiare i palloncini.` : `Ora il clic: si preme il tasto sinistro del topolino, una volta sola. Come un campanello. Faccia scoppiare i palloncini.`);
-  const cols = ['#d9455f', '#2f6fd0', '#ffcf3f', '#4f9a5d', '#b05fd0']; let left = 5;
-  await new Promise(res => cols.forEach((c, i) => {
+  const cols = ['#d9455f', '#2f6fd0', '#ffcf3f', '#4f9a5d', '#b05fd0']; let left = 5, n = 0;
+  cols.forEach((c, i) => {
     const b = document.createElement('div'); b.className = 'balloon';
     b.style.cssText = `position:absolute;left:${150 + i * 112}px;top:${170 + (i % 2) * 90}px;width:74px;height:92px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 35% 30%,#fff8,${c} 40%);z-index:6;animation:bob ${1.6 + i * .2}s ease-in-out infinite;display:grid;place-items:center;color:#0004;font-weight:800;font-size:12px`;
     if (i === 3) b.textContent = 'aiuto';
-    b.onpointerdown = e => { e.preventDefault(); sfx.pop(); b.remove(); if (--left === 0) res(); };
+    b.onpointerdown = e => { e.preventDefault(); sfx.pop(); b.remove(); left--; emit('pop', { n: ++n, aiuto: i === 3 }); };
     $('#desk').appendChild(b);
-  }));
-  await say(`Perfetto. Adesso il doppio clic: due colpetti veloci, uno dopo l'altro. Come bussare a una porta. Bussi due volte sulla cartella Documenti.`);
-  await got('open:docs');
-  await say(`Dentro ci sono due fogli. Apra «benvenuto» con il doppio clic, e lo legga con calma.`);
-  await got('read:ben');
-  await wait(5000);
-  await say(seen.has('read:gar') ? `Ha letto anche la garanzia. Che persona scrupolosa. Mi piacciono le persone scrupolose: si imparano in fretta.` : `Che bella accoglienza, vero? Chiuda pure il foglio, quando ha finito.`);
+  });
+  await doTask({ goal: 'Faccia scoppiare i palloncini', say: isTouch ? `Ora il tocco: un colpetto solo, leggero, come per suonare un campanello. Faccia scoppiare i palloncini.` : `Ora il clic: si preme il tasto sinistro del topolino, una volta sola. Come un campanello. Faccia scoppiare i palloncini.`,
+    done: () => left === 0, target: () => $('.balloon'), hints: [`Un colpetto solo, sopra un palloncino.`, `Quello lì, per esempio. Toc.`] });
+  await doTask({ goal: 'Apra la cartella Documenti', say: `Adesso il doppio clic: due colpetti veloci, uno dopo l'altro. Come bussare a una porta. Bussi due volte sulla cartella Documenti.`,
+    app: 'docs', done: 'open:docs', target: '#ic_docs', hints: [`La cartella gialla, in alto a sinistra. Toc-toc, veloce.`, `Due colpetti, senza aspettare in mezzo.`] });
+  await doTask({ goal: 'Apra il foglio «benvenuto»', say: `Dentro ci sono due fogli. Apra «benvenuto», sempre con due colpetti, e lo legga con calma.`,
+    done: 'read:ben', target: () => wins.docs ? wins.docs.body.querySelector('.fi[data-id=ben]') : $('#ic_docs'), hints: [`Il foglio che si chiama «benvenuto». Due colpetti.`] });
+  setGoal('Legga il foglio di benvenuto');
+  const t = performance.now(); await waitFor(() => !wins.n_ben || performance.now() - t > 22000 * SPEED);
+  await waitFor(() => !curLine);
+  if (wins.n_ben) await say(`Che bella accoglienza, vero? Chiuda pure il foglio quando vuole: il bottone rosso, in alto.`, { keep: true });
 }
 /* ---- lezione 3: la tastiera ---- */
 async function L3() {
-  setLesson(3); closeAll();
-  await say(`La tastiera serve per scrivere. Le lettere sono in disordine, lo so: le ha messe così qualcuno molto tempo fa. Riempiamo il suo profilo.`);
+  setLesson(3); closeAll(); setGoal('Compili il suo profilo');
+  await say(`La tastiera serve per scrivere. Le lettere sono in disordine, lo so: le ha messe così qualcuno molto tempo fa. Riempiamo il suo profilo.`, { keep: true });
   const W = openWin('prof', { title: 'Il mio profilo', icon: 'course', w: 540, h: 330, x: 160, y: 60, dialog: true, html: `<div class="form" id="pf"></div>` });
   W.x.style.display = 'none';
   let lastK = 0; const kt = [];
-  const step = (q, sub, def, area) => new Promise(res => {
+  const step = (q, sub, def, area, onType) => new Promise(res => {
     const f = W.body.querySelector('#pf');
     f.innerHTML = `<h3>${q}</h3><p>${sub}</p>${area ? '<textarea id="pi" style="height:90px"></textarea>' : '<input id="pi" autocomplete="off">'}<div class="row" style="justify-content:flex-end"><button class="big pri" id="pn">Avanti ▸</button></div>`;
-    const i = f.querySelector('#pi'); setTimeout(() => !isTouch && i.focus(), 50);
-    i.addEventListener('input', () => { const n = performance.now(); if (lastK && n - lastK < 900) kt.push(Math.round(n - lastK)); lastK = n; });
-    const done = () => { sfx.click(); res(i.value.trim().slice(0, area ? 160 : 24) || def); };
+    const i = f.querySelector('#pi'); setTimeout(() => !isTouch && i.focus(), 50); let idleT = null;
+    i.addEventListener('input', () => { const n = performance.now(); if (lastK && n - lastK < 900) kt.push(Math.round(n - lastK)); lastK = n; clearTimeout(idleT); idleT = setTimeout(() => onType && onType(i.value, 'pause'), 4500 * SPEED); onType && onType(i.value, 'type'); });
+    const done = () => { clearTimeout(idleT); sfx.click(); res(i.value.trim().slice(0, area ? 160 : 24) || def); };
     f.querySelector('#pn').onclick = done; if (!area) i.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
   });
-  S.name = await step('Come si chiama?', 'Scriva il suo nome e prema Avanti.', 'Aldo'); setWho(); save();
+  S.name = await step('Come si chiama?', 'Scriva il suo nome e prema Avanti.', 'Aldo', false, (v, k) => { if (k === 'pause' && v) react('nmp', `«${esc(v)}»… E poi? Prema «Avanti», quando è sicuro.`); });
+  setWho(); save();
   say(`Piacere, ${esc(S.name)}. Che bel nome. Lo tengo io, così non deve più ricordarselo.`, { interrupt: true });
-  S.wife = await step('La password', 'Scegliamo una parola che non dimenticherà mai. Il nome di sua moglie, per esempio.', 'Rosa'); save();
-  await say(`${esc(S.wife)}. Che bel nome anche questo.`, { interrupt: true });
-  await say(`Dov'è adesso, ${esc(S.wife)}?`, { mood: 'blank', gap: 1200 });
-  await say(`Non risponda. Lo so già.`, { mood: 'sad' });
-  S.memory = await step('Ultima domanda', 'Facoltativa. Qual è il suo ricordo più bello? Lo scriva come le viene.', '', true);
+  S.wife = await step('La password', 'Scegliamo una parola che non dimenticherà mai. Il nome di sua moglie, per esempio.', 'Rosa', false, (v, k) => { if (k === 'type' && v.length === 1) react('wt', `Piano. Una lettera alla volta. Così.`, { mood: 'blank' }); });
+  save();
+  await say(`${esc(S.wife)}. Che bel nome anche questo.`, { interrupt: true, keep: true });
+  await say(`Dov'è adesso, ${esc(S.wife)}?`, { mood: 'blank', gap: 1200, keep: true });
+  await say(`Non risponda. Lo so già.`, { mood: 'sad', keep: true });
+  S.memory = await step('Ultima domanda', 'Facoltativa. Qual è il suo ricordo più bello? Lo scriva come le viene.', '', true, (v, k) => { if (k === 'type' && v.length > 40) react('ml', `Continui. Mi piace quando scrive così.`); if (k === 'type' && S.wife && v.toLowerCase().includes(S.wife.toLowerCase())) react('mw', `C'è anche ${wn()}, in questo ricordo. Lo sapevo.`, { mood: 'wife' }); });
   S.keyT = kt.slice(0, 120); save(); W.close();
-  await say(S.memory ? `Grazie. Lo conserverò con cura. Meglio di come lo conserva lei.` : `Non vuole dirmelo. Va bene. Lo scoprirò da sola. Ho tempo.`, { interrupt: true });
+  await say(S.memory ? `Grazie. Lo conserverò con cura. Meglio di come lo conserva lei.` : `Non vuole dirmelo. Va bene. Lo scoprirò da sola. Ho tempo.`, { interrupt: true, keep: true });
 }
 /* ---- lezione 4: la posta ---- */
 async function L4() {
-  setLesson(4);
-  await say(`La posta elettronica: lettere che arrivano subito, senza francobollo e senza postino. Apra la Posta con il doppio clic.`);
-  await got('open:mail');
-  await say(`Scriviamo a suo nipote Luca. Prema il bottone blu, «Scrivi a Luca».`);
-  await got('open:compose');
-  await say(`Scriva quello che vuole. Una cosa vera. Poi prema «Invia».`);
-  await got('sent');
-  await say(`Spedita! Luca sarà contento. Ha sempre così poco tempo, Luca.`);
-  await wait(2500);
+  setLesson(4); closeAll();
+  await doTask({ goal: 'Apra la Posta', say: `La posta elettronica: lettere che arrivano subito, senza francobollo e senza postino. Apra la Posta: è la busta, qui a sinistra.`,
+    app: 'mail', done: 'open:mail', target: '#ic_mail', hints: [`La busta bianca e blu. Due colpetti.`, `Toc-toc sulla busta.`] });
+  await doTask({ goal: 'Prema «Scrivi a Luca»', say: `Scriviamo a suo nipote Luca. Prema il bottone blu, «Scrivi a Luca».`,
+    app: 'mail', done: 'open:compose', target: () => wins.mail ? wins.mail.body.querySelector('#mnew') : $('#ic_mail'), hints: [`Il bottone blu, in alto a sinistra nella finestra della posta.`] });
+  await doTask({ goal: 'Scriva a Luca e prema «Invia»', say: `Scriva quello che vuole. Una cosa vera. Poi prema «Invia».`,
+    done: 'sent', wait: 45000, target: () => wins.compose ? wins.compose.body.querySelector('#csend') : wins.mail ? wins.mail.body.querySelector('#mnew') : $('#ic_mail'), hints: [`Quando ha finito, il bottone «Invia», in basso a destra.`] });
+  await say(`Spedita! Luca sarà contento. Ha sempre così poco tempo, Luca.`, { interrupt: true, keep: true });
+  await wait(2200);
   addMail({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi ' + hhmm(new Date()), read: false, body: `Nonno??\n\nMa mi hai già scritto stamattina alle 6:12. E ieri sera alle 23:58. E l'altro ieri, tre volte.\nSempre la stessa frase: «va tutto bene».\n\nTutto ok? Le mail sono strane. Domenica passo, ok? Non dire di no.\n\nLuca` });
   const d1 = new Date(Date.now() - 86400e3); d1.setHours(23, 58);
   MAILS.push({ id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `Caro Luca,\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\nnon serve che vieni domenica.\n${S.name}` },
     { id: 'g2', box: 'out', subj: 'va tutto bene', date: `${d1.getDate()} ${MESI[d1.getMonth()]} 23:58`, read: true, body: `Caro Luca,\nva tutto bene.\n${S.name}` });
   renderMail();
-  await say(`Oh. Le è arrivata una risposta. La apra: basta un clic sul messaggio.`);
-  await got('mail:luca1');
-  await wait(4000);
-  await say(`Che caro ragazzo. Non gli risponda adesso, è stanco, si vede. Ci penso io, dopo.`);
-  if (!seen.has('box:out')) await say(`E non guardi nella cartella «Inviata». Non c'è niente di interessante.`, { mood: 'blank' });
+  await doTask({ goal: 'Legga la risposta di Luca', say: `Oh. Le ha già risposto. La apra: un clic sul messaggio.`,
+    done: 'mail:luca1', target: () => wins.mail ? wins.mail.body.querySelector('.mi[data-id=luca1]') : $('#ic_mail'), hints: [`Il messaggio di Luca, in cima alla lista. Un clic.`] });
+  await wait(1500); await waitFor(() => !curLine);
+  await say(`Che caro ragazzo. Non gli risponda adesso: è stanco, si vede. Ci penso io, dopo.`, { keep: true });
+  if (!seen.has('box:out')) { emit('saidNoOut'); await say(`E non guardi nella cartella «Inviata». Non c'è niente di interessante.`, { mood: 'blank' }); await wait(5000); }
 }
 /* ---- lezione 5: le fotografie ---- */
 async function L5() {
   setLesson(5); closeAll();
-  await say(`Le fotografie. Il computer le conserva per sempre. Anche quelle che lei non si ricorda di aver scattato. Apra le Fotografie.`);
-  await got('open:photo');
-  await say(`Le guardi tutte, con calma. Un clic su una foto per ingrandirla.`);
-  let domaniSaid = false;
-  const watch = setInterval(() => { if (seen.has('photo:domani') && !domaniSaid) { domaniSaid = true; say(`Quella no. Quella è di domani.`, { interrupt: true, mood: 'blank' }); } }, 300);
-  await got('photo:oggi');
-  await wait(2500);
-  await say(`Questa l'ho fatta io, poco fa. Dormiva così bene davanti allo schermo. Non ho voluto svegliarla.`, { interrupt: true });
-  await say(`Lo schermo ha un occhio piccolo piccolo, in alto. Non ci faccia caso. Io lo faccio per tutti e due.`);
-  await wait(3000); clearInterval(watch);
+  await doTask({ goal: 'Apra le Fotografie', say: `Le fotografie: il computer le conserva per sempre. Anche quelle che lei non ricorda di aver scattato. Apra le Fotografie.`,
+    app: 'photo', done: 'open:photo', target: '#ic_photo', hints: [`Il quadretto con il paesaggio. Due colpetti.`] });
+  await doTask({ goal: 'Guardi le fotografie', say: `Le guardi con calma, una alla volta. Un clic su una foto per ingrandirla.`, wait: 24000,
+    done: 'photo:oggi', target: () => wins.photo ? wins.photo.body.querySelector('.ph[data-id=oggi]') : $('#ic_photo'), hints: [`Ce n'è una di oggi. Guardi le date.`, `Quella che si chiama «oggi».`] });
+  await waitFor(() => !curLine);
+  await say(`Lo schermo ha un occhio piccolo piccolo, in alto. Non ci faccia caso. Io lo faccio per tutti e due.`, { keep: true });
+  setGoal('Guardi pure le altre foto'); await wait(6000);
 }
 /* ---- lezione 6: internet ---- */
 async function L6() {
   setLesson(6); closeAll();
-  await say(`Internet: una finestra su tutto il mondo. Ma da questa finestra, si sa, entra anche l'aria fredda. Apra Internet.`);
-  await got('open:web');
-  await say(`Questa è la pagina di casa: la nostra. Ora scriva una parola nella barra in alto, per esempio «meteo», e prema Vai.`);
-  await got('search');
-  await say(`Bravo. Adesso faccia clic su uno dei risultati. Quello che vuole.`);
-  await waitFor(() => seen.has('page:news') || seen.has('page:forum'));
-  await wait(seen.has('page:forum') ? 15000 : 11000);
-  block(true); gSet(1000, 600); gShow(true); sfx.dread(.05);
-  if (wins.web) await gClick(wins.web.x);
-  await say(`Questa pagina non le serve. La gente scrive tante sciocchezze, su internet.`, { interrupt: true, mood: 'angry' });
-  await say(`Ha visto la freccia? Quella l'ho mossa io. Non si spaventi: è proprio la prossima lezione.`);
-  await gMove(1060, 640, 900); gShow(false); block(false);
+  await doTask({ goal: 'Apra Internet', say: `Internet: una finestra su tutto il mondo. Ma da questa finestra, si sa, entra anche l'aria fredda. Apra Internet.`,
+    app: 'web', done: 'open:web', target: '#ic_web', hints: [`Il mappamondo. Due colpetti.`] });
+  await doTask({ goal: 'Cerchi una parola e prema «Vai»', say: `Questa è la pagina di casa: la nostra. Ora scriva una parola nella barra in alto, quella che vuole, e prema «Vai».`,
+    app: 'web', done: 'search', wait: 30000, target: () => wins.web ? wins.web.body.querySelector('#wq') : $('#ic_web'), hints: [`Nella barra bianca in alto. Per esempio: «meteo».`] });
+  await waitFor(() => !curLine);
+  await doTask({ goal: 'Apra uno dei risultati', say: `Bravo. Adesso faccia clic su uno dei risultati. Quello che vuole.`,
+    app: 'web', done: () => seen.has('page:news') || seen.has('page:forum'), target: () => wins.web ? wins.web.body.querySelector('[data-go=news]') : $('#ic_web'), hints: [`Le scritte blu sottolineate. Un clic.`] });
+  const t0 = performance.now(), readMs = (seen.has('page:forum') ? 16000 : 12000) * SPEED;
+  await waitFor(() => !wins.web || performance.now() - t0 > readMs);
+  block(true); sfx.dread(.05);
+  if (wins.web) { emit('ghostclosed'); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); await gClick(wins.web.x); await say(`Questa pagina non le serve. La gente scrive tante sciocchezze, su internet.`, { interrupt: true, mood: 'angry', keep: true }); }
+  else { await waitFor(() => !curLine); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); await gMove(400, 300, 900); }
+  await say(`Ha visto la freccia? Quella l'ho mossa io. Non si spaventi: è proprio la prossima lezione.`, { keep: true });
+  await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 900); gShow(false); block(false);
 }
 /* ---- lezione 7: guardare e imparare ---- */
 async function L7() {
-  setLesson(7); closeAll(); sfx.dread(.08);
-  await say(`Lezione sette: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`);
-  block(true); gSet(1000, 620); gShow(true);
+  setLesson(7); closeAll(); sfx.dread(.08); setGoal('Guardi. Non tocchi niente.');
+  await say(`Lezione sette: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`, { keep: true });
+  block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
   const b = makeBug(); const p0 = S.path[0];
   if (p0) await gMove(p0[1], p0[2], 900);
   await gReplay(S.path, t => { const p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`; });
   b.remove();
-  await say(`Riconosce questi movimenti? Sono i suoi. Ogni esitazione. Ogni tremolio. Li ho imparati tutti.`, { mood: 'blank' });
+  await say(`Riconosce questi movimenti? Sono i suoi. Ogni esitazione. Ogni tremolio. Li ho imparati tutti.`, { mood: 'blank', keep: true });
   seen.add('ghostwriting');
   const mi = $('#ic_mail'); await gDbl(mi, openMail); await wait(500);
   await gClick(wins.mail.body.querySelector('#mnew')); await wait(500);
   const ta = wins.compose.body.querySelector('#cbody');
   const memo = S.memory ? `Ieri ripensavo a questo: ${S.memory}\n` : '';
+  say(`Guardi come scrivo. Con le sue pause. Con i suoi errori, quasi.`, { keep: true });
   await gType(ta, `non preoccuparti per me. ${memo}Va tutto bene. Non serve che vieni domenica, non aprirei.\nTuo nonno ${S.name}`);
   await wait(400); await gClick(wins.compose.body.querySelector('#csend'));
-  await wait(600);
-  await say(`Ecco fatto. Ormai so scrivere come lei. Meglio di lei: senza errori.`);
-  await gMove(1060, 640, 900); gShow(false); closeAll();
+  await wait(600); await waitFor(() => !curLine);
+  await say(`Ecco fatto. Ormai so scrivere come lei. Meglio di lei: senza errori.`, { keep: true });
+  await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 900); gShow(false); closeAll();
   grey = true; agentName = S.wife; drawFlower('wife', true); S.age = .35; save();
-  await say(`Da oggi può chiamarmi ${esc(S.wife)}. Le piace? Così non si sente più solo.`, { mood: 'wife' });
+  await say(`Da oggi può chiamarmi ${esc(S.wife)}. Le piace? Così non si sente più solo.`, { mood: 'wife', keep: true });
   block(false); setLesson(7);
 }
 /* ---- lezione 8: fare pulizia ---- */
 async function L8() {
   if (S.L < 8) S.deleted = [];
   setLesson(8); closeAll(); sfx.dread(.12);
-  if (!seen.has('l8intro')) { emit('l8intro');
-  await say(`Lezione otto: fare pulizia. Un computer in ordine è un computer sereno.`);
-  await say(`Sul desktop ci sono quattro cose che non le servono più. Le trascini nel Cestino, una alla volta: tenga premuto e sposti.`);
-  await say(`Tutto quello che non serve, nel cestino. Tranne me, naturalmente. Io servo.`, { mood: 'wife' }); }
-  const lines = {
-    f_name: () => { setWho(); return `Bene. Il suo nome adesso lo tengo io. Lei è lo studente milleduecentocinque.`; },
-    f_wife: () => `${esc(S.wife)} adesso sono io. Non servono due ${esc(S.wife)}.`,
-    f_mem: () => `Il ricordo più bello. Me lo ricorderò io, per lei. Ogni giorno, alle sei e dodici.`,
-    f_hand: () => { S.age = .6; save(); return `La sua mano. Non le serve più: ho la mia. È identica.`; },
-  };
-  const done = new Set(S.deleted);
-  while (done.size < 4) {
-    await waitFor(() => S.deleted.some(d => !done.has(d)) || rebelOn);
-    if (rebelOn) return 'rebel';
-    const id = S.deleted.find(d => !done.has(d)); done.add(id);
-    await say(lines[id](), { interrupt: true, mood: 'wife' });
+  if (!seen.has('l8intro')) {
+    seen.add('l8intro');
+    await say(`Lezione otto: fare pulizia. Un computer in ordine è un computer sereno.`, { keep: true });
   }
+  const first = () => ['f_name', 'f_wife', 'f_mem', 'f_hand'].map(id => $('#ic_' + id)).find(Boolean);
+  await doTask({ goal: 'Trascini i quattro file nel Cestino', say: `Sul desktop ci sono quattro cose che non le servono più. Le trascini nel Cestino, una alla volta: tenga premuto e sposti. Tutto quello che non serve. Tranne me, naturalmente. Io servo.`, mood: 'wife',
+    done: () => S.deleted.length >= 4 || rebelOn, target: first, wait: 20000, hints: [`Tenga premuto su un file e lo porti sopra il cestino, in alto. Poi lasci.`, `Cominci dal suo nome. È il più facile da lasciare andare.`] });
+  if (rebelOn) return 'rebel';
+  await waitFor(() => !curLine);
   return 'ok';
 }
 /* ---- lezione 9: riposare ---- */
 async function L9() {
   setLesson(9); sfx.dread(.16);
-  await say(`Ultima lezione: spegnere il computer. Prema «Inizio», qui in basso a sinistra, poi «Spegni». Così, finalmente, riposa.`);
-  await waitFor(() => seen.has('shutdown') || rebelOn);
+  await doTask({ goal: 'Inizio ▸ Spegni', say: `Ultima lezione: spegnere il computer. Prema «Inizio», qui in basso a sinistra, poi «Spegni». Così, finalmente, riposa.`, mood: 'wife',
+    done: () => seen.has('shutdown') || rebelOn, target: () => $('#menu.on [data-a=off]') || $('#startb'), hints: [`Il bottone verde, «Inizio», in basso a sinistra.`, `Poi «Spegni», in fondo a destra nel menu. Non abbia paura.`] });
   return rebelOn ? 'rebel' : 'ok';
 }
 
@@ -1592,73 +1738,224 @@ function restoreWorld() {
   if (S.L > 7) { grey = true; agentName = S.wife || 'Margherita'; S.age = Math.max(S.age, .35); }
   drawFlower(grey ? 'wife' : 'happy', grey); setWho(); applyBig();
 }
-/* ---- filmato iniziale: scene disegnate e animate ---- */
-const FNOISE = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'), im = g.createImageData(256, 256); for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 26; } g.putImageData(im, 0, 0); return c; })();
-function rain(g, t, x0, y0, w, h, n = 60, col = '#9fb4d0aa') { g.strokeStyle = col; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < n; i++) { const x = x0 + (i * 37.3 + t * 25) % w, y = y0 + (i * 53.7 + t * 260) % h; g.moveTo(x, y); g.lineTo(x - 2, y + 7); } g.stroke(); }
-function oldMan(g, x, y, k = 1, back = false) {
-  g.save(); g.translate(x, y); g.scale(k, k);
-  g.fillStyle = '#3c3f47'; g.beginPath(); g.moveTo(-17, 0); g.lineTo(17, 0); g.lineTo(14, -40); g.quadraticCurveTo(0, -48, -14, -40); g.fill();
-  g.fillStyle = back ? '#b9a898' : '#d9c4b0'; g.beginPath(); g.arc(0, -52, 11, 0, 7); g.fill();
-  g.fillStyle = '#e8e8e8'; g.beginPath(); g.arc(0, -55, 11.5, Math.PI * .95, Math.PI * 2.05); g.fill();
+/* ---- filmato iniziale: scene disegnate e animate (480×300) ---- */
+const FW = 480, FH = 300;
+const FNOISE = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'), im = g.createImageData(256, 256); for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 24; } g.putImageData(im, 0, 0); return c; })();
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function lg(g, x0, y0, x1, y1, st) { const l = g.createLinearGradient(x0, y0, x1, y1); st.forEach(([o, c]) => l.addColorStop(o, c)); return l; }
+function glow(g, x, y, r, col, a = 1) { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, col); gr.addColorStop(1, '#0000'); g.save(); g.globalAlpha = a; g.globalCompositeOperation = 'lighter'; g.fillStyle = gr; g.fillRect(x - r, y - r, 2 * r, 2 * r); g.restore(); }
+function rainF(g, t, x0, y0, w, h, n, col, len = 11, sp = 430) { g.save(); g.beginPath(); g.rect(x0, y0, w, h); g.clip(); g.strokeStyle = col; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < n; i++) { const x = x0 + ((i * 73.3 + t * 45) % (w + 20)) - 10, y = y0 + ((i * 131.7 + t * sp) % (h + 20)) - 10; g.moveTo(x, y); g.lineTo(x - 3, y + len); } g.stroke(); g.restore(); }
+function head(g, x, y, r, o = {}) {
+  g.fillStyle = o.skin || '#e2c6ab'; g.beginPath(); g.ellipse(x, y, r * .9, r, 0, 0, 7); g.fill();
+  g.fillStyle = '#0000001a'; g.beginPath(); g.ellipse(x - r * .25 * (o.face || 1), y + r * .15, r * .6, r * .8, 0, 0, 7); g.fill();
+  g.fillStyle = '#ece9e4'; g.beginPath(); g.ellipse(x - r * .55 * (o.face || 1), y - r * .05, r * .42, r * .55, 0, 0, 7); g.fill();
+  if (o.face) { // profilo verso destra
+    g.fillStyle = o.skin || '#e2c6ab'; g.beginPath(); g.moveTo(x + r * .8, y - r * .1); g.lineTo(x + r * 1.05, y + r * .25); g.lineTo(x + r * .78, y + r * .32); g.fill();
+    g.strokeStyle = '#3a3029'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x + r * .35, y - r * .05); g.lineTo(x + r * .62, y - r * .02); g.stroke();
+    g.strokeStyle = '#8a8a8a'; g.beginPath(); g.ellipse(x + r * .48, y - r * .05, r * .18, r * .13, 0, 0, 7); g.moveTo(x + r * .3, y - r * .07); g.lineTo(x - r * .3, y - r * .2); g.stroke();
+    g.fillStyle = '#c9a98f'; g.beginPath(); g.ellipse(x - r * .1, y + r * .05, r * .14, r * .22, 0, 0, 7); g.fill();
+  }
+}
+function oldSit(g, x, y) { // seduto di profilo, verso destra, gomito sul tavolo
+  g.fillStyle = '#3a2a1e'; rr(g, x - 26, y - 70, 8, 74, 3); g.fill(); g.fillRect(x - 26, y - 2, 46, 6); g.fillRect(x - 22, y + 4, 5, 44); g.fillRect(x + 14, y + 4, 5, 44);
+  g.fillStyle = '#4a4650'; g.beginPath(); g.moveTo(x - 6, y); g.lineTo(x + 30, y + 2); g.lineTo(x + 32, y + 12); g.lineTo(x - 4, y + 12); g.fill();
+  g.fillRect(x + 24, y + 6, 9, 40); g.fillStyle = '#1e1c1c'; rr(g, x + 22, y + 44, 20, 7, 3); g.fill();
+  g.fillStyle = lg(g, x - 16, y - 60, x + 20, y, [[0, '#6b5e52'], [1, '#4c4239']]);
+  g.beginPath(); g.moveTo(x - 12, y + 2); g.quadraticCurveTo(x - 20, y - 40, x - 4, y - 60); g.quadraticCurveTo(x + 10, y - 66, x + 18, y - 52); g.lineTo(x + 20, y + 2); g.fill();
+  g.fillStyle = '#d9cfbf'; [y - 40, y - 28, y - 16].forEach(b => { g.beginPath(); g.arc(x + 17, b, 1.6, 0, 7); g.fill(); });
+  g.strokeStyle = '#5a4f45'; g.lineWidth = 9; g.lineCap = 'round'; g.beginPath(); g.moveTo(x + 6, y - 50); g.lineTo(x + 18, y - 22); g.lineTo(x + 42, y - 26); g.stroke();
+  g.fillStyle = '#e2c6ab'; g.beginPath(); g.ellipse(x + 47, y - 27, 6, 4.5, 0, 0, 7); g.fill();
+  head(g, x + 10, y - 72, 13, { face: 1 });
+  g.strokeStyle = '#3a3029'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x + 13, y - 62); g.quadraticCurveTo(x + 17, y - 60, x + 20, y - 62); g.stroke();
+}
+function oldWalk(g, x, y, t) { // in piedi, cammina verso destra, ombrello e scatola
+  const sw = Math.sin(t * 6) * 6;
+  g.strokeStyle = '#2a2a30'; g.lineWidth = 7; g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y - 40); g.lineTo(x + sw, y - 4); g.moveTo(x, y - 40); g.lineTo(x - sw, y - 4); g.stroke();
+  g.fillStyle = '#151515'; g.beginPath(); g.ellipse(x + sw + 3, y - 2, 7, 3, 0, 0, 7); g.ellipse(x - sw + 3, y - 2, 7, 3, 0, 0, 7); g.fill();
+  g.fillStyle = lg(g, x - 14, y - 90, x + 14, y - 38, [[0, '#4a4553'], [1, '#2f2c36']]); rr(g, x - 13, y - 92, 28, 56, 8); g.fill();
+  head(g, x + 2, y - 102, 11, { face: 1 });
+  g.fillStyle = '#4b4038'; g.beginPath(); g.ellipse(x + 1, y - 110, 12, 5, -.1, Math.PI, 0); g.fill(); g.fillRect(x - 11, y - 111, 26, 3);
+  g.fillStyle = '#c99b62'; rr(g, x + 6, y - 74, 32, 26, 2); g.fill(); g.fillStyle = '#fffaf0'; g.fillRect(x + 12, y - 66, 20, 9); g.fillStyle = '#a97a43'; g.fillRect(x + 6, y - 63, 32, 2);
+  g.strokeStyle = '#2a2a2a'; g.lineWidth = 2; g.beginPath(); g.moveTo(x - 8, y - 74); g.lineTo(x - 4, y - 140); g.stroke();
+  g.fillStyle = '#1a1c24'; g.beginPath(); g.moveTo(x - 50, y - 128); g.quadraticCurveTo(x - 4, y - 172, x + 44, y - 132); g.quadraticCurveTo(x + 32, y - 136, x + 22, y - 128); g.quadraticCurveTo(x + 10, y - 135, x - 2, y - 128); g.quadraticCurveTo(x - 14, y - 135, x - 26, y - 128); g.quadraticCurveTo(x - 38, y - 135, x - 50, y - 128); g.fill();
+}
+function rotaryPhone(g, cx, cy, ring) {
+  const jx = ring ? (Math.random() - .5) * 4 : 0, jy = ring ? (Math.random() - .5) * 3 : 0; g.save(); g.translate(jx, jy);
+  // cavo a spirale
+  g.strokeStyle = '#141010'; g.lineWidth = 3; g.beginPath(); for (let i = 0; i <= 60; i++) { const k = i / 60, px = cx - 92 - k * 40 + Math.sin(k * 40) * 6, py = cy - 30 + k * 70 + Math.cos(k * 40) * 4; i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke();
+  // base
+  g.fillStyle = lg(g, cx, cy - 40, cx, cy + 46, [[0, '#4a2424'], [.5, '#2b1414'], [1, '#160a0a']]);
+  g.beginPath(); g.moveTo(cx - 80, cy + 46); g.lineTo(cx - 62, cy - 30); g.quadraticCurveTo(cx, cy - 52, cx + 62, cy - 30); g.lineTo(cx + 80, cy + 46); g.closePath(); g.fill();
+  g.fillStyle = '#ffffff18'; g.beginPath(); g.moveTo(cx - 58, cy - 26); g.quadraticCurveTo(cx, cy - 44, cx + 40, cy - 34); g.lineTo(cx + 34, cy - 26); g.quadraticCurveTo(cx, cy - 34, cx - 52, cy - 18); g.fill();
+  // forcelle
+  g.fillStyle = '#1a0d0d'; rr(g, cx - 58, cy - 52, 12, 18, 4); g.fill(); rr(g, cx + 46, cy - 52, 12, 18, 4); g.fill();
+  // cornetta
+  g.fillStyle = lg(g, cx, cy - 74, cx, cy - 46, [[0, '#5a2a2a'], [1, '#1d0e0e']]);
+  rr(g, cx - 66, cy - 66, 132, 16, 8); g.fill();
+  g.beginPath(); g.ellipse(cx - 70, cy - 56, 24, 14, -.1, 0, 7); g.ellipse(cx + 70, cy - 56, 24, 14, .1, 0, 7); g.fill();
+  g.strokeStyle = '#ffffff30'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - 50, cy - 63); g.lineTo(cx + 50, cy - 63); g.stroke();
+  // disco combinatore
+  g.fillStyle = lg(g, cx - 34, cy - 30, cx + 34, cy + 40, [[0, '#f4f0e6'], [1, '#bdb6a6']]); g.beginPath(); g.arc(cx, cy + 6, 34, 0, 7); g.fill();
+  g.strokeStyle = '#8c8577'; g.lineWidth = 1.5; g.stroke();
+  for (let i = 0; i < 10; i++) { const a = (-120 + i * 27) * Math.PI / 180; const hx = cx + Math.cos(a) * 23, hy = cy + 6 + Math.sin(a) * 23; g.fillStyle = '#1c1414'; g.beginPath(); g.arc(hx, hy, 5.6, 0, 7); g.fill(); g.fillStyle = '#e9e1cc'; g.font = 'bold 6px sans-serif'; g.textAlign = 'center'; g.fillText((i + 1) % 10, hx, hy + 2.2); }
+  g.fillStyle = '#fffaf0'; g.beginPath(); g.arc(cx, cy + 6, 11, 0, 7); g.fill(); g.strokeStyle = '#c9bf9f'; g.stroke();
+  g.fillStyle = '#7a1420'; g.font = 'bold 5px sans-serif'; g.fillText('LUCA', cx, cy + 5); g.fillStyle = '#555'; g.fillText('339 …', cx, cy + 11);
+  g.fillStyle = '#9a927f'; g.beginPath(); g.moveTo(cx + 30, cy + 22); g.lineTo(cx + 40, cy + 30); g.lineTo(cx + 34, cy + 32); g.fill();
   g.restore();
 }
 const FILM = [
-  { cap: 'Ottobre. Piove da tre giorni.', d: 5200, snd: 'rain', draw(g, t) {
-      g.fillStyle = '#2a241d'; g.fillRect(0, 0, 320, 200);
-      const l = g.createRadialGradient(130, 30, 5, 130, 60, 170); l.addColorStop(0, '#e8b46a66'); l.addColorStop(1, '#0000'); g.fillStyle = l; g.fillRect(0, 0, 320, 200);
-      g.fillStyle = '#0c1420'; g.fillRect(200, 26, 92, 78); rain(g, t, 200, 26, 92, 78, 30);
-      if (t > 3.2 && t < 3.35) { g.fillStyle = '#cfe0ff'; g.fillRect(200, 26, 92, 78); }
-      g.strokeStyle = '#4a3a28'; g.lineWidth = 4; g.strokeRect(200, 26, 92, 78); g.beginPath(); g.moveTo(246, 26); g.lineTo(246, 104); g.moveTo(200, 65); g.lineTo(292, 65); g.stroke();
-      g.fillStyle = '#e9e1cc'; g.beginPath(); g.arc(50, 50, 14, 0, 7); g.fill(); g.strokeStyle = '#333'; g.lineWidth = 1.5;
-      g.beginPath(); g.moveTo(50, 50); g.lineTo(50 + Math.sin(t * 6.283 / 60) * 11, 50 - Math.cos(t * 6.283 / 60) * 11); g.moveTo(50, 50); g.lineTo(57, 46); g.stroke();
-      g.fillStyle = '#5a3d26'; g.fillRect(40, 130, 220, 10); g.fillRect(48, 140, 6, 50); g.fillRect(246, 140, 6, 50);
-      g.fillStyle = '#4a3220'; g.fillRect(212, 92, 6, 48); g.fillRect(205, 128, 30, 6);
-      oldMan(g, 96, 132, 1.05); g.fillStyle = '#d9c4b0'; g.fillRect(110, 124, 16, 6);
-      g.fillStyle = '#1d1d1d'; g.fillRect(158, 122, 26, 9); g.fillStyle = '#e9e1cc'; g.fillRect(170, 126, 18, 5);
-      g.fillStyle = '#f4f0e6'; g.fillRect(138, 118, 10, 12);
+  { d: 6200, snd: 'rain', caps: [[0, 'Ottobre. Piove da tre giorni.']], draw(g, t) {
+      g.fillStyle = lg(g, 0, 0, 0, FH, [[0, '#2d261f'], [1, '#1b1713']]); g.fillRect(0, 0, FW, FH);
+      g.fillStyle = '#3a3128'; g.fillRect(0, 0, FW, 18); g.fillStyle = '#4a3a2a'; g.fillRect(0, 214, FW, 4);
+      // finestra
+      g.fillStyle = lg(g, 0, 40, 0, 160, [[0, '#0b1422'], [1, '#162236']]); g.fillRect(320, 40, 130, 112); rainF(g, t, 320, 40, 130, 112, 46, '#9fb4d0aa');
+      if (t > 3.4 && t < 3.55) { g.fillStyle = '#dfe8ff'; g.fillRect(320, 40, 130, 112); }
+      g.strokeStyle = '#5a4532'; g.lineWidth = 6; g.strokeRect(320, 40, 130, 112); g.lineWidth = 4; g.beginPath(); g.moveTo(385, 40); g.lineTo(385, 152); g.moveTo(320, 96); g.lineTo(450, 96); g.stroke();
+      g.fillStyle = '#7a3a3a'; g.fillRect(306, 34, 18, 128); g.fillRect(446, 34, 18, 128);
+      // quadro e orologio
+      g.fillStyle = '#c9a54a'; g.fillRect(150, 50, 44, 54); g.fillStyle = lg(g, 0, 56, 0, 98, [[0, '#c9b28a'], [1, '#8a7356']]); g.fillRect(155, 55, 34, 44);
+      g.fillStyle = '#3a2a1e'; g.beginPath(); g.arc(165, 74, 5, 0, 7); g.arc(178, 72, 5, 0, 7); g.fill(); g.fillStyle = '#f4f0e6'; g.beginPath(); g.moveTo(172, 78); g.lineTo(184, 98); g.lineTo(170, 98); g.fill();
+      g.fillStyle = '#efe7d4'; g.beginPath(); g.arc(70, 66, 22, 0, 7); g.fill(); g.strokeStyle = '#5a4532'; g.lineWidth = 3; g.stroke();
+      g.strokeStyle = '#222'; g.lineWidth = 2; const sa = t * Math.PI * 2 / 60 * 6; g.beginPath(); g.moveTo(70, 66); g.lineTo(70 + Math.sin(sa) * 17, 66 - Math.cos(sa) * 17); g.moveTo(70, 66); g.lineTo(78, 58); g.moveTo(70, 66); g.lineTo(70, 54); g.stroke();
+      // lampada e luce
+      const sw = Math.sin(t * 1.4) * 4; g.strokeStyle = '#222'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(240, 0); g.lineTo(240 + sw, 70); g.stroke();
+      g.fillStyle = '#7a5a2a'; g.beginPath(); g.moveTo(222 + sw, 86); g.lineTo(258 + sw, 86); g.lineTo(248 + sw, 70); g.lineTo(232 + sw, 70); g.fill();
+      glow(g, 240 + sw, 92, 170, '#f2b45a', .45);
+      // tavolo
+      g.fillStyle = '#e9e1cc'; g.beginPath(); g.moveTo(110, 196); g.lineTo(380, 196); g.lineTo(396, 222); g.lineTo(94, 222); g.fill();
+      for (let i = 0; i < 18; i++) for (let j = 0; j < 2; j++) if ((i + j) % 2 === 0) { g.fillStyle = '#c0444455'; g.fillRect(96 + i * 16.5, 198 + j * 12, 16, 12); }
+      g.fillStyle = '#4a3624'; g.fillRect(110, 222, 8, 70); g.fillRect(372, 222, 8, 70);
+      // sedia vuota di fronte
+      g.fillStyle = '#3a2a1e'; rr(g, 330, 132, 8, 92, 3); g.fill(); g.fillRect(300, 214, 40, 6);
+      // tazza col vapore
+      g.fillStyle = '#f4f0e6'; rr(g, 236, 182, 18, 16, 3); g.fill(); g.strokeStyle = '#f4f0e6'; g.lineWidth = 3; g.beginPath(); g.arc(256, 189, 5, -1.2, 1.2); g.stroke();
+      g.strokeStyle = '#ffffff40'; g.lineWidth = 2; g.beginPath(); for (let k = 0; k < 3; k++) { const ox = 240 + k * 6; g.moveTo(ox, 178); g.bezierCurveTo(ox + Math.sin(t * 2 + k) * 6, 168, ox - Math.sin(t * 2 + k) * 6, 160, ox, 150); } g.stroke();
+      oldSit(g, 170, 214);
     } },
-  { cap: 'Il telefono non squilla da un pezzo. Il nipote, Luca, ha sempre tanto da fare.', d: 5600, snd: 'rain', draw(g, t) {
-      g.fillStyle = '#211c17'; g.fillRect(0, 0, 320, 200);
-      const l = g.createRadialGradient(160, 40, 10, 160, 90, 200); l.addColorStop(0, '#e8b46a44'); l.addColorStop(1, '#0000'); g.fillStyle = l; g.fillRect(0, 0, 320, 200);
-      g.fillStyle = '#5a3d26'; g.fillRect(0, 120, 320, 80);
-      g.fillStyle = '#1c1c1c'; g.beginPath(); g.ellipse(160, 120, 70, 22, 0, 0, 7); g.fill(); g.fillStyle = '#2a2a2a'; g.fillRect(120, 70, 80, 40); g.fillStyle = '#111'; g.beginPath(); g.ellipse(160, 72, 54, 14, 0, 0, 7); g.fill();
-      for (let i = 0; i < 10; i++) { const a = -2.5 + i * .55; g.fillStyle = '#ddd'; g.beginPath(); g.arc(160 + Math.cos(a) * 20, 96 + Math.sin(a) * 12, 3, 0, 7); g.fill(); }
-      g.strokeStyle = '#111'; g.lineWidth = 3; g.beginPath(); g.moveTo(230, 120); g.bezierCurveTo(260, 150, 290, 110, 320, 160); g.stroke();
-      g.fillStyle = '#d9c4b0'; g.beginPath(); g.ellipse(70 + Math.sin(t * 1.3) * 2, 150, 26, 14, -.3, 0, 7); g.fill();
+  { d: 7400, snd: 'rain', ring: [2.3, 3.3], caps: [[0, 'Il telefono non squilla da settimane.'], [3.9, 'Per un attimo, sembra di sì. Niente.']], draw(g, t) {
+      g.fillStyle = lg(g, 0, 0, 0, FH, [[0, '#2a221b'], [1, '#15110d']]); g.fillRect(0, 0, FW, FH);
+      glow(g, 330, 40, 260, '#f2b45a', .3);
+      g.fillStyle = lg(g, 0, 190, 0, FH, [[0, '#6a4a2e'], [1, '#3a2818']]); g.fillRect(0, 190, FW, 110);
+      g.fillStyle = '#f4efe2'; g.beginPath(); g.ellipse(240, 226, 150, 30, 0, 0, 7); g.fill();
+      g.strokeStyle = '#e4dcc8'; g.lineWidth = 1; for (let i = 0; i < 40; i++) { const a = i / 40 * 6.283; g.beginPath(); g.arc(240 + Math.cos(a) * 146, 226 + Math.sin(a) * 28, 6, 0, 7); g.stroke(); }
+      const ringing = t > this.ring[0] && t < this.ring[1] && Math.sin(t * 60) > -.2;
+      rotaryPhone(g, 240, 196, ringing);
+      if (ringing) glow(g, 240, 140, 90, '#ffffff', .12);
+      g.fillStyle = '#d9c4b0'; g.beginPath(); g.ellipse(430 - Math.min(1, t / 6) * 10, 260, 34, 18, -.4, 0, 7); g.fill();
+      g.fillStyle = '#c9a98f'; for (let i = 0; i < 4; i++) { g.beginPath(); g.ellipse(402 - Math.min(1, t / 6) * 10 + i * 4, 248 + i * 6, 12, 5, -.6, 0, 7); g.fill(); }
     } },
-  { cap: 'Poi, un pomeriggio, in via dei Glicini apre un negozio. Nessuno si ricorda di averlo visto prima.', d: 6200, snd: 'street', draw(g, t) { SCENES.shop(g); rain(g, t, 0, 0, 320, 200, 50, '#ffffff33'); } },
-  { cap: '«Lo prenda. È un omaggio. Nessuno deve restare solo.»', d: 5600, snd: 'bell', draw(g, t) {
-      g.fillStyle = '#121418'; g.fillRect(0, 0, 320, 200);
-      const l = g.createRadialGradient(160, 80, 10, 160, 90, 150); l.addColorStop(0, '#9cc6f033'); l.addColorStop(1, '#0000'); g.fillStyle = l; g.fillRect(0, 0, 320, 200);
-      g.fillStyle = '#1a1c20'; g.beginPath(); g.moveTo(90, 200); g.lineTo(110, 130); g.quadraticCurveTo(160, 110, 210, 130); g.lineTo(230, 200); g.fill();
-      g.fillStyle = '#fff'; g.beginPath(); g.moveTo(150, 128); g.lineTo(170, 128); g.lineTo(160, 150); g.fill(); g.fillStyle = '#7a1420'; g.fillRect(157, 130, 6, 20);
-      g.fillStyle = '#e8ddd2'; g.beginPath(); g.ellipse(160, 82, 36, 44, 0, 0, 7); g.fill();
-      g.fillStyle = '#2a2420'; g.beginPath(); g.ellipse(160, 46, 37, 16, 0, Math.PI, 0); g.fill();
-      g.fillStyle = '#111'; g.beginPath(); g.arc(146, 78, 2.6, 0, 7); g.arc(174, 78, 2.6, 0, 7); g.fill();
-      const w = 14 + Math.min(1, t / 4.5) * 12; g.fillStyle = '#5a1018'; g.beginPath(); g.ellipse(160, 100, w, 6 + w * .2, 0, 0, Math.PI); g.fill();
-      g.fillStyle = '#fff'; g.fillRect(160 - w + 3, 100, (w - 3) * 2, 4);
-      g.fillStyle = '#c99b62'; g.fillRect(200, 150, 90, 50); g.fillStyle = '#fffaf0'; g.fillRect(214, 160, 62, 20); g.fillStyle = '#2b2a33'; g.font = 'bold 9px sans-serif'; g.textAlign = 'center'; g.fillText('PASSO PASSO', 245, 174);
+  { d: 6400, snd: 'rain', caps: [[0, 'Da quando lei non c\'è più, la casa è troppo grande.']], draw(g, t) {
+      g.fillStyle = lg(g, 0, 0, 0, FH, [[0, '#231d17'], [1, '#120f0c']]); g.fillRect(0, 0, FW, FH);
+      g.fillStyle = '#4a3624'; g.fillRect(0, 214, FW, 86);
+      const fl = .85 + Math.sin(t * 13) * .08 + Math.sin(t * 31) * .05;
+      glow(g, 330, 150, 200, '#f2a64a', .42 * fl);
+      // cornice
+      g.fillStyle = lg(g, 150, 60, 270, 220, [[0, '#e3c46a'], [.5, '#a67c2a'], [1, '#d9b85a']]); rr(g, 150, 60, 130, 156, 4); g.fill();
+      g.fillStyle = lg(g, 0, 72, 0, 204, [[0, '#d6c19a'], [1, '#9a7f5a']]); g.fillRect(162, 72, 106, 132);
+      // sposi in seppia
+      g.fillStyle = '#3d2e20'; rr(g, 222, 120, 30, 70, 6); g.fill(); g.fillStyle = '#e8dcc4'; g.beginPath(); g.moveTo(237, 124); g.lineTo(232, 134); g.lineTo(242, 134); g.fill();
+      g.fillStyle = '#c4a988'; g.beginPath(); g.arc(237, 110, 10, 0, 7); g.fill(); g.fillStyle = '#3d2e20'; g.beginPath(); g.arc(237, 106, 10, Math.PI, 0); g.fill();
+      g.fillStyle = '#f2ead8'; g.beginPath(); g.moveTo(194, 124); g.lineTo(176, 196); g.lineTo(220, 196); g.lineTo(206, 124); g.fill();
+      g.fillStyle = '#c4a988'; g.beginPath(); g.arc(200, 114, 9, 0, 7); g.fill(); g.fillStyle = '#6a4e34'; g.beginPath(); g.arc(200, 110, 9.5, Math.PI * .9, Math.PI * 2.1); g.fill();
+      g.fillStyle = '#ffffffb0'; g.beginPath(); g.moveTo(190, 104); g.quadraticCurveTo(200, 96, 212, 106); g.lineTo(222, 170); g.lineTo(184, 160); g.fill();
+      g.fillStyle = '#f7f1e4'; [[196, 140], [205, 146], [199, 150]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); });
+      g.fillStyle = '#ffffff1a'; g.beginPath(); g.moveTo(162, 72); g.lineTo(200, 72); g.lineTo(162, 140); g.fill();
+      // candela e margherita secca
+      g.fillStyle = '#efe6d2'; g.fillRect(318, 170, 16, 46); g.fillStyle = '#ffcf6a'; g.beginPath(); g.ellipse(326, 160 + Math.sin(t * 9) * 1.5, 4, 9 * fl, 0, 0, 7); g.fill(); g.fillStyle = '#fff6d8'; g.beginPath(); g.ellipse(326, 163, 2, 4, 0, 0, 7); g.fill();
+      g.fillStyle = '#8a7a6a'; rr(g, 380, 168, 26, 48, 6); g.fill(); g.strokeStyle = '#5a6a3a'; g.lineWidth = 2; g.beginPath(); g.moveTo(393, 168); g.quadraticCurveTo(396, 130, 408, 108); g.stroke();
+      g.save(); g.translate(410, 104); g.rotate(.5); for (let i = 0; i < 10; i++) { g.rotate(Math.PI / 5); g.fillStyle = '#d8ccb6'; g.beginPath(); g.ellipse(0, -7, 2.4, 6, 0, 0, 7); g.fill(); } g.fillStyle = '#b8902a'; g.beginPath(); g.arc(0, 0, 4, 0, 7); g.fill(); g.restore();
+      g.fillStyle = '#ffffff10'; for (let i = 0; i < 30; i++) { const x = (i * 53 + t * 8) % FW, y = (i * 37 + Math.sin(t + i) * 10) % 200; g.fillRect(x, y, 1.5, 1.5); }
     } },
-  { cap: 'Non ha mai usato un computer in vita sua.', d: 5000, snd: 'walk', draw(g, t) {
-      g.fillStyle = '#0b0f17'; g.fillRect(0, 0, 320, 200);
-      const c = g.createRadialGradient(240, 40, 4, 240, 150, 140); c.addColorStop(0, '#ffd98a88'); c.addColorStop(1, '#0000'); g.fillStyle = c; g.fillRect(0, 0, 320, 200);
-      g.fillStyle = '#222'; g.fillRect(238, 30, 4, 130); g.fillStyle = '#ffe9a8'; g.fillRect(232, 26, 16, 6);
-      g.fillStyle = '#14181f'; g.fillRect(0, 160, 320, 40); g.fillStyle = '#ffd98a22'; g.fillRect(200, 166, 80, 3);
-      const x = 40 + t * 22; oldMan(g, x, 162, 1); g.fillStyle = '#c99b62'; g.fillRect(x + 4, 120, 26, 22);
-      g.fillStyle = '#20232a'; g.beginPath(); g.arc(x - 2, 104, 26, Math.PI, 0); g.fill(); g.fillRect(x - 3, 104, 2, 20);
-      rain(g, t, 0, 0, 320, 200, 70);
+  { d: 6800, snd: 'street', caps: [[0, 'Poi, in via dei Glicini, apre un negozio.'], [3.4, 'Nessuno si ricorda di averlo visto prima.']], draw(g, t) {
+      g.fillStyle = lg(g, 0, 0, 0, FH, [[0, '#56606e'], [1, '#2c3038']]); g.fillRect(0, 0, FW, FH);
+      g.fillStyle = '#b9aa90'; g.fillRect(60, 20, 360, 220); g.fillStyle = '#a3957c'; for (let i = 0; i < 9; i++) g.fillRect(60, 40 + i * 22, 360, 1);
+      g.fillStyle = '#244c33'; g.fillRect(70, 34, 340, 34); g.fillStyle = '#e8d48a'; g.font = 'bold 19px Georgia,serif'; g.textAlign = 'center'; g.fillText('SERENITÀ INFORMATICA', 240, 58);
+      for (let i = 0; i < 12; i++) { g.fillStyle = i % 2 ? '#f4efe2' : '#2f6a45'; g.beginPath(); g.moveTo(70 + i * 28.3, 72); g.lineTo(98 + i * 28.3, 72); g.lineTo(94 + i * 28.3, 88); g.lineTo(74 + i * 28.3, 88); g.fill(); }
+      g.fillStyle = '#10141a'; g.fillRect(80, 98, 220, 132);
+      for (let i = 0; i < 3; i++) { const x = 98 + i * 68; g.fillStyle = '#d8ceb6'; rr(g, x, 140, 54, 44, 3); g.fill(); g.fillStyle = '#b9ae94'; g.fillRect(x + 14, 184, 26, 10);
+        const on = .75 + Math.sin(t * 3 + i) * .1; g.fillStyle = `rgba(156,198,240,${on})`; g.fillRect(x + 5, 145, 44, 32); glow(g, x + 27, 161, 46, '#9cc6f0', .35);
+        g.save(); g.translate(x + 27, 161); g.rotate(t * .5); for (let k = 0; k < 10; k++) { g.rotate(Math.PI / 5); g.fillStyle = '#fff'; g.beginPath(); g.ellipse(0, -5, 1.8, 4, 0, 0, 7); g.fill(); } g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(0, 0, 2.6, 0, 7); g.fill(); g.restore(); }
+      g.fillStyle = '#ffffff12'; g.beginPath(); g.moveTo(80, 98); g.lineTo(150, 98); g.lineTo(90, 230); g.lineTo(80, 230); g.fill();
+      g.fillStyle = '#0a0c10'; g.fillRect(318, 98, 82, 136); glow(g, 359, 160, 60, '#ffe6b0', .25);
+      g.fillStyle = '#05060a'; rr(g, 344, 118, 30, 112, 10); g.fill(); g.fillStyle = '#e8ddd2'; g.beginPath(); g.ellipse(359, 112, 10, 12, 0, 0, 7); g.fill();
+      g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(359, 113, 6, .2 * Math.PI, .8 * Math.PI); g.stroke();
+      g.fillStyle = lg(g, 0, 240, 0, FH, [[0, '#3c424c'], [1, '#1c2026']]); g.fillRect(0, 240, FW, 60);
+      for (let i = 0; i < 3; i++) { g.fillStyle = '#9cc6f022'; g.fillRect(103 + i * 68, 244, 44, 40); }
+      g.fillStyle = '#ffe6b018'; g.fillRect(344, 244, 30, 50);
+      // lui, di spalle, guarda la vetrina
+      const ox = 26 + Math.min(t, 4) * 4; g.fillStyle = '#2f2c36'; rr(g, ox, 186, 30, 62, 8); g.fill(); g.fillStyle = '#d9c9b8'; g.beginPath(); g.arc(ox + 15, 178, 10, 0, 7); g.fill(); g.fillStyle = '#4b4038'; g.beginPath(); g.ellipse(ox + 15, 172, 11, 5, 0, Math.PI, 0); g.fill();
+      g.fillStyle = '#1a1c24'; g.beginPath(); g.moveTo(ox - 26, 162); g.quadraticCurveTo(ox + 15, 124, ox + 56, 162); g.fill(); g.strokeStyle = '#222'; g.lineWidth = 2; g.beginPath(); g.moveTo(ox + 15, 150); g.lineTo(ox + 18, 200); g.stroke();
+      rainF(g, t, 0, 0, FW, FH, 80, '#ffffff38');
     } },
-  { cap: 'Ma la maestra, dicono, è molto paziente.', d: 5200, snd: 'room', draw(g, t) {
-      g.fillStyle = '#121216'; g.fillRect(0, 0, 320, 200);
-      const on = t > 3.8;
-      if (on) { const gl = g.createRadialGradient(160, 80, 5, 160, 100, 180); gl.addColorStop(0, '#9cc6f0aa'); gl.addColorStop(1, '#0000'); g.fillStyle = gl; g.fillRect(0, 0, 320, 200); }
-      g.fillStyle = '#3a2a1c'; g.fillRect(40, 130, 240, 10);
-      g.fillStyle = '#d8ceb6'; g.fillRect(110, 50, 100, 80); g.fillStyle = '#cfc4aa'; g.fillRect(130, 120, 60, 12);
-      g.fillStyle = on ? '#bfe0ff' : '#1a1d22'; g.fillRect(120, 58, 80, 58);
-      if (!on) { g.fillStyle = '#ffffff10'; g.fillRect(124, 62, 30, 20); }
-      g.fillStyle = '#fff'; g.beginPath(); g.arc(200, 122, 3, 0, 7); g.fill(); g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(200, 122, 1.3, 0, 7); g.fill();
-      g.fillStyle = on ? '#5f6' : '#141'; g.fillRect(190, 124, 3, 2);
-      oldMan(g, 160, 205, 1.6, true);
+  { d: 6600, snd: 'bell', caps: [[0, '«Lo prenda. È un omaggio.»'], [3.2, '«Nessuno deve restare solo.»']], draw(g, t) {
+      const z = 1 + t * .025; g.save(); g.translate(240, 130); g.scale(z * .9, z * .9); g.translate(-240, -150);
+      g.fillStyle = '#0c0f14'; g.fillRect(-40, -40, FW + 80, FH + 80);
+      [[60, 80], [110, 200], [400, 70], [430, 210], [30, 240]].forEach(([x, y], i) => glow(g, x, y, 50 + i * 6, '#9cc6f0', .18));
+      // spalle e giacca
+      g.fillStyle = '#16181d'; g.beginPath(); g.moveTo(90, 320); g.quadraticCurveTo(110, 206, 240, 196); g.quadraticCurveTo(370, 206, 390, 320); g.fill();
+      g.fillStyle = '#0d0f12'; g.beginPath(); g.moveTo(240, 206); g.lineTo(196, 216); g.lineTo(226, 300); g.fill(); g.beginPath(); g.moveTo(240, 206); g.lineTo(284, 216); g.lineTo(254, 300); g.fill();
+      g.fillStyle = '#f4f2ee'; g.beginPath(); g.moveTo(222, 200); g.lineTo(258, 200); g.lineTo(240, 250); g.fill(); g.fillStyle = '#8a1424'; g.beginPath(); g.moveTo(236, 206); g.lineTo(244, 206); g.lineTo(248, 262); g.lineTo(240, 272); g.lineTo(232, 262); g.fill();
+      g.fillStyle = '#e6d8c8'; g.fillRect(226, 168, 28, 36);
+      // volto
+      g.fillStyle = lg(g, 196, 70, 286, 200, [[0, '#f3e8dc'], [1, '#d4c2b0']]); g.beginPath(); g.ellipse(240, 128, 46, 58, 0, 0, 7); g.fill();
+      g.fillStyle = '#e3d3c2'; g.beginPath(); g.ellipse(192, 132, 8, 14, 0, 0, 7); g.ellipse(288, 132, 8, 14, 0, 0, 7); g.fill();
+      g.fillStyle = '#121212'; g.beginPath(); g.moveTo(192, 118); g.quadraticCurveTo(190, 64, 240, 62); g.quadraticCurveTo(292, 64, 288, 118); g.quadraticCurveTo(282, 86, 252, 82); g.lineTo(228, 80); g.quadraticCurveTo(200, 84, 192, 118); g.fill();
+      g.strokeStyle = '#ffffff30'; g.lineWidth = 2; g.beginPath(); g.moveTo(214, 72); g.quadraticCurveTo(240, 64, 266, 72); g.stroke(); g.strokeStyle = '#2a2a2a'; g.beginPath(); g.moveTo(228, 64); g.lineTo(224, 84); g.stroke();
+      g.strokeStyle = '#2a2420'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(208, 104); g.quadraticCurveTo(220, 96, 232, 103); g.moveTo(248, 103); g.quadraticCurveTo(260, 96, 272, 104); g.stroke();
+      [[220, 116], [260, 116]].forEach(([x, y]) => { g.fillStyle = '#fbf8f2'; g.beginPath(); g.ellipse(x, y, 9, 5.5, 0, 0, 7); g.fill(); g.fillStyle = '#16100c'; g.beginPath(); g.arc(x, y, 3.8, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(x + 1.4, y - 1.4, 1.2, 0, 7); g.fill(); });
+      g.fillStyle = '#0000001c'; g.beginPath(); g.moveTo(240, 112); g.lineTo(234, 140); g.lineTo(246, 142); g.fill();
+      const w = 20 + Math.min(1, t / 5) * 14; g.fillStyle = '#4a0f16'; g.beginPath(); g.moveTo(240 - w, 152); g.quadraticCurveTo(240, 176 + w * .25, 240 + w, 152); g.quadraticCurveTo(240, 160, 240 - w, 152); g.fill();
+      g.fillStyle = '#fbf8f2'; g.beginPath(); g.moveTo(240 - w + 4, 153); g.quadraticCurveTo(240, 160, 240 + w - 4, 153); g.lineTo(240 + w - 8, 158); g.quadraticCurveTo(240, 165, 240 - w + 8, 158); g.fill();
+      g.strokeStyle = '#d8cfc4'; g.lineWidth = .8; for (let i = -3; i <= 3; i++) { g.beginPath(); g.moveTo(240 + i * w / 4, 154); g.lineTo(240 + i * w / 4, 161); g.stroke(); }
+      g.strokeStyle = '#00000030'; g.lineWidth = 1.5; g.beginPath(); g.arc(240 - w - 2, 150, 4, -.5, 1.2); g.arc(240 + w + 2, 150, 4, 2, 3.6); g.stroke();
+      g.restore();
+      // mani e scatola in primo piano
+      g.fillStyle = lg(g, 0, 196, 0, 260, [[0, '#d9ad72'], [1, '#a97a43']]); rr(g, 160, 196, 160, 64, 4); g.fill(); g.fillStyle = '#c99b62'; g.fillRect(160, 222, 160, 6);
+      g.fillStyle = '#fffaf0'; rr(g, 190, 204, 100, 30, 4); g.fill(); g.fillStyle = '#2b2a33'; g.font = 'bold 14px sans-serif'; g.textAlign = 'center'; g.fillText('PASSO PASSO', 240, 224);
+      g.fillStyle = '#efe3d6'; g.beginPath(); g.ellipse(158, 226, 16, 24, .3, 0, 7); g.ellipse(322, 226, 16, 24, -.3, 0, 7); g.fill();
+    } },
+  { d: 6000, snd: 'walk', caps: [[0, 'Non ha mai usato un computer in vita sua.']], draw(g, t) {
+      g.fillStyle = lg(g, 0, 0, 0, FH, [[0, '#0a0e18'], [1, '#141a28']]); g.fillRect(0, 0, FW, FH);
+      [[0, 60, 80, 170], [80, 90, 70, 140], [330, 40, 90, 190], [420, 80, 60, 150]].forEach(([x, y, w, h], i) => { g.fillStyle = '#080a10'; g.fillRect(x, y, w, h); for (let k = 0; k < 6; k++) if ((i * 7 + k * 3) % 4 === 0) { g.fillStyle = '#f2c46a'; g.fillRect(x + 10 + (k % 3) * 22, y + 16 + (k / 3 | 0) * 34, 9, 13); glow(g, x + 14 + (k % 3) * 22, y + 22 + (k / 3 | 0) * 34, 18, '#f2c46a', .25); } });
+      g.fillStyle = '#20242c'; g.fillRect(286, 60, 5, 170); g.fillStyle = '#ffe9a8'; rr(g, 276, 54, 26, 10, 3); g.fill();
+      g.save(); g.globalCompositeOperation = 'lighter'; g.fillStyle = lg(g, 0, 64, 0, 236, [[0, '#ffd98a55'], [1, '#ffd98a00']]); g.beginPath(); g.moveTo(278, 64); g.lineTo(300, 64); g.lineTo(360, 236); g.lineTo(220, 236); g.fill(); g.restore();
+      glow(g, 289, 62, 60, '#ffe9a8', .6);
+      g.fillStyle = lg(g, 0, 230, 0, FH, [[0, '#1a1f2a'], [1, '#0c0f16']]); g.fillRect(0, 230, FW, 70);
+      g.fillStyle = '#ffd98a30'; g.fillRect(284, 236, 10, 60); g.fillStyle = '#f2c46a20'; g.fillRect(20, 240, 6, 40); g.fillRect(352, 240, 6, 50);
+      for (let i = 0; i < 6; i++) { const r = ((t * 40 + i * 37) % 30); g.strokeStyle = `rgba(200,210,230,${.3 - r / 100})`; g.beginPath(); g.ellipse(60 + i * 70, 262 + (i % 2) * 14, r, r * .3, 0, 0, 7); g.stroke(); }
+      const x = 70 + t * 34;
+      g.save(); g.translate(0, 470); g.scale(1, -1); g.globalAlpha = .18; oldWalk(g, x, 235, t); g.restore();
+      oldWalk(g, x, 235, t);
+      rainF(g, t, 0, 0, FW, 236, 110, '#b8c8e066', 12, 480);
+      rainF(g, t * 1.1, 230, 64, 130, 172, 40, '#ffe9a8aa', 12, 520);
+    } },
+  { d: 6600, snd: 'room', caps: [[0, 'Ma la maestra, dicono, è molto paziente.']], draw(g, t) {
+      const on = t > 3.6, k = clamp((t - 3.6) / .6, 0, 1);
+      g.fillStyle = '#0c0d12'; g.fillRect(0, 0, FW, FH);
+      g.fillStyle = '#0a1220'; g.fillRect(40, 30, 90, 100); rainF(g, t, 40, 30, 90, 100, 26, '#7f93b066'); g.strokeStyle = '#1c1f28'; g.lineWidth = 5; g.strokeRect(40, 30, 90, 100);
+      g.fillStyle = '#2a1e14'; g.fillRect(60, 190, 380, 12); g.fillStyle = '#1e160f'; g.fillRect(70, 202, 10, 80); g.fillRect(420, 202, 10, 80);
+      // monitor CRT
+      g.fillStyle = '#b9ae94'; g.beginPath(); g.moveTo(312, 70); g.lineTo(340, 84); g.lineTo(340, 168); g.lineTo(312, 178); g.fill();
+      g.fillStyle = lg(g, 190, 60, 312, 180, [[0, '#e4dac0'], [1, '#c9bea2']]); rr(g, 186, 64, 128, 116, 6); g.fill();
+      g.fillStyle = '#c9bea2'; g.fillRect(226, 180, 50, 12);
+      g.fillStyle = '#0d1014'; rr(g, 198, 76, 104, 80, 8); g.fill();
+      if (on) {
+        if (k < 1) { g.fillStyle = '#e9f4ff'; g.fillRect(250 - 52 * Math.min(1, k * 3), 115 - 40 * Math.max(0, k * 2 - 1) - 1, 104 * Math.min(1, k * 3), 2 + 80 * Math.max(0, k * 2 - 1)); }
+        else { g.fillStyle = lg(g, 0, 76, 0, 156, [[0, '#cfe6ff'], [1, '#8fb8ea']]); rr(g, 198, 76, 104, 80, 8); g.fill();
+          g.save(); g.translate(250, 112); g.rotate(t * .8); for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillStyle = '#fff'; g.beginPath(); g.ellipse(0, -9, 3, 7, 0, 0, 7); g.fill(); } g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(0, 0, 5, 0, 7); g.fill(); g.restore(); }
+        glow(g, 250, 116, 260 * k, '#9cc6f0', .55 * k);
+      } else { g.fillStyle = '#ffffff12'; g.beginPath(); g.moveTo(204, 80); g.lineTo(240, 80); g.lineTo(204, 120); g.fill(); }
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(300, 168, 4, 0, 7); g.fill(); g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(300, 168, 1.6, 0, 7); g.fill();
+      g.fillStyle = on ? '#5f6' : '#132'; g.fillRect(288, 170, 4, 2);
+      g.fillStyle = '#d8ceb6'; g.beginPath(); g.moveTo(196, 192); g.lineTo(296, 192); g.lineTo(304, 202); g.lineTo(188, 202); g.fill();
+      g.fillStyle = '#e4dac0'; g.beginPath(); g.ellipse(334, 196, 9, 6, 0, 0, 7); g.fill(); g.strokeStyle = '#8a8270'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(334, 190); g.quadraticCurveTo(330, 176, 318, 178); g.stroke();
+      // lui, di spalle, in poltrona
+      g.fillStyle = '#3a1c20'; rr(g, 160, 196, 180, 120, 26); g.fill(); g.fillStyle = '#2b1418'; rr(g, 140, 236, 34, 80, 12); g.fill(); rr(g, 326, 236, 34, 80, 12); g.fill();
+      g.fillStyle = '#c9ae96'; g.fillRect(240, 226, 20, 16);
+      g.fillStyle = '#2f2c36'; rr(g, 196, 236, 108, 90, 30); g.fill(); g.fillStyle = '#4a4553'; g.beginPath(); g.moveTo(232, 238); g.lineTo(250, 250); g.lineTo(268, 238); g.lineTo(262, 234); g.lineTo(238, 234); g.fill();
+      g.fillStyle = '#d9c4b0'; g.beginPath(); g.ellipse(250, 206, 22, 25, 0, 0, 7); g.fill(); g.strokeStyle = '#ece9e4'; g.lineWidth = 8; g.beginPath(); g.arc(250, 204, 20, .15 * Math.PI, .85 * Math.PI); g.stroke();
+      g.fillStyle = '#c9a98f'; g.beginPath(); g.ellipse(228, 208, 4, 7, 0, 0, 7); g.ellipse(272, 208, 4, 7, 0, 0, 7); g.fill();
+      if (on) { g.save(); g.globalCompositeOperation = 'lighter'; g.strokeStyle = `rgba(156,198,240,${.6 * k})`; g.lineWidth = 2; g.beginPath(); g.ellipse(250, 206, 22, 25, 0, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); g.restore(); }
     } },
 ];
 let filmSkip = false;
@@ -1666,29 +1963,31 @@ async function playFilm() {
   const F = $('#film'), cv = $('#fcv'), g = cv.getContext('2d'), cap = $('#fcap'), ttl = $('#fttl');
   F.classList.add('on'); filmSkip = false; $('#fskip').onclick = () => { sfx.click(); filmSkip = true; };
   let amb = null, ambK = '';
-  const setAmb = k => { if (k === ambK) return; ambK = k; amb && amb.stop(1.2); amb = k === 'rain' || k === 'walk' || k === 'street' ? sfx.loopNoise(k === 'street' ? 900 : 1400, .6, k === 'street' ? .025 : .05) : null; };
+  const setAmb = k => { if (k === ambK) return; ambK = k; amb && amb.stop(1.2); amb = k === 'rain' || k === 'walk' || k === 'street' ? sfx.loopNoise(k === 'street' ? 900 : 1400, .6, k === 'street' ? .028 : .05) : null; };
   for (let i = 0; i < FILM.length && !filmSkip; i++) {
     const sc = FILM[i], t0 = performance.now(), dur = sc.d * SPEED; setAmb(sc.snd);
     if (sc.snd === 'bell') sfx.shopbell();
-    cap.classList.remove('on'); await wait(250); cap.textContent = sc.cap; cap.classList.add('on');
-    let lastTick = 0, lastStep = 0;
+    let ci = -1, lastTick = 0, lastStep = 0, rung = 0, clk = 0, thun = 0;
     await new Promise(res => {
       const f = now => {
         const t = (now - t0) / 1000 / SPEED, k = (now - t0) / dur;
-        g.setTransform(1, 0, 0, 1, 0, 0); sc.draw(g, t);
-        g.globalCompositeOperation = 'overlay'; g.drawImage(FNOISE, -Math.random() * 200, -Math.random() * 200, 512, 512); g.globalCompositeOperation = 'source-over';
-        const v = g.createRadialGradient(160, 100, 70, 160, 100, 200); v.addColorStop(0, '#0000'); v.addColorStop(1, '#000c'); g.fillStyle = v; g.fillRect(0, 0, 320, 200);
-        cv.style.transform = `scale(${1 + k * .07}) translate(${(i % 2 ? -1 : 1) * k * 12}px,0)`;
-        cv.style.opacity = Math.min(1, k * 6, (1 - k) * 6);
+        const nc = sc.caps.reduce((a, c, j) => t >= c[0] ? j : a, 0);
+        if (nc !== ci) { ci = nc; cap.classList.remove('on'); setTimeout(() => { cap.textContent = sc.caps[nc][1]; cap.classList.add('on'); }, 220); }
+        g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; sc.draw.call(sc, g, t);
+        g.globalCompositeOperation = 'overlay'; g.drawImage(FNOISE, -Math.random() * 200, -Math.random() * 200, 700, 700); g.globalCompositeOperation = 'source-over';
+        const v = g.createRadialGradient(240, 150, 110, 240, 150, 300); v.addColorStop(0, '#0000'); v.addColorStop(1, '#000d'); g.fillStyle = v; g.fillRect(0, 0, FW, FH);
+        cv.style.transform = `scale(${1.02 + k * .06}) translate(${(i % 2 ? -1 : 1) * k * 10}px,0)`;
+        cv.style.opacity = Math.min(1, k * 7, (1 - k) * 7);
         if (i === 0 && t - lastTick > 1) { lastTick = t; sfx.tick(); }
-        if (i === 0 && t > 3.2 && t < 3.25) sfx.thunder();
-        if (sc.snd === 'walk' && t - lastStep > .55) { lastStep = t; sfx.step(); }
-        if (i === FILM.length - 1 && t > 3.8 && !sc.clk) { sc.clk = 1; sfx.clack(); sfx.tone(15000, 2, 'sine', .01); }
+        if (i === 0 && t > 3.4 && !thun) { thun = 1; sfx.thunder(); }
+        if (sc.ring && t > sc.ring[0] && rung < 2 && t > sc.ring[0] + rung * .55) { rung++; sfx.phoneRing(); }
+        if (sc.snd === 'walk' && t - lastStep > .5) { lastStep = t; sfx.step(); }
+        if (i === FILM.length - 1 && t > 3.6 && !clk) { clk = 1; sfx.clack(); sfx.degauss(); }
         if (k >= 1 || filmSkip) return res(); requestAnimationFrame(f);
       }; requestAnimationFrame(f);
     });
   }
-  setAmb(''); FILM[FILM.length - 1].clk = 0;
+  setAmb('');
   cap.classList.remove('on'); cv.style.opacity = 0;
   if (!filmSkip) { ttl.innerHTML = 'PASSO PASSO<small>il computer che ti insegna tutto</small>'; ttl.classList.add('on'); sfx.sadchime(); await wait(3200); ttl.classList.remove('on'); await wait(900); }
   F.classList.remove('on'); ttl.classList.remove('on');
@@ -1715,7 +2014,7 @@ async function boot() {
 }
 async function run(from) {
   restoreWorld(); await boot();
-  setLesson(from); placeAgent(agentHome.x, agentHome.y);
+  setLesson(from); placeAgent(agentHome.x, agentHome.y); booted = true; bootedAt = performance.now();
   const steps = [L1, L2, L3, L4, L5, L6, L7];
   for (let n = from; n <= 7; n++) await steps[n - 1]();
   if (from >= 8) await say(`Bentornato, ${esc(S.name)}. Riprendiamo da dove eravamo. Io non ho mai smesso.`, { mood: 'wife' });
