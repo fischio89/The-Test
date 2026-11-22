@@ -3,1223 +3,1166 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#2a2d33">
-<title>THE TEST</title>
-<link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23777'/%3E%3Crect width='8' height='8' fill='%23999'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23999'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#16150f">
+<title>Passo Passo</title>
+<link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23fff'%3E%3Cellipse cx='32' cy='13' rx='7' ry='13'/%3E%3Cellipse cx='32' cy='51' rx='7' ry='13'/%3E%3Cellipse cx='13' cy='32' rx='13' ry='7'/%3E%3Cellipse cx='51' cy='32' rx='13' ry='7'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='12' fill='%23ffcf3f'/%3E%3C/svg%3E">
 <style>
-/* VOICE: clinico, burocratico, poi corrotto
-   IDEA: la test-suite di un motore grafico abbandonato
-   PICTURE: la scena greybox a tutto schermo
-   COLOUR/TYPE: grigi da editor, giallo debug, verde PASS, rosso FAIL; monospace di sistema
-   LAYOUT: runner dei test a destra, debug in alto a sinistra, sottotitoli in basso */
-:root{--ui:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;--y:#ffd400;--g:#3ddc84;--r:#ff4d4d}
+/* PASSO PASSO — un sistema operativo per anziani che insegna, passo passo, a non servire più. */
+:root{--ink:#2b2a33;--paper:#fffaf0;--line:#d8c9a3;--blue:#2f6fd0;--sun:#ffcf3f;--rose:#d9455f;--leaf:#4f9a5d;
+  --os:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sky1:#d9ecff;--sky2:#9cc6f0;--sky3:#78a6dc;--hill:#8cc47a;--hill2:#6fae63;--fl:1}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#2a2d33;color:#ddd;font-family:var(--ui);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-#view{position:fixed;inset:0;transform-origin:50% 60%}
-#view canvas{display:block;width:100%;height:100%}
-.hud{position:fixed;pointer-events:none;z-index:5}
-#debug{top:10px;left:12px;font-size:11px;line-height:1.5;color:#cfcfcf;background:rgba(0,0,0,.45);padding:6px 9px;border-left:2px solid var(--y);white-space:pre}
-#debug b{color:var(--y);font-weight:600}
-#debug i{color:var(--r);font-style:normal;font-weight:600}
-#suite{top:10px;right:12px;width:270px;background:rgba(16,17,20,.82);border:1px solid #3b3f47;font-size:11px}
-#suite h1{font-size:11px;font-weight:600;padding:7px 10px;background:#1d2026;border-bottom:1px solid #3b3f47;color:#aab;display:flex;justify-content:space-between;gap:8px}
-#suite ul{list-style:none;padding:4px 0;max-height:52vh;overflow:hidden}
-#suite li{display:grid;grid-template-columns:38px 1fr 58px;gap:6px;padding:3px 10px;color:#888}
-#suite li .s{text-align:right;font-weight:600}
-#suite li.run{color:#eee;background:rgba(255,212,0,.08)}#suite li.run .s{color:var(--y)}
-#suite li.pass .s{color:var(--g)}#suite li.fail .s{color:var(--r)}
-#suite li.undef .s{color:#c46bff}#suite li.wait .s{color:#555}
-#suite li.hidden{display:none}
-#suite li.new{animation:blink .5s steps(2) 6}
-@keyframes blink{50%{background:rgba(255,77,77,.25)}}
-#sub{bottom:9vh;left:50%;transform:translateX(-50%);max-width:min(760px,86vw);text-align:center;font-size:clamp(13px,1.6vw,17px);line-height:1.45;color:#fff;background:rgba(0,0,0,.62);padding:8px 14px;opacity:0;transition:opacity .2s;z-index:12}
-#sub.on{opacity:1}
-#sub .who{color:var(--y);font-size:.78em;display:block;letter-spacing:.04em;margin-bottom:2px}
-#sub.creepy{color:#ffd9d9;background:rgba(40,0,0,.7)}#sub.creepy .who{color:var(--r)}
-#cross{top:50%;left:50%;width:4px;height:4px;margin:-2px 0 0 -2px;background:rgba(255,255,255,.7);border-radius:50%}
-#prompt{top:58%;left:50%;transform:translateX(-50%);font-size:13px;color:#111;background:var(--y);padding:5px 10px;display:none}
-#prompt.on{display:block}
-#clog{left:12px;bottom:12px;width:min(360px,44vw);font-size:11px;line-height:1.55;background:rgba(0,0,0,.7);border-left:2px solid var(--r);padding:7px 10px;display:none;white-space:pre}
-#clog.on{display:block}
-#clog .h{color:var(--r)}
-#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s;z-index:20}
-#toast{top:44%;left:50%;transform:translate(-50%,-50%);font-size:clamp(28px,6vw,64px);font-weight:700;letter-spacing:.06em;opacity:0;transition:opacity .25s}
-#toast.on{opacity:1}
+html,body{width:100%;height:100%;overflow:hidden;background:#16150f;color:var(--ink);font-family:var(--os);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+input,textarea{user-select:text;-webkit-user-select:text;touch-action:manipulation}
+#screen{position:absolute;left:50%;top:50%;width:1024px;height:640px;transform:translate(-50%,-50%);overflow:hidden;background:#000}
+body.nocur,body.nocur *{cursor:none!important}
+button{font-family:var(--os);cursor:pointer}
 
-/* CCTV */
-#cctv{position:fixed;inset:0;z-index:4;pointer-events:none;display:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
-body.cctv #cctv{display:block}
-body.cctv #view{filter:grayscale(.85) contrast(1.3) brightness(1.15)}
-body.cctv #cross{display:none}
-#cctv .t{position:absolute;left:max(18px,24vw);top:16px;font-size:14px;color:#eee;text-shadow:0 0 4px #000}
-#cctv .t b{color:var(--r)}
-#static{position:fixed;inset:0;z-index:11;pointer-events:none;opacity:0;background-size:256px;image-rendering:pixelated}
-#static.on{opacity:.85;animation:st .08s steps(3) infinite}
-@keyframes st{33%{background-position:37px 81px}66%{background-position:-90px 14px}}
+/* ---------- desktop ---------- */
+#desk{position:absolute;left:0;top:0;width:1024px;height:592px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 55%,var(--sky3));transition:filter 3s}
+#sunb{position:absolute;right:150px;top:60px;width:90px;height:90px;border-radius:50%;background:radial-gradient(#fff6c8,#ffd75a 60%,#ffd75a00 72%);transition:all 3s}
+.hill{position:absolute;border-radius:50%;transition:background 3s}
+#h1{left:-160px;right:300px;bottom:-260px;height:470px;background:var(--hill2)}
+#h2{left:260px;right:-200px;bottom:-300px;height:480px;background:var(--hill)}
+#meadow{position:absolute;inset:0;pointer-events:none;opacity:var(--fl);transition:opacity 3s,filter 3s}
+#mark{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;color:#ffffffb0;font-weight:800;letter-spacing:.06em;font-size:42px;text-shadow:0 2px 10px #0002;pointer-events:none;transition:color 3s}
+#mark small{display:block;font-size:15px;font-weight:600;letter-spacing:.02em;margin-top:2px}
+body.w1{--sky1:#f7d9b5;--sky2:#d9a08a;--sky3:#8a7aa0;--hill:#7c9e62;--hill2:#5e8452}
+body.w1 #sunb{top:200px;background:radial-gradient(#ffe0b0,#ff9a5a 60%,#ff9a5a00 72%)}
+body.w2{--sky1:#3a4766;--sky2:#28314a;--sky3:#151a28;--hill:#334a3a;--hill2:#26382d;--fl:.55}
+body.w2 #sunb{top:70px;width:60px;height:60px;background:radial-gradient(#f2f2ff,#c9cbe0 55%,#c9cbe000 72%)}
+body.w2 #mark{color:#ffffff40}
+body.w3{--sky1:#2a2a2a;--sky2:#1d1d1d;--sky3:#101010;--hill:#2c2c2c;--hill2:#222;--fl:.35}
+body.w3 #meadow{filter:grayscale(1) brightness(.6)}
+body.w3 #sunb{opacity:0}
+body.w3 #mark{color:#ffffff22}
 
-/* boot */
-#boot{position:fixed;inset:0;z-index:30;background:#16181c;display:flex;align-items:center;justify-content:center;padding:4vh 6vw}
-#boot .box{width:min(720px,100%);font-size:clamp(11px,1.5vw,13px);line-height:1.6}
-#boot pre{color:#9aa;white-space:pre-wrap;min-height:11em}
-#boot pre .ok{color:var(--g)}#boot pre .w{color:var(--y)}#boot pre .e{color:var(--r)}
-#boot .title{font-size:clamp(34px,7vw,72px);font-weight:800;color:#e8e8e8;letter-spacing:.02em;line-height:1;margin-bottom:14px}
-#boot .title span{color:var(--y)}
-.btn{font:600 15px var(--ui);color:#111;background:var(--y);border:0;padding:13px 22px;cursor:pointer;min-height:44px}
-.btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
-#start{margin-top:18px;opacity:0;transition:opacity .4s}
-#start.on{opacity:1}
-#restart{margin-left:12px;background:none;border:0;color:#888;font:12px var(--ui);text-decoration:underline;cursor:pointer;display:none;min-height:44px}
-#boot .note{color:#666;font-size:11px;margin-top:12px}
-#boot label{display:inline-flex;gap:8px;align-items:center;color:#888;margin-left:14px;font-size:12px;cursor:pointer}
+.ic{position:absolute;width:108px;padding:6px 4px 8px;border-radius:10px;text-align:center;color:#fff;font-size:16px;font-weight:600;line-height:1.15;text-shadow:0 1px 3px #000c;border:2px solid transparent;animation:icin .5s ease-out}
+.ic svg{display:block;margin:0 auto 4px;filter:drop-shadow(0 2px 3px #0005)}
+.ic.sel{background:#ffffff40;border-color:#ffffffa0}
+.ic.drag{opacity:.75;z-index:50}
+.ic.hot{background:#ff4d4d55;border-color:#ff9a9a}
+.ic .badge{position:absolute;right:20px;top:2px;background:var(--rose);color:#fff;font-size:13px;border-radius:12px;padding:1px 7px;text-shadow:none}
+.ic.shake{animation:shake .25s infinite}
+@keyframes icin{from{transform:scale(.4);opacity:0}}
+@keyframes shake{25%{transform:translate(-3px,1px) rotate(-3deg)}75%{transform:translate(3px,-1px) rotate(3deg)}}
 
-#pause{position:fixed;inset:0;z-index:15;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);color:#eee;font-size:14px;cursor:pointer}
-#pause.on{display:flex}
-#rotate{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:#16181c;color:#ddd;text-align:center;padding:30px;font-size:14px}
-#rotate .ph{width:44px;height:74px;border:3px solid var(--y);border-radius:8px;animation:rot 1.8s ease-in-out infinite}
+/* ---------- barra ---------- */
+#bar{position:absolute;left:0;right:0;bottom:0;height:48px;background:#fdf6e3;border-top:2px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 10px;z-index:600;font-size:15px}
+#startb{height:38px;padding:0 16px 0 8px;border:2px solid #3e8a4c;border-radius:20px;background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;text-shadow:0 1px 1px #0005}
+#lesson{flex:1;text-align:center;color:#6b6250;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#who{color:#6b6250}
+#spk{width:38px;height:34px;border:2px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center}
+#clock{font-weight:700;min-width:64px;text-align:right;font-variant-numeric:tabular-nums;line-height:1.05}
+#clock small{display:block;font-weight:500;font-size:11px;color:#8b826e}
+#menu{position:absolute;left:8px;bottom:54px;width:310px;background:var(--paper);border:2px solid var(--line);border-radius:12px;box-shadow:0 12px 30px #0006;z-index:650;display:none;overflow:hidden}
+#menu.on{display:block}
+#menu .hd{background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;padding:12px 14px;font-weight:800;font-size:18px}
+#menu .hd small{display:block;font-weight:500;font-size:13px;opacity:.9}
+#menu button{display:flex;gap:12px;align-items:center;width:100%;border:0;border-bottom:1px solid #eee2c4;background:none;text-align:left;padding:12px 14px;font-size:18px;color:var(--ink)}
+#menu button:hover{background:#fff1c9}
+
+/* ---------- finestre ---------- */
+#wins{position:absolute;left:0;top:0;width:1024px;height:592px;pointer-events:none}
+#wins>*{pointer-events:auto}
+.win{position:absolute;background:var(--paper);border:2px solid #bfae84;border-radius:12px;box-shadow:0 14px 34px #0007;display:flex;flex-direction:column;overflow:hidden;animation:wopen .18s ease-out}
+@keyframes wopen{from{transform:scale(.92);opacity:0}}
+.tb{height:42px;flex:none;background:linear-gradient(#ffeab0,#ffd86b);border-bottom:2px solid #e3c063;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;font-weight:800;font-size:18px;color:#4a3d18}
+.tb .tt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb .x{height:32px;padding:0 12px;border:2px solid #b8323f;border-radius:8px;background:#e0505c;color:#fff;font-weight:800;font-size:15px}
+.win.inactive .tb{background:#efe6cc;border-color:#ddd0aa;color:#8a7d5c}
+.wb{flex:1;overflow:auto;position:relative}
+.big{font-size:17px;font-weight:700;border:2px solid #b9a671;border-radius:10px;background:#fff;padding:10px 16px;color:var(--ink)}
+.big.pri{background:var(--blue);border-color:#1e4f9c;color:#fff}
+.big:disabled{opacity:.4}
+.note{padding:22px 26px;font-size:19px;line-height:1.55;white-space:pre-wrap;font-family:Georgia,"Times New Roman",serif;background:repeating-linear-gradient(#fffaf0 0 29px,#e9e1cc 29px 30px);min-height:100%}
+.folder{display:flex;flex-wrap:wrap;gap:6px;padding:14px}
+.folder .fi{width:120px;padding:8px;border-radius:10px;text-align:center;font-size:15px;border:2px solid transparent}
+.folder .fi.sel{background:#ffe9a8;border-color:#e3c063}
+.form{padding:20px 24px;display:flex;flex-direction:column;gap:12px;font-size:18px}
+.form h3{font-size:22px}
+.form p{color:#6b6250;line-height:1.4}
+.form input,.form textarea{font:18px var(--os);border:2px solid #b9a671;border-radius:8px;padding:10px 12px;background:#fff;color:var(--ink);width:100%}
+.form textarea{resize:none;height:150px}
+.form .row{display:flex;gap:10px;align-items:center}
+.form .row b{min-width:80px}
+
+/* posta */
+.mail{display:grid;grid-template-columns:160px 230px 1fr;height:100%}
+.mside{background:#f4ecd6;border-right:2px solid #e3d6b2;padding:10px;display:flex;flex-direction:column;gap:6px}
+.mf{padding:9px 10px;border-radius:8px;font-weight:600;font-size:16px}
+.mf.on{background:#fff;box-shadow:inset 0 0 0 2px #e3c063}
+.mlist{border-right:2px solid #e3d6b2;overflow:auto}
+.mi{padding:10px 12px;border-bottom:1px solid #eadfc2;font-size:15px}
+.mi b{display:block;font-size:16px}
+.mi small{color:#8b826e}
+.mi.unread b::before{content:"● ";color:var(--rose)}
+.mi.on{background:#fff1c9}
+.mread{padding:16px 18px;overflow:auto;font-size:17px;line-height:1.5;white-space:pre-wrap}
+.mread h4{font-size:19px;margin-bottom:4px;white-space:normal}
+.mread .meta{color:#8b826e;font-size:14px;margin-bottom:12px;white-space:normal}
+
+/* foto */
+.gal{display:flex;flex-wrap:wrap;gap:14px;padding:16px}
+.gal .ph{width:170px;text-align:center;font-size:14px;color:#6b6250}
+.gal canvas{width:170px;height:106px;border:4px solid #fff;box-shadow:0 2px 6px #0004;display:block;margin-bottom:4px;background:#222}
+.viewer{background:#1b1a17;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#ddd;font-size:15px}
+.viewer canvas{width:600px;height:375px;border:6px solid #fff}
+
+/* internet */
+.web{display:flex;flex-direction:column;height:100%}
+.addr{display:flex;gap:8px;padding:8px;background:#eef2f7;border-bottom:2px solid #d3dae4}
+.addr input{flex:1;font:17px var(--os);padding:8px 12px;border:2px solid #b8c3d3;border-radius:20px}
+.addr button{font-size:16px;font-weight:700;border:2px solid #b8c3d3;border-radius:20px;background:#fff;padding:0 16px}
+.page{flex:1;overflow:auto;background:#fff;font-family:Georgia,serif;font-size:17px;line-height:1.55;color:#222}
+.page .in{padding:20px 28px;max-width:720px}
+.page h1{font-family:var(--os);font-size:28px;margin-bottom:8px}
+.page h2{font-family:var(--os);font-size:21px;margin:6px 0}
+.page p{margin:8px 0}
+.page .res{margin:14px 0;padding-bottom:10px;border-bottom:1px solid #eee}
+.page .res a{font-family:var(--os);font-size:19px;color:#1a4fb5;font-weight:600;text-decoration:underline}
+.page .res small{display:block;color:#1d7a35;font-family:var(--os);font-size:13px}
+.page .hero{background:linear-gradient(#7ccf87,#4f9a5d);color:#fff;padding:26px 28px;font-family:var(--os)}
+.page .post{border:1px solid #ddd;border-radius:6px;padding:10px 14px;margin:10px 0;background:#fafafa}
+.page .post b{font-family:var(--os);color:#555}
+
+/* cestino */
+.trashw{padding:14px;display:flex;flex-direction:column;gap:10px;height:100%}
+.trashw .items{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.trashw .it{width:120px;text-align:center;font-size:14px}
+
+/* ---------- Margherita ---------- */
+#agent{position:absolute;left:880px;top:440px;width:110px;z-index:700;touch-action:none}
+#agent .fl{width:110px;height:140px;display:block;filter:drop-shadow(0 4px 6px #0006)}
+#agent.bob .fl{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) rotate(2deg)}}
+#agent.talk .fl{animation:talk .3s ease-in-out infinite}
+@keyframes talk{50%{transform:scale(1.03,.97)}}
+.bal{position:absolute;bottom:150px;right:-14px;width:250px;background:#fff;border:3px solid #2b2a33;border-radius:18px;padding:12px 16px 12px;font-size:19px;line-height:1.36;box-shadow:0 6px 0 #0002;display:none}
+.bal.on{display:block;animation:balin .2s ease-out}
+@keyframes balin{from{transform:scale(.9);opacity:0}}
+.bal::after{content:"";position:absolute;right:58px;bottom:-26px;border:13px solid transparent;border-top:15px solid #2b2a33}
+.bal .nm{display:block;font-size:13px;font-weight:800;color:var(--leaf);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.bal .sk{display:block;font-size:12px;color:#aaa;margin-top:6px;text-align:right}
+#agent.dark .bal{background:#1a1416;color:#ffd6dc;border-color:#d9455f}
+#agent.dark .bal .nm{color:#ff8a9a}
+#agent.dark .bal::after{border-top-color:#d9455f}
+#agent.intrash .fl{opacity:.2;filter:grayscale(1)}
+
+/* ---------- cursori ---------- */
+#cur,#ghost{position:absolute;left:0;top:0;width:40px;height:52px;pointer-events:none;z-index:9000;will-change:transform}
+#ghost{display:none;z-index:8999;opacity:.92}
+#block{position:absolute;inset:0;z-index:800;display:none}
+#block.on{display:block}
+
+/* ---------- schermate ---------- */
+.full{position:absolute;inset:0;z-index:5000;display:none}
+.full.on{display:flex}
+#box{background:radial-gradient(ellipse at 50% 30%,#3a3326,#16150f 75%);align-items:center;justify-content:center;gap:46px;padding:30px}
+.carton{width:430px;height:470px;background:linear-gradient(135deg,#c99b62,#a97a43);border-radius:6px;box-shadow:0 30px 60px #000a,inset 0 0 0 2px #0002;position:relative;padding:30px 30px;color:#3a2a14;transform:rotate(-2deg)}
+.carton::before{content:"";position:absolute;left:0;right:0;top:46%;height:34px;background:#d8b47a99;border-top:1px dashed #0002;border-bottom:1px dashed #0002}
+.carton .lab{background:#fffaf0;border-radius:10px;padding:22px 22px 18px;text-align:center;box-shadow:0 2px 0 #0002;position:relative}
+.carton .lab h1{font-size:46px;letter-spacing:.04em;color:#2b2a33;line-height:1;margin:6px 0 6px}
+.carton .lab p{font-size:16px;color:#4f9a5d;font-weight:700}
+.carton .lab .sm{color:#8b826e;font-weight:500;font-size:13px;margin-top:8px}
+.carton .stk{position:absolute;right:-22px;bottom:84px;width:128px;height:128px;border-radius:50%;background:var(--rose);color:#fff;display:grid;place-items:center;text-align:center;font-weight:800;font-size:15px;line-height:1.15;transform:rotate(14deg);box-shadow:0 4px 0 #0003}
+.carton .bot{position:absolute;left:30px;bottom:22px;font-size:12px;line-height:1.5;color:#3a2a14cc}
+.side{width:330px;color:#e8dcc0}
+.receipt{background:#f6f3ea;color:#333;font:13px/1.55 var(--mono);padding:16px 18px;transform:rotate(1.5deg);box-shadow:0 10px 24px #0008;margin-bottom:22px;white-space:pre}
+.side .go{width:100%;font-size:20px;font-weight:800;padding:16px;border-radius:12px;border:0;background:var(--sun);color:#2b2a33;box-shadow:0 5px 0 #b8901c}
+.side .go:active{transform:translateY(3px);box-shadow:0 2px 0 #b8901c}
+.side .opt{display:flex;gap:10px;align-items:center;margin-top:14px;font-size:16px}
+.side .opt input{width:22px;height:22px}
+.side .lnk{background:none;border:0;color:#b9ad92;text-decoration:underline;font-size:14px;margin-top:12px}
+.side .ends{margin-top:16px;font-size:13px;color:#a89c80;line-height:1.7}
+.side .ends b{color:#e8dcc0}
+.side .hint{font-size:12.5px;color:#8b826e;margin-top:12px;line-height:1.45}
+
+#boot{background:#000;color:#c8c8c8;font:17px/1.6 var(--mono);padding:40px 50px;white-space:pre}
+#boot.on,#safe.on{display:block}
+#boot .ok{color:#6fd27a}#boot .w{color:#ffcf3f}
+#logo{background:linear-gradient(#d9ecff,#9cc6f0);align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#fff;font-size:40px;font-weight:800;letter-spacing:.06em;text-shadow:0 2px 8px #0003}
+#logo svg{animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#logo small{font-size:16px;font-weight:600;letter-spacing:.02em}
+#safe{background:#0b0b0b;color:#cfcfcf;font:15px/1.55 var(--mono);padding:28px 34px;white-space:pre-wrap}
+#safe .r{color:#ff6b7d}#safe .g{color:#7fdc8a}#safe .y{color:#ffd76a}
+#safe input{background:none;border:0;border-bottom:2px solid #7fdc8a;color:#fff;font:16px var(--mono);width:640px;outline:none;padding:2px 4px}
+#endc{background:#000;color:#ddd;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px}
+#endc h2{font-size:52px;letter-spacing:.05em}
+#endc p{color:#9a9a9a;font-size:17px;max-width:640px;line-height:1.6}
+#endc .tiny{position:absolute;right:16px;bottom:12px;font:12px var(--mono);color:#555}
+#story{background:#000;color:#e6e6e6;align-items:center;justify-content:center;font:26px/1.6 Georgia,serif;text-align:center;padding:60px}
+#fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .8s;z-index:6000}
+#crt{position:absolute;inset:0;pointer-events:none;z-index:9500;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000010 2px 3px),radial-gradient(ellipse at center,#0000 60%,#0006 100%)}
+body.glitch #desk,body.glitch #wins{animation:gl .11s steps(2) infinite}
+@keyframes gl{0%{filter:hue-rotate(90deg) saturate(3);transform:translate(6px,-3px)}50%{filter:contrast(2);transform:translate(-8px,4px) skewX(3deg)}100%{transform:none}}
+#rotate{position:fixed;inset:0;z-index:99999;display:none;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:#16150f;color:#e8dcc0;text-align:center;padding:30px;font:18px var(--os)}
+#rotate .ph{width:46px;height:76px;border:3px solid var(--sun);border-radius:8px;animation:rot 1.8s ease-in-out infinite}
 @keyframes rot{50%{transform:rotate(-90deg)}}
 @media (orientation:portrait) and (pointer:coarse){#rotate{display:flex}}
-
-/* touch */
-#touch{position:fixed;inset:0;z-index:6;display:none}
-body.touch #touch{display:block}
-#joyB{position:absolute;width:120px;height:120px;border:2px solid rgba(255,255,255,.25);border-radius:50%;display:none;pointer-events:none}
-#joyK{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(255,212,0,.55)}
-.tb{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.35);color:#fff;font:600 12px var(--ui)}
-#jump{right:max(26px,env(safe-area-inset-right));bottom:30px;width:84px;height:84px}
-#use{right:max(124px,calc(env(safe-area-inset-right) + 100px));bottom:44px;width:70px;height:70px;display:none;border-color:var(--y)}
-#use.show{display:block}
-.tb.on{background:rgba(255,212,0,.5)}
-body.touch #suite{width:200px;font-size:9.5px}
-body.touch #suite li{grid-template-columns:30px 1fr 44px;padding:2px 8px}
-body.touch #debug{font-size:9.5px}
-body.touch #clog{font-size:9.5px;bottom:auto;top:96px}
-
-/* glitch, crash, slots, end */
-body.glitch #view,body.glitch #slots{animation:gl .12s steps(2) infinite}
-@keyframes gl{0%{filter:invert(1) hue-rotate(90deg);transform:translate(8px,-4px) skewX(4deg)}50%{filter:saturate(6) contrast(3);transform:translate(-12px,6px) scaleY(1.04)}100%{filter:none;transform:none}}
-#crash{position:fixed;inset:0;z-index:50;background:#202124;color:#e8eaed;display:none;align-items:center;justify-content:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-#crash.on{display:flex}
-#crash .c{max-width:520px;padding:30px}
-#crash h2{font-weight:500;font-size:24px;margin:18px 0 10px}
-#crash p{color:#9aa0a6;font-size:14px;line-height:1.6}
-#crash code{font-family:var(--ui);font-size:12px;color:#9aa0a6;display:block;margin-top:14px}
-#crash button{margin-top:24px;background:#8ab4f8;color:#202124;border:0;border-radius:4px;padding:10px 22px;font:500 14px system-ui,sans-serif;cursor:pointer;min-height:44px}
-#slots{position:fixed;inset:0;z-index:45;background:#101114;display:none;align-items:center;justify-content:center;padding:5vh 5vw}
-#slots.on{display:flex}
-#slots .box{width:min(760px,100%)}
-#slots h2{font-size:clamp(20px,3.4vw,30px);color:#eee;margin-bottom:16px;letter-spacing:.03em}
-.slot{display:grid;grid-template-columns:70px 1fr auto;gap:14px;align-items:center;border:1px solid #33363d;background:#17191d;padding:12px 14px;margin-bottom:10px;font-size:13px}
-.slot .n{color:#666}
-.slot .nm{color:#ddd;font-weight:600}
-.slot .meta{color:#888;font-size:11.5px;margin-top:3px}
-.slot.dead .nm{color:#666;text-decoration:line-through}
-.slot.me{border-color:var(--y)}
-.slot.it{border-color:#5a1b1b;background:#1c1213}.slot.it .nm{color:#ff8a8a}
-.slot button{font:600 12px var(--ui);background:#2a2d33;color:#888;border:1px solid #444;padding:8px 12px;min-height:40px;cursor:pointer}
-.slot button:disabled{opacity:.35;cursor:default}
-.slot.it button:not(:disabled){background:var(--r);color:#111;border-color:var(--r)}
-#end{position:fixed;inset:0;z-index:60;background:#000;color:#ddd;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px}
-#end.on{display:flex}
-#end h2{font-size:clamp(30px,6vw,60px);letter-spacing:.04em}
-#end p{color:#888;font-size:13px;max-width:520px;line-height:1.6}
 </style>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
 </head>
 <body>
-<div id="view"></div>
+<div id="screen">
+  <div id="desk"><div id="sunb"></div><div class="hill" id="h1"></div><div class="hill" id="h2"></div><div id="meadow"></div>
+    <div id="mark">PASSO PASSO<small>il computer che ti insegna tutto</small></div><div id="icons"></div></div>
+  <div id="wins"></div>
+  <div id="agent" class="bob" style="left:890px"><div class="bal" id="bal"></div><svg class="fl" id="flower" viewBox="0 0 110 140"></svg></div>
+  <div id="menu"></div>
+  <div id="bar"><button id="startb"></button><div id="lesson"></div><span id="who"></span><button id="spk" title="Voce"></button><div id="clock"></div></div>
+  <div id="block"></div>
+  <svg id="ghost" viewBox="0 0 40 52"><path d="M3 3 L3 42 L13 32 L20 48 L27 45 L20 29 L34 29 Z" fill="#e9e4da" stroke="#5a1d2a" stroke-width="2.5" stroke-linejoin="round"/></svg>
+  <svg id="cur" viewBox="0 0 40 52"><path d="M3 3 L3 42 L13 32 L20 48 L27 45 L20 29 L34 29 Z" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></svg>
 
-<div id="cctv"><div class="t"><b>● REC</b> <span id="camN">CAM_01</span> · <span id="cctvT">00:00:00</span></div></div>
-<div id="debug" class="hud"></div>
-<div id="suite" class="hud"><h1><span>QA SUITE · test_final_FINAL.map</span><span id="cnt">0/12</span></h1><ul id="list"></ul></div>
-<div id="cross" class="hud"></div>
-<div id="prompt" class="hud"></div>
-<div id="clog" class="hud"></div>
-<div id="sub" class="hud"></div>
-<div id="toast" class="hud"></div>
-<div id="static"></div>
+  <div class="full" id="box">
+    <div class="carton">
+      <div class="lab"><svg width="76" height="76" viewBox="0 0 64 64" id="boxlogo"></svg>
+        <h1>PASSO PASSO</h1><p>Il computer che ti insegna tutto</p>
+        <div class="sm">Per la terza età · Nessuna esperienza richiesta · Tasti grandi</div></div>
+      <div class="stk">OMAGGIO<br><small>Progetto<br>Compagnia</small></div>
+      <div class="bot">SERENITÀ INFORMATICA s.r.l.<br>via dei Glicini 7 · «Nessuno deve restare solo»<br>NON STACCARE LA SPINA DURANTE IL CORSO</div>
+    </div>
+    <div class="side">
+      <div class="receipt" id="receipt"></div>
+      <button class="go" id="go">Accendi il computer</button>
+      <button class="lnk" id="reset" style="display:none">ricomincia il corso da capo</button>
+      <label class="opt"><input type="checkbox" id="voiceOpt" checked> Voce di Margherita</label>
+      <label class="opt"><input type="checkbox" id="bigOpt"> Testo extra grande</label>
+      <div class="ends" id="ends"></div>
+      <div class="hint">Mouse o dito. Meglio con le cuffie. La voce si può togliere anche dopo, dall'altoparlante in basso.</div>
+    </div>
+  </div>
+  <div class="full" id="boot"></div>
+  <div class="full" id="logo"><svg width="120" height="120" viewBox="0 0 64 64" id="logosvg"></svg><div>PASSO PASSO<small style="display:block;text-align:center">un passo alla volta</small></div></div>
+  <div class="full" id="safe"></div>
+  <div class="full" id="story"></div>
+  <div class="full" id="endc"></div>
+  <div id="fade"></div>
+  <div id="crt"></div>
+</div>
+<div id="rotate"><div class="ph"></div>Giri il telefono in orizzontale.<br><small style="color:#8b826e">Il computer è largo, come i computer di una volta.</small></div>
 
-<div id="touch"><div id="joyB"><div id="joyK"></div></div><button id="use" class="tb">USA</button><button id="jump" class="tb">SALTA</button></div>
-<div id="pause">Clicca per riprendere il test</div>
-<div id="fade"></div>
-
-<div id="boot"><div class="box">
-  <div class="title">THE <span>TEST</span></div>
-  <pre id="bootlog"></pre>
-  <button id="start" class="btn">ESEGUI SUITE ▸</button><button id="restart">ricomincia da capo</button><label><input type="checkbox" id="mute"> voce disattivata</label>
-  <p class="note">PC: mouse + WASD + Spazio + E · Smartphone: in orizzontale, joystick a sinistra, guarda a destra. Usa le cuffie.</p>
-</div></div>
-
-<div id="slots"><div class="box"><h2>STATI SALVATI · test_final_FINAL</h2><div id="slotList"></div></div></div>
-
-<div id="rotate"><div class="ph"></div>Ruota il dispositivo in orizzontale.<br><small style="color:#777">La suite richiede una vista orizzontale.</small></div>
-
-<div id="crash"><div class="c">
-  <svg width="64" height="64" viewBox="0 0 64 64"><rect x="20" y="6" width="24" height="52" rx="12" fill="none" stroke="#9aa0a6" stroke-width="3"/><path d="M18 30 L30 26 L34 34 L46 30" stroke="#202124" stroke-width="6" fill="none"/><path d="M18 30 L30 26 L34 34 L46 30" stroke="#9aa0a6" stroke-width="2" fill="none"/></svg>
-  <h2 id="crashT">Uffa! Il motore si è arrestato.</h2>
-  <p id="crashP">Si è verificato un errore durante l'esecuzione della scena. Il soggetto di prova non risponde.</p>
-  <code>Codice di errore: STATUS_ENTITY_COUNT_MISMATCH (expected 1, got 2)</code>
-  <button id="reload">Ricarica</button>
-</div></div>
-
-<div id="end"><h2 id="endT">FINE CAPITOLO 2</h2><p id="endP"></p><button id="again" class="btn">Ricomincia la suite</button></div>
-
-<script type="module">
-import * as THREE from 'three';
-
-const $ = s => document.querySelector(s);
+<script>
+'use strict';
+/* =================== BASE =================== */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const FAST = /[?&]fast/.test(location.search), SPEED = FAST ? .04 : 1;
+const wait = ms => new Promise(r => setTimeout(r, ms * SPEED));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const isTouch = matchMedia('(pointer:coarse)').matches;
-if (isTouch) document.body.classList.add('touch');
-const wait = ms => new Promise(r => setTimeout(r, ms));
-const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad2 = n => String(n).padStart(2, '0');
+const hhmm = d => pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+const waitFor = cond => new Promise(res => { const t = setInterval(() => { if (cond()) { clearInterval(t); res(); } }, 80); });
+const seen = new Set(); const emit = n => seen.add(n); const got = n => waitFor(() => seen.has(n));
 
-/* ============ SALVATAGGI ============ */
-const CPKEY = 'thetest_cp_v2';
-let CP = null; try { CP = JSON.parse(localStorage.getItem(CPKEY) || 'null'); } catch (e) { }
-function saveCP(o) { try { CP = { ...(CP || {}), ...o }; localStorage.setItem(CPKEY, JSON.stringify(CP)); return true; } catch (e) { return false; } }
-function clearCP() { try { localStorage.removeItem(CPKEY); } catch (e) { } CP = null; }
+/* salvataggio */
+const KEY = 'passopasso_v1';
+const S = { L: 0, name: '', wife: '', memory: '', path: [], keyT: [], endings: {}, voice: true, big: false, deleted: [], age: 0, vol: .8, sentText: '' };
+try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } };
 
-/* ============ RENDERER ============ */
-const renderer = new THREE.WebGLRenderer({ antialias: !isTouch, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-$('#view').appendChild(renderer.domElement);
-const scene = new THREE.Scene();
-const SKY = new THREE.Color(0x2a2d33);
-scene.background = SKY.clone();
-scene.fog = new THREE.Fog(0x2a2d33, 25, 80);
-const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.05, 300);
-camera.rotation.order = 'YXZ';
-let resized = false;
-addEventListener('resize', () => {
-  renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-  if (control && !isTouch && !resized && stage !== 'intro') { resized = true; setTimeout(() => sayIdle('Hai ridimensionato la finestra. Le pareti se ne sono accorte. Non farlo più.'), 600); }
-});
-
-const hemi = new THREE.HemisphereLight(0xdfe6ff, 0x3a3a40, 1.1); scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-sun.position.set(12, 24, 8); sun.castShadow = true;
-sun.shadow.mapSize.set(isTouch ? 1024 : 2048, isTouch ? 1024 : 2048);
-Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 80 });
-scene.add(sun, sun.target);
-const voidLight = new THREE.PointLight(0xff2a2a, 0, 40, 1.5); scene.add(voidLight);
-function resetEnv(bg = 0x2a2d33, near = 25, far = 80, h = 1.1, s = 1.6) {
-  scene.background.set(bg); scene.fog.color.set(bg); scene.fog.near = near; scene.fog.far = far;
-  hemi.intensity = h; sun.intensity = s; voidLight.intensity = 0;
-}
-
-/* ============ TEXTURE ============ */
-function canvasTex(draw, size = 256) {
-  const c = document.createElement('canvas'); c.width = c.height = size;
-  draw(c.getContext('2d'), size);
-  const t = new THREE.CanvasTexture(c);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  return t;
-}
-const checker = (a, b, line) => canvasTex((g, s) => {
-  g.fillStyle = a; g.fillRect(0, 0, s, s);
-  g.fillStyle = b; g.fillRect(0, 0, s / 2, s / 2); g.fillRect(s / 2, s / 2, s / 2, s / 2);
-  if (line) { g.strokeStyle = line; g.lineWidth = 2; g.strokeRect(1, 1, s - 2, s - 2); g.beginPath(); g.moveTo(s / 2, 0); g.lineTo(s / 2, s); g.moveTo(0, s / 2); g.lineTo(s, s / 2); g.lineWidth = 1; g.stroke(); }
-});
-const T = {
-  grey: checker('#8d8f94', '#828489', '#9a9ca1'),
-  floor: checker('#9fa1a6', '#93959a', '#b3b5ba'),
-  dark: checker('#3a3c40', '#333539', '#45474c'),
-  white: checker('#e9e9e6', '#dfdfdc', '#f4f4f2'),
-  missing: canvasTex((g, s) => { g.fillStyle = '#000'; g.fillRect(0, 0, s, s); g.fillStyle = '#ff00ff'; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) if ((i + j) % 2 == 0) g.fillRect(i * s / 4, j * s / 4, s / 4, s / 4); }),
-};
-T.missing.magFilter = THREE.NearestFilter;
-const M = {
-  grey: new THREE.MeshStandardMaterial({ map: T.grey, roughness: .92 }),
-  floor: new THREE.MeshStandardMaterial({ map: T.floor, roughness: .95 }),
-  dark: new THREE.MeshStandardMaterial({ map: T.dark, roughness: 1 }),
-  white: new THREE.MeshStandardMaterial({ map: T.white, roughness: .9 }),
-  missing: new THREE.MeshBasicMaterial({ map: T.missing }),
-  yellow: new THREE.MeshStandardMaterial({ color: 0xffd400, emissive: 0x806a00, roughness: .5 }),
-  red: new THREE.MeshStandardMaterial({ color: 0xe02020, emissive: 0x500000, roughness: .4 }),
-  capsule: new THREE.MeshStandardMaterial({ color: 0xb8bac0, roughness: .6 }),
-  manne: new THREE.MeshStandardMaterial({ color: 0xc9c3b8, roughness: .8 }),
-  voidFloor: new THREE.MeshStandardMaterial({ color: 0x0b0b0d, roughness: 1 }),
-};
-const noiseURL = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), d = g.createImageData(128, 128); for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c.toDataURL(); })();
-$('#static').style.backgroundImage = `url(${noiseURL})`;
-
-function boxGeo(w, h, d) {
-  const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
-  const dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
-  for (let f = 0; f < 6; f++) for (let i = 0; i < 4; i++) { const k = f * 4 + i; uv.setXY(k, uv.getX(k) * dims[f][0] * .5, uv.getY(k) * dims[f][1] * .5); }
-  return g;
-}
-
-/* ============ LIVELLO ============ */
-let level = new THREE.Group(); scene.add(level);
-let colliders = [];
-function clearLevel() {
-  scene.remove(level);
-  level.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.userData && o.material.userData.own) { o.material.map?.dispose(); o.material.dispose(); } });
-  level = new THREE.Group(); scene.add(level); colliders = [];
-  playerMesh = null; target = null; entity = null;
-}
-function addBox(x, y, z, w, h, d, o = {}) {
-  const m = new THREE.Mesh(boxGeo(w, h, d), M[o.mat || 'grey']);
-  m.position.set(x, y + h / 2, z); m.castShadow = o.cast !== false; m.receiveShadow = true;
-  if (o.visible !== false) level.add(m);
-  const c = { min: new THREE.Vector3(x - w / 2, y, z - d / 2), max: new THREE.Vector3(x + w / 2, y + h, z + d / 2), thin: !!o.thin, name: o.name || 'box', off: false, mesh: m };
-  if (o.collide !== false) colliders.push(c);
-  return c;
-}
-function textCanvas(lines, { color = '#ffd400', bg = 'rgba(0,0,0,.6)', font = 28, pad = 10 } = {}) {
-  lines = [].concat(lines);
-  const c = document.createElement('canvas'), g = c.getContext('2d');
-  g.font = `600 ${font}px ui-monospace,Menlo,Consolas,monospace`;
-  const w = Math.max(...lines.map(l => g.measureText(l).width)) + pad * 2, h = lines.length * font * 1.25 + pad * 2;
-  c.width = Math.ceil(w); c.height = Math.ceil(h);
-  if (bg) { g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height); }
-  g.font = `600 ${font}px ui-monospace,Menlo,Consolas,monospace`; g.fillStyle = color; g.textBaseline = 'top';
-  lines.forEach((l, i) => g.fillText(l, pad, pad + i * font * 1.25));
-  return c;
-}
-function label(lines, x, y, z, o = {}) {
-  const c = textCanvas(lines, o), t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const mat = new THREE.SpriteMaterial({ map: t, depthWrite: false, fog: true }); mat.userData.own = true;
-  const s = new THREE.Sprite(mat), k = (o.size || .35) / 28;
-  s.scale.set(c.width * k, c.height * k, 1); s.position.set(x, y, z); level.add(s); return s;
-}
-function decal(lines, x, y, z, rotY, o = {}) {
-  const c = textCanvas(lines, { bg: null, color: o.color || '#5a0d0d', font: 48, ...o }), t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const mat = new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, side: THREE.DoubleSide }); mat.userData.own = true;
-  const k = (o.size || 1.1) / 48, p = new THREE.Mesh(new THREE.PlaneGeometry(c.width * k, c.height * k), mat);
-  p.position.set(x, y, z); p.rotation.y = rotY; if (o.rotX) p.rotation.x = o.rotX; level.add(p); return p;
-}
-function room(w, d, h, th, o = {}) {
-  const W = w / 2, D = d / 2;
-  addBox(0, -.5, 0, w + th * 2, .5, d + th * 2, { mat: o.floorMat || 'floor', collide: o.floorCollide !== false, name: 'floor' });
-  const wo = n => ({ thin: o.thin, name: n, mat: o.mat });
-  addBox(0, 0, -D - th / 2, w + th * 2, h, th, wo('wall_N'));
-  addBox(0, 0, D + th / 2, w + th * 2, h, th, wo('wall_S'));
-  addBox(-W - th / 2, 0, 0, th, h, d, wo('wall_W'));
-  addBox(W + th / 2, 0, 0, th, h, d, wo('wall_E'));
-}
-function debugAxes(x, y, z) { const a = new THREE.AxesHelper(1.2); a.position.set(x, y, z); level.add(a); }
-function mannequin(scale = 1, mat = M.manne) {
-  const g = new THREE.Group(), b = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; g.add(m); return m; };
-  b(.5, .7, .28, 0, 1.15, 0); b(.42, .2, .26, 0, .72, 0);
-  b(.17, .72, .2, -.12, .36, 0); b(.17, .72, .2, .12, .36, 0);
-  b(1.5, .13, .14, 0, 1.42, 0);
-  g.userData.head = b(.26, .32, .28, 0, 1.72, 0);
-  g.scale.setScalar(scale); return g;
-}
-function makeEntity() { const e = mannequin(1.14, new THREE.MeshStandardMaterial({ color: 0xbdb5a8, roughness: .7 })); e.userData.box = new THREE.Box3(); level.add(e); return e; }
-function marker(x, y, z, flip) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.7, .7, .06, 32), M.yellow); m.position.set(x, y, z); if (flip) m.rotation.x = Math.PI; level.add(m); return m; }
-
-/* ============ GIOCATORE & FISICA ============ */
-const BASE = 4.4, JUMP = 5.3, HOP_WIN = .11, HOP_MUL = 1.3, CCD_LIMIT = 14;
-let grav = 16;
-const P = { pos: new THREE.Vector3(), prev: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: 0, pitch: 0, roll: 0, grounded: false, gt: 0, r: .35, h: 1.7, eye: 1.55, cap: Infinity };
-let control = false, frozen = false, paused = false, camMode = 'fp';
-const keys = new Set(); let jumpHeld = false, useHeld = false, lastInput = performance.now();
-const joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 }, look = { id: null, lx: 0, ly: 0 };
-const inv = () => grav < 0 ? -1 : 1;
-
-function spawn(x, y, z, yaw = 0) { P.pos.set(x, y, z); P.prev.copy(P.pos); P.vel.set(0, 0, 0); P.yaw = yaw; P.pitch = 0; P.grounded = false; }
-function overlap(c) { return P.pos.x + P.r > c.min.x && P.pos.x - P.r < c.max.x && P.pos.z + P.r > c.min.z && P.pos.z - P.r < c.max.z && P.pos.y + P.h > c.min.y && P.pos.y < c.max.y; }
-function moveAxis(ax, d) {
-  if (!d) return;
-  P.pos[ax] += d;
-  const hs = Math.hypot(P.vel.x, P.vel.z);
-  for (const c of colliders) {
-    if (c.off) continue;
-    if (c.thin && ax !== 'y' && hs > CCD_LIMIT) continue;           // bug: niente CCD sopra i 14 m/s
-    if (!overlap(c)) continue;
-    if (ax === 'y') {
-      if (d < 0) { P.pos.y = c.max.y; if (grav > 0) P.grounded = true; }
-      else { P.pos.y = c.min.y - P.h; if (grav < 0) P.grounded = true; }
-      P.vel.y = 0;
-    } else {
-      P.pos[ax] = d > 0 ? c.min[ax] - P.r - 1e-4 : c.max[ax] + P.r + 1e-4;
-      P.vel[ax] = 0;
-      if (stage === 't5' && c.name.startsWith('maze')) logHit(c.name, ax, d);
-    }
-  }
-}
-const wish = new THREE.Vector3();
-function step(dt) {
-  let f = 0, s = 0;
-  if (control) {
-    if (keys.has('KeyW') || keys.has('ArrowUp')) f++;
-    if (keys.has('KeyS') || keys.has('ArrowDown')) f--;
-    if (keys.has('KeyD') || keys.has('ArrowRight')) s++;
-    if (keys.has('KeyA') || keys.has('ArrowLeft')) s--;
-    f += -joy.y; s += joy.x;
-  }
-  s *= inv();
-  if (camMode === 'cctv' && Math.abs(f) + Math.abs(s) < .15) cctv.ctrl = cctv.cams[cctv.cur].base;   // direzione stabile: cambia solo a input rilasciato
-  const yb = camMode === 'cctv' ? cctv.ctrl : P.yaw;
-  const sy = Math.sin(yb), cy = Math.cos(yb);
-  wish.set(-sy * f + cy * s, 0, -cy * f - sy * s);
-  if (wish.lengthSq() > 1) wish.normalize();
-  const moving = wish.lengthSq() > .01;
-  const hs = Math.hypot(P.vel.x, P.vel.z);
-  const wantJump = control && (jumpHeld || keys.has('Space'));
-
-  if (P.grounded) {
-    if (wantJump) {
-      let ns = Math.max(hs, moving ? BASE : 0);
-      if (P.gt < HOP_WIN && moving && hs > BASE * .8) ns *= HOP_MUL;
-      ns = Math.min(ns, P.cap);
-      const dir = moving ? wish.clone().normalize() : (hs > .01 ? new THREE.Vector3(P.vel.x / hs, 0, P.vel.z / hs) : new THREE.Vector3());
-      P.vel.x = dir.x * ns; P.vel.z = dir.z * ns; P.vel.y = grav >= 0 ? JUMP : -JUMP; P.grounded = false;
-      sfx.jump(ns);
-    } else if (P.gt > HOP_WIN || !moving) {
-      const a = 1 - Math.exp(-12 * dt);
-      P.vel.x += (wish.x * BASE - P.vel.x) * a; P.vel.z += (wish.z * BASE - P.vel.z) * a;
-    }
-  } else if (moving) {
-    if (hs < BASE) { P.vel.x += wish.x * 14 * dt; P.vel.z += wish.z * 14 * dt; }
-    else {
-      const cur = Math.atan2(P.vel.x, P.vel.z), tgt = Math.atan2(wish.x, wish.z);
-      let d = tgt - cur; d = Math.atan2(Math.sin(d), Math.cos(d));
-      const na = cur + clamp(d, -2.6 * dt, 2.6 * dt);
-      P.vel.x = Math.sin(na) * hs; P.vel.z = Math.cos(na) * hs;
-    }
-  }
-  P.vel.y -= grav * dt;
-  const dx = P.vel.x * dt, dy = P.vel.y * dt, dz = P.vel.z * dt;
-  const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz)) / .2));
-  const wasG = P.grounded; P.grounded = false;
-  for (let i = 0; i < n; i++) { moveAxis('x', dx / n); moveAxis('z', dz / n); moveAxis('y', dy / n); }
-  if (P.grounded && !wasG) { P.gt = 0; if (Math.abs(P.vel.y) < 1e-6 && !wasG && hs < 1 && Math.abs(dy) > .3) sfx.thud(); }
-  else if (P.grounded) P.gt += dt;
-}
-
-/* ============ INPUT ============ */
-const touchInput = () => { lastInput = performance.now(); };
-addEventListener('keydown', e => { keys.add(e.code); touchInput(); if (e.code === 'Space') e.preventDefault(); });
-addEventListener('keyup', e => keys.delete(e.code));
-const canvas = renderer.domElement;
-canvas.addEventListener('click', () => { if (!isTouch && control && !frozen) canvas.requestPointerLock?.(); });
-document.addEventListener('pointerlockchange', () => {
-  const locked = document.pointerLockElement === canvas;
-  paused = !locked && control && !frozen && !isTouch;
-  $('#pause').classList.toggle('on', paused);
-});
-$('#pause').addEventListener('click', () => canvas.requestPointerLock?.());
-addEventListener('mousemove', e => {
-  if (document.pointerLockElement !== canvas || !control) return;
-  touchInput();
-  if (camMode === 'cctv') return;
-  P.yaw -= e.movementX * .0022 * inv(); P.pitch -= e.movementY * .0022 * inv();
-  P.pitch = clamp(P.pitch, -1.5, 1.5);
-});
-const tl = $('#touch'), jb = $('#joyB'), jk = $('#joyK');
-tl.addEventListener('pointerdown', e => {
-  if (e.target.classList.contains('tb')) return;
-  touchInput();
-  if (e.clientX < innerWidth * .42 && joy.id === null) {
-    joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = joy.y = 0;
-    jb.style.display = 'block'; jb.style.left = (e.clientX - 60) + 'px'; jb.style.top = (e.clientY - 60) + 'px'; jk.style.transform = '';
-  } else if (look.id === null) { look.id = e.pointerId; look.lx = e.clientX; look.ly = e.clientY; }
-});
-tl.addEventListener('pointermove', e => {
-  if (e.pointerId === joy.id) {
-    let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const l = Math.hypot(dx, dy), m = 50;
-    if (l > m) { dx *= m / l; dy *= m / l; }
-    joy.x = dx / m; joy.y = dy / m; jk.style.transform = `translate(${dx}px,${dy}px)`; touchInput();
-  } else if (e.pointerId === look.id && control && camMode !== 'cctv') {
-    P.yaw -= (e.clientX - look.lx) * .0055 * inv(); P.pitch -= (e.clientY - look.ly) * .0055 * inv();
-    P.pitch = clamp(P.pitch, -1.5, 1.5); look.lx = e.clientX; look.ly = e.clientY; touchInput();
-  }
-});
-const endPtr = e => {
-  if (e.pointerId === joy.id) { joy.id = null; joy.x = joy.y = 0; jb.style.display = 'none'; }
-  if (e.pointerId === look.id) look.id = null;
-};
-tl.addEventListener('pointerup', endPtr); tl.addEventListener('pointercancel', endPtr);
-function holdBtn(el, set) {
-  el.addEventListener('pointerdown', e => { e.preventDefault(); set(true); el.classList.add('on'); touchInput(); });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, () => { set(false); el.classList.remove('on'); }));
-}
-holdBtn($('#jump'), v => jumpHeld = v);
-holdBtn($('#use'), v => useHeld = v);
+/* scala dello schermo virtuale 1024×640 */
+const scr = $('#screen'); let scale = 1;
+function fit() { scale = Math.min(innerWidth / 1024, innerHeight / 640); scr.style.transform = `translate(-50%,-50%) scale(${scale})`; }
+fit(); addEventListener('resize', fit);
+function toV(e) { const r = scr.getBoundingClientRect(); return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }; }
+function center(el) { const r = el.getBoundingClientRect(), s = scr.getBoundingClientRect(); return { x: (r.left + r.width / 2 - s.left) / scale, y: (r.top + r.height / 2 - s.top) / scale }; }
+function rectV(el) { const r = el.getBoundingClientRect(), s = scr.getBoundingClientRect(); return { l: (r.left - s.left) / scale, t: (r.top - s.top) / scale, r: (r.right - s.left) / scale, b: (r.bottom - s.top) / scale }; }
+const inside = (p, R, m = 0) => p.x > R.l - m && p.x < R.r + m && p.y > R.t - m && p.y < R.b + m;
+if (!isTouch) document.body.classList.add('nocur');
 addEventListener('contextmenu', e => e.preventDefault());
-// forza lo schermo intero al primo tocco/click ovunque (e lo ripristina se viene chiuso)
-const isFS = () => document.fullscreenElement || document.webkitFullscreenElement;
-const forceFS = () => {
-  if (isFS()) return;
-  const d = document.documentElement, req = d.requestFullscreen || d.webkitRequestFullscreen;
-  if (!req) return;
-  try {
-    const p = req.call(d, { navigationUI: 'hide' });
-    p?.then?.(() => screen.orientation?.lock?.('landscape')).catch?.(() => { });
-  } catch (e) { }
-};
-['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, forceFS, { capture: true, passive: true }));
-const usePressed = () => keys.has('KeyE') || useHeld;
-function setPrompt(txt) {
-  const p = $('#prompt'), u = $('#use');
-  if (isTouch) { u.classList.toggle('show', !!txt); p.classList.remove('on'); }
-  else { p.textContent = txt; p.classList.toggle('on', !!txt); }
+
+/* schermo intero al primo tocco (solo dispositivi touch) */
+if (isTouch) {
+  const fs = () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    const d = document.documentElement, req = d.requestFullscreen || d.webkitRequestFullscreen;
+    try { const p = req && req.call(d, { navigationUI: 'hide' }); p && p.then && p.then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape')).catch(() => { }); } catch (e) { }
+  };
+  ['pointerup', 'touchend', 'click'].forEach(ev => addEventListener(ev, fs, { capture: true, passive: true }));
 }
 
-/* ============ AUDIO ============ */
-let actx = null, master = null, drone = null;
+/* =================== GRAFICA =================== */
+const SV = (s, inner, vb = '0 0 64 64') => `<svg width="${s}" height="${s}" viewBox="${vb}">${inner}</svg>`;
+const petals = (cx, cy, r, w, l, col, n = 12) => Array.from({ length: n }, (_, i) => `<ellipse cx="${cx}" cy="${cy - r}" rx="${w}" ry="${l}" transform="rotate(${i * 360 / n} ${cx} ${cy})" fill="${col}"/>`).join('');
+const daisy = (col = '#fff') => petals(32, 32, 15, 6, 12, col) + '<circle cx="32" cy="32" r="11" fill="#ffcf3f"/><circle cx="32" cy="32" r="11" fill="none" stroke="#e0a91f" stroke-width="2"/>';
+const ICON = {
+  folder: s => SV(s, '<path d="M4 14q0-4 4-4h16l6 6h26q4 0 4 4v4H4z" fill="#e9a93b"/><rect x="4" y="20" width="56" height="34" rx="4" fill="#ffcf5a"/><rect x="4" y="20" width="56" height="6" fill="#ffe08a"/>'),
+  mail: s => SV(s, '<rect x="5" y="13" width="54" height="38" rx="5" fill="#fff" stroke="#2f6fd0" stroke-width="3"/><path d="M7 16l25 20 25-20" fill="none" stroke="#2f6fd0" stroke-width="3" stroke-linejoin="round"/>'),
+  photo: s => SV(s, '<rect x="5" y="9" width="54" height="46" rx="4" fill="#fff" stroke="#8a6d3b" stroke-width="3"/><rect x="11" y="15" width="42" height="28" fill="#9fd0ff"/><circle cx="44" cy="22" r="4" fill="#ffcf3f"/><path d="M11 43l12-14 9 9 7-6 14 11z" fill="#4f9a5d"/>'),
+  globe: s => SV(s, '<circle cx="32" cy="32" r="25" fill="#6fb5ff" stroke="#2c6fc2" stroke-width="3"/><path d="M15 21q10 6 8 14t6 13M39 9q-4 8 4 12t10 10M29 56q2-8-6-12" fill="none" stroke="#3a9a4a" stroke-width="5" stroke-linecap="round"/><ellipse cx="32" cy="32" rx="11" ry="25" fill="none" stroke="#ffffff70" stroke-width="2"/><path d="M7 32h50" stroke="#ffffff70" stroke-width="2"/>'),
+  trash: s => SV(s, '<path d="M14 19h36l-4 37q0 3-3 3H21q-3 0-3-3z" fill="#d6dde5" stroke="#5d6874" stroke-width="3"/><rect x="10" y="12" width="44" height="7" rx="3" fill="#97a3b0"/><rect x="26" y="7" width="12" height="6" rx="2" fill="#97a3b0"/><path d="M25 27v24M32 27v24M39 27v24" stroke="#5d6874" stroke-width="3"/>'),
+  trashfull: s => SV(s, '<path d="M14 19h36l-4 37q0 3-3 3H21q-3 0-3-3z" fill="#d6dde5" stroke="#5d6874" stroke-width="3"/><circle cx="24" cy="16" r="8" fill="#fff" stroke="#999" stroke-width="2"/><circle cx="38" cy="13" r="7" fill="#ffe9a8" stroke="#999" stroke-width="2"/>' + `<g transform="translate(36 2) scale(.32)">${daisy()}</g>` + '<path d="M25 27v24M32 27v24M39 27v24" stroke="#5d6874" stroke-width="3"/>'),
+  txt: s => SV(s, '<path d="M14 5h26l12 12v42H14z" fill="#fff" stroke="#777" stroke-width="2.5"/><path d="M40 5v12h12" fill="#eee" stroke="#777" stroke-width="2.5"/><path d="M20 28h24M20 35h24M20 42h18M20 49h22" stroke="#9aa" stroke-width="3"/>'),
+  dat: s => SV(s, '<path d="M14 5h26l12 12v42H14z" fill="#fff" stroke="#777" stroke-width="2.5"/><path d="M40 5v12h12" fill="#eee" stroke="#777" stroke-width="2.5"/><text x="33" y="44" font-family="monospace" font-size="15" font-weight="700" fill="#d9455f" text-anchor="middle">0101</text>'),
+  heart: s => SV(s, '<path d="M14 5h26l12 12v42H14z" fill="#fff" stroke="#777" stroke-width="2.5"/><path d="M40 5v12h12" fill="#eee" stroke="#777" stroke-width="2.5"/><path d="M33 48q-14-9-14-17a7 7 0 0 1 14-2 7 7 0 0 1 14 2q0 8-14 17z" fill="#d9455f"/>'),
+  daisy: s => SV(s, daisy()),
+  course: s => SV(s, '<rect x="8" y="8" width="48" height="48" rx="8" fill="#4f9a5d"/><path d="M18 33l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'),
+  gear: s => SV(s, '<circle cx="32" cy="32" r="16" fill="none" stroke="#6b6250" stroke-width="9" stroke-dasharray="7 5"/><circle cx="32" cy="32" r="9" fill="#6b6250"/>'),
+  power: s => SV(s, '<path d="M20 20a17 17 0 1 0 24 0" fill="none" stroke="#d9455f" stroke-width="6" stroke-linecap="round"/><path d="M32 10v22" stroke="#d9455f" stroke-width="6" stroke-linecap="round"/>'),
+  spk: on => SV(22, `<path d="M8 24h10l14-12v40L18 40H8z" fill="#4a3d18"/>${on ? '<path d="M40 22q6 10 0 20M46 16q11 16 0 32" fill="none" stroke="#4a3d18" stroke-width="5" stroke-linecap="round"/>' : '<path d="M40 22l16 20M56 22L40 42" stroke="#d9455f" stroke-width="5" stroke-linecap="round"/>'}`),
+};
+$('#boxlogo').innerHTML = daisy(); $('#logosvg').innerHTML = daisy();
+$('#startb').innerHTML = SV(26, daisy()) + 'Inizio';
+
+/* prato dello sfondo */
+(() => {
+  let h = ''; const spots = [[90, 470, .55], [170, 520, .7], [300, 500, .5], [420, 548, .8], [560, 470, .45], [640, 520, .65], [760, 500, .55], [690, 575, .9], [230, 575, .85], [860, 560, .6], [960, 500, .5], [50, 560, .75], [500, 590, .9], [360, 455, .4]];
+  for (const [x, y, k] of spots) h += `<svg style="position:absolute;left:${x}px;top:${y - 40}px" width="${46 * k}" height="${46 * k}" viewBox="0 0 64 64">${daisy()}</svg>`;
+  $('#meadow').innerHTML = h;
+})();
+
+/* Margherita: un fiore in un vaso, con la faccia */
+function drawFlower(mood = 'happy', grey = false) {
+  const pc = grey ? '#c9c4bd' : '#fff', face = {
+    happy: '<circle cx="47" cy="44" r="3" fill="#2b2a33"/><circle cx="63" cy="44" r="3" fill="#2b2a33"/><path d="M46 52q9 8 18 0" fill="none" stroke="#2b2a33" stroke-width="3" stroke-linecap="round"/>',
+    sad: '<path d="M43 43l7 2M67 43l-7 2" stroke="#2b2a33" stroke-width="3" stroke-linecap="round"/><path d="M47 56q8-6 16 0" fill="none" stroke="#2b2a33" stroke-width="3" stroke-linecap="round"/>',
+    angry: '<path d="M42 40l9 4M68 40l-9 4" stroke="#2b2a33" stroke-width="3.5" stroke-linecap="round"/><circle cx="48" cy="47" r="2.5"/><circle cx="62" cy="47" r="2.5"/><path d="M47 56h16" stroke="#2b2a33" stroke-width="3" stroke-linecap="round"/>',
+    wife: '<path d="M43 45q4 3 8 0M59 45q4 3 8 0" fill="none" stroke="#2b2a33" stroke-width="2.5" stroke-linecap="round"/><path d="M48 53q7 4 14 0" fill="none" stroke="#a33" stroke-width="3" stroke-linecap="round"/>',
+    blank: '<circle cx="47" cy="45" r="4" fill="#2b2a33"/><circle cx="63" cy="45" r="4" fill="#2b2a33"/>',
+  }[mood] || '';
+  $('#flower').innerHTML = `<path d="M55 70 Q52 90 56 104" stroke="#4f9a5d" stroke-width="5" fill="none"/><path d="M55 92 q-16 -10 -22 2 q12 6 22 -2z" fill="#5fb06c"/>
+    <path d="M28 102h56l-7 34H35z" fill="#c8693f"/><rect x="25" y="98" width="62" height="10" rx="3" fill="#dd7d50"/>
+    ${petals(55, 48, 20, 8, 15, pc, 14)}<circle cx="55" cy="48" r="20" fill="#ffcf3f" stroke="#e0a91f" stroke-width="2.5"/>${face}`;
+}
+
+/* =================== AUDIO =================== */
+let actx = null, master = null, hum = null;
 const sfx = {
   init() {
     if (actx) { actx.resume(); return; }
     try {
       actx = new (window.AudioContext || window.webkitAudioContext)();
-      master = actx.createGain(); master.gain.value = .8; master.connect(actx.destination);
-      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 220;
-      const g = actx.createGain(); g.gain.value = .045; lp.connect(g); g.connect(master);
-      const o1 = actx.createOscillator(), o2 = actx.createOscillator();
-      o1.type = 'sawtooth'; o2.type = 'sawtooth'; o1.frequency.value = 55; o2.frequency.value = 55.6;
-      o1.connect(lp); o2.connect(lp); o1.start(); o2.start();
-      drone = { o1, o2, lp, g };
+      master = actx.createGain(); master.gain.value = S.vol; master.connect(actx.destination);
+      const len = actx.sampleRate * 2, b = actx.createBuffer(1, len, actx.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      const src = actx.createBufferSource(); src.buffer = b; src.loop = true;
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 180;
+      const g = actx.createGain(); g.gain.value = .02; src.connect(lp); lp.connect(g); g.connect(master); src.start();
+      const o = actx.createOscillator(), og = actx.createGain(); o.frequency.value = 50; og.gain.value = 0; o.connect(og); og.connect(master); o.start();
+      hum = { g, og, lp };
     } catch (e) { actx = null; }
   },
-  tone(freq, dur, type = 'sine', vol = .15, slide = 0, t0 = 0, pan = 0) {
-    if (!actx) return; const t = actx.currentTime + t0;
-    const o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.setValueAtTime(freq, t);
-    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t + dur);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    let out = g;
-    if (pan && actx.createStereoPanner) { const p = actx.createStereoPanner(); p.pan.value = pan; g.connect(p); out = p; }
-    o.connect(g); out.connect(master); o.start(t); o.stop(t + dur + .02);
+  tone(f, dur, type = 'sine', vol = .12, slide = 0, t0 = 0) {
+    if (!actx) return; const t = actx.currentTime + t0, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .05);
   },
-  jump(s) { this.tone(260 + Math.min(s, 30) * 22, .09, 'square', .035, 120); },
-  thud() { this.tone(90, .25, 'sine', .35, -50); },
-  pass() { this.tone(660, .14, 'sine', .14); this.tone(990, .26, 'sine', .14, 0, .12); },
-  fail() { this.tone(180, .5, 'square', .1, -60); this.tone(120, .6, 'square', .08, -40, .05); },
-  beat(vol = .5) { this.tone(70, .22, 'sine', vol, -35); this.tone(62, .22, 'sine', vol * .7, -30, .18); },
-  noise(dur = .9, vol = .5) {
+  noise(dur = .3, vol = .2, f = 2000) {
     if (!actx) return; const b = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < .02 ? 1 : .55);
-    const s = actx.createBufferSource(), g = actx.createGain(); s.buffer = b; g.gain.value = vol; s.connect(g); g.connect(master); s.start();
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const s = actx.createBufferSource(), lp = actx.createBiquadFilter(), g = actx.createGain(); lp.frequency.value = f; s.buffer = b; g.gain.value = vol; s.connect(lp); lp.connect(g); g.connect(master); s.start();
   },
-  droneTo(f, gain, lp, t = 3) { if (!drone) return; const n = actx.currentTime; drone.o1.frequency.linearRampToValueAtTime(f, n + t); drone.o2.frequency.linearRampToValueAtTime(f * 1.012, n + t); drone.g.gain.linearRampToValueAtTime(gain, n + t); drone.lp.frequency.linearRampToValueAtTime(lp, n + t); },
+  click() { this.tone(1800, .03, 'square', .03); },
+  open() { this.tone(523, .09, 'sine', .07); this.tone(784, .12, 'sine', .07, 0, .07); },
+  close() { this.tone(660, .08, 'sine', .05); this.tone(440, .1, 'sine', .05, 0, .06); },
+  pop() { this.tone(900, .08, 'triangle', .14, -500); this.noise(.06, .1, 4000); },
+  ding() { this.tone(1046, .25, 'sine', .1); this.tone(1318, .4, 'sine', .08, 0, .12); },
+  crumple() { this.noise(.35, .25, 1600); this.noise(.2, .15, 900); },
+  err() { this.tone(220, .25, 'square', .06); },
+  chime() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, .7, 'sine', .07, 0, i * .16)); },
+  sadchime() { [784, 659, 523, 392].forEach((f, i) => this.tone(f, .9, 'sine', .06, 0, i * .22)); },
+  bell() { this.tone(988, 1.2, 'sine', .14); this.tone(784, 1.6, 'sine', .14, 0, .55); },
+  heart(v = .4) { this.tone(70, .2, 'sine', v, -30); this.tone(62, .2, 'sine', v * .7, -25, .17); },
+  dread(on) { if (!hum) return; const t = actx.currentTime; hum.og.gain.linearRampToValueAtTime(on, t + 3); hum.lp.frequency.linearRampToValueAtTime(180 + on * 900, t + 3); },
 };
 
-/* ============ VOCE / SOTTOTITOLI ============ */
-let muted = false, voice = null, sayToken = 0, sayChain = Promise.resolve();
+/* =================== VOCE + FUMETTO =================== */
+let voice = null;
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
-  const vs = speechSynthesis.getVoices();
-  voice = vs.find(v => /^it/i.test(v.lang) && /google|luca|cosimo|diego/i.test(v.name)) || vs.find(v => /^it/i.test(v.lang)) || null;
+  const vs = speechSynthesis.getVoices().filter(v => /^it/i.test(v.lang));
+  voice = vs.find(v => /alice|elsa|federica|paola|isabella|google/i.test(v.name)) || vs[0] || null;
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-const sub = $('#sub');
+const stopSpeech = () => { try { speechSynthesis.cancel(); } catch (e) { } };
+const agent = $('#agent'), bal = $('#bal');
+let agentName = 'Margherita', mood = 'happy', grey = false, sayQ = Promise.resolve(), sayTok = 0, skipFn = null;
+function setMood(m) { if (m === mood) return; mood = m; drawFlower(mood, grey); }
 function say(text, o = {}) {
-  if (o.interrupt) { sayToken++; try { speechSynthesis.cancel(); } catch (e) { } sayChain = Promise.resolve(); }
-  const tok = sayToken;
-  sayChain = sayChain.then(() => tok === sayToken ? speak(text, o, tok) : null);
-  return sayChain;
+  if (o.interrupt) { sayTok++; stopSpeech(); if (skipFn) skipFn(true); sayQ = Promise.resolve(); }
+  const tok = sayTok;
+  sayQ = sayQ.then(() => tok === sayTok ? speak(text, o) : null);
+  return sayQ;
 }
-function speak(text, o, tok) {
+function speak(text, o) {
   return new Promise(res => {
-    sub.className = 'hud on' + (o.creepy ? ' creepy' : '');
-    sub.innerHTML = `<span class="who">${o.creepy ? 'QA SUITE ▒▒▒' : 'QA SUITE'}</span>${text}`;
+    setMood(o.mood || (grey ? 'wife' : 'happy'));
+    agent.classList.toggle('dark', !!o.dark);
+    bal.innerHTML = `<span class="nm">${esc(agentName)}</span>${text}<span class="sk">${isTouch ? 'tocca' : 'clic'} qui per andare avanti</span>`;
+    bal.classList.remove('on'); void bal.offsetWidth; bal.classList.add('on');
+    agent.classList.add('talk'); agent.classList.remove('bob');
     let done = false, t;
-    const est = 700 + text.length * 60 / (o.rate || 1);
-    const fin = () => { if (done) return; done = true; clearTimeout(t); setTimeout(() => { if (tok === sayToken) sub.classList.remove('on'); res(); }, o.gap ?? 280); };
-    const tts = !muted && 'speechSynthesis' in window;
-    t = setTimeout(fin, tts ? est * 1.9 + 1500 : est);
+    const plain = text.replace(/<[^>]+>/g, '');
+    const est = (900 + plain.length * 58) * SPEED;
+    const fin = quick => {
+      if (done) return; done = true; clearTimeout(t); skipFn = null; agent.classList.remove('talk'); agent.classList.add('bob');
+      setTimeout(res, quick ? 0 : (o.gap ?? 300) * SPEED);
+    };
+    skipFn = q => { stopSpeech(); fin(q); };
+    const tts = S.voice && !FAST && 'speechSynthesis' in window;
+    t = setTimeout(fin, tts ? est * 2 + 2500 : est + 1400 * SPEED);
     if (tts) {
-      const u = new SpeechSynthesisUtterance(o.speak || text.replace(/<[^>]+>/g, ''));
+      const u = new SpeechSynthesisUtterance(o.speak || plain);
       u.lang = 'it-IT'; if (voice) u.voice = voice;
-      u.rate = o.rate || 1.02; u.pitch = o.pitch ?? (o.creepy ? .15 : .7);
-      u.onend = fin; u.onerror = () => { clearTimeout(t); t = setTimeout(fin, est); };
+      u.rate = o.rate || 1; u.pitch = o.pitch ?? (grey ? .75 : o.dark ? .6 : 1.15); u.volume = S.vol;
+      u.onend = () => fin(); u.onerror = () => { clearTimeout(t); t = setTimeout(fin, est); };
       speechSynthesis.speak(u);
     }
   });
 }
-const sayIdle = (text, o) => { if (!sub.classList.contains('on') && !frozen) say(text, o); };
+bal.addEventListener('click', () => { sfx.click(); skipFn && skipFn(); });
+let lastNag = 0;
+const nag = (t, o) => { if (performance.now() - lastNag < 6000) return; lastNag = performance.now(); say(t, o); };
+function setVoice(on) { S.voice = on; save(); if (!on) stopSpeech(); $('#spk').innerHTML = ICON.spk(on); }
 
-/* ============ HUD SUITE ============ */
-const TESTS = [
-  ['0001', 'Il giocatore può camminare'], ['0001b', 'Entità nella scena = 1'], ['0002', 'Collisione con i muri'],
-  ['0003', 'Confini della mappa'], ['0004', 'Gravità costante'], ['0005', 'Telecamera nei limiti'],
-  ['0006', 'Oggetti fuori vista'], ['0007', 'Salvataggio stato'], ['0008', 'Audio posizionale'],
-  ['0009', 'Uscita dalla scena'], ['0010', 'Rimozione soggetto'], ['0011', 'Spedizione build'],
-  ['0207', 'Entità nella scena = 1'],
-];
-const ST = { wait: 'IN ATTESA', run: 'IN CORSO', pass: 'PASS', fail: 'FAIL', undef: '???' };
-$('#list').innerHTML = TESTS.map(([id, n]) => `<li id="t${id}" class="wait${id === '0207' ? ' hidden' : ''}"><span>${id}</span><span>${n}</span><span class="s">${ST.wait}</span></li>`).join('');
-function setStatus(id, st) {
-  const li = $('#t' + id); li.className = st; li.querySelector('.s').textContent = ST[st];
-  $('#cnt').textContent = TESTS.filter(([i]) => i !== '0207' && /pass|fail|undef/.test($('#t' + i).className)).length + '/12';
+/* =================== CURSORI =================== */
+const M = { x: 512, y: 320, vx: 512, vy: 320, down: false };
+let lastInput = performance.now(), rec = null;
+const track = e => { const p = toV(e); M.x = p.x; M.y = p.y; lastInput = performance.now(); if (rec && (!isTouch || M.down)) { const t = performance.now() - rec.t0; if (!rec.p.length || t - rec.p[rec.p.length - 1][0] > 30) rec.p.push([Math.round(t), Math.round(M.x), Math.round(M.y)]); } };
+addEventListener('pointermove', track, { passive: true });
+addEventListener('pointerdown', e => { M.down = true; track(e); }, { passive: true });
+addEventListener('pointerup', () => { M.down = false; }, { passive: true });
+addEventListener('keydown', () => { lastInput = performance.now(); });
+const curEl = $('#cur'), ghostEl = $('#ghost');
+if (isTouch) curEl.style.display = 'none';
+let mirror = false;
+function curLoop(now) {
+  requestAnimationFrame(curLoop);
+  const k = 1 - S.age * .75;
+  M.vx += (M.x - M.vx) * k; M.vy += (M.y - M.vy) * k;
+  const tr = S.age * 5, nx = M.vx + Math.sin(now * .013) * tr + Math.sin(now * .031) * tr * .6, ny = M.vy + Math.cos(now * .017) * tr;
+  curEl.style.transform = `translate(${nx - 3}px,${ny - 3}px)`;
+  if (mirror) gSet(M.x + 0, M.y);
 }
-function toast(text, color) { const t = $('#toast'); t.textContent = text; t.style.color = color; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 1400); }
-const fadeEl = $('#fade');
-async function fadeTo(fn) { fadeEl.style.opacity = 1; await wait(650); fn(); await wait(250); fadeEl.style.opacity = 0; await wait(500); }
-const waiters = [];
-const waitFor = cond => new Promise(res => waiters.push({ cond, res }));
-const staticFx = async ms => { $('#static').classList.add('on'); sfx.noise(ms / 1000, .25); await wait(ms); $('#static').classList.remove('on'); };
-
-/* ============ STATO GLOBALE ============ */
-let stage = 'boot', stageT = 0, entityGlitch = 0, playerMesh = null, target = null, zTile = null, entity = null;
-let gInt = 16, gAcc = 0, flags = {}, falls = 0, bridge = [], cctv = null, hitLog = [], hitSeen = {}, beepT = 0;
-const showCapsule = on => { if (playerMesh) playerMesh.visible = on; };
-function addCapsuleMesh(glow) {
-  playerMesh = new THREE.Mesh(new THREE.CapsuleGeometry(P.r, P.h - P.r * 2, 6, 16), M.capsule);
-  playerMesh.castShadow = true; level.add(playerMesh);
-  if (glow) { const l = new THREE.PointLight(0xffe7a0, 7, 7, 1.6); l.position.y = .3; playerMesh.add(l); }
-}
-
-/* ============ CAPITOLO 1 ============ */
-function buildTest1() {
-  clearLevel(); resetEnv();
-  room(14, 14, 4, 1);
-  for (const [x, z] of [[-4, -3], [3.5, 2.5], [-3, 4]]) addBox(x, 0, z, 1.2, 1.2, 1.2, { name: 'crate' });
-  target = marker(0, .03, -5);
-  label(['TARGET_01'], 0, 1.3, -5);
-  label(['crate_ref.fbx', 'scale: 1.0'], -4, 1.8, -3, { color: '#9cf', size: .22 });
-  debugAxes(0, .02, 0);
-  label(['scene: test_final_FINAL.map', 'light: sun_debug (NON TOCCARE)'], 0, 3.2, 6.6, { color: '#aaa', size: .25 });
-  addCapsuleMesh(false);
-  spawn(0, 0, 4.5, 0);
-}
-function buildTest2() {
-  clearLevel(); resetEnv();
-  addBox(0, -.6, 0, 70, .5, 70, { mat: 'dark', name: 'outer_floor' });
-  for (const [x, z, w, d] of [[0, -33, 70, 2], [0, 33, 70, 2], [-33, 0, 2, 70], [33, 0, 2, 70]]) addBox(x, -.6, z, w, 6, d, { mat: 'dark' });
-  room(12, 36, 4.5, .06, { thin: true });
-  label(['wall_thin_N', 'collider: 0.06 m'], 0, 3, -17.6, { color: '#9cf', size: .25 });
-  label(['wall_thin_E', 'collider: 0.06 m'], 5.6, 3, 0, { color: '#9cf', size: .25 });
-  label(['wall_thin_W', 'collider: 0.06 m'], -5.6, 3, 0, { color: '#9cf', size: .25 });
-  for (let z = -15; z <= 15; z += 6) { const l = new THREE.Mesh(new THREE.BoxGeometry(12, .02, .06), M.yellow); l.position.set(0, .01, z); level.add(l); }
-  label(['velocità registrata ▸ vedi debug'], 0, 2.6, 16, { color: '#aaa', size: .22 });
-  decal(['NON FIDARTI', 'DEI PASS'], 0, 2.2, -18.1, Math.PI);
-  decal(['CI SONO ALTRE', 'CAPSULE'], 0, 2.2, 18.1, 0);
-  decal(['GUARDA', 'SOTTO'], -6.1, 2.2, 0, -Math.PI / 2);
-  decal(['IL 0207 NON', 'FINISCE'], 6.1, 2.2, 0, Math.PI / 2);
-  spawn(0, 0, 16, 0); P.cap = Infinity;
-}
-function buildTest3() {
-  clearLevel(); resetEnv();
-  addBox(0, -.5, 0, 20, .5, 20, { mat: 'floor', collide: false });
-  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
-    if (i === 1 && j === 2) continue;                              // floor_tile_17: collider mancante
-    addBox(-7 + i * 2, -.5, -7 + j * 2, 2, .5, 2, { visible: false, name: 'tile' });
-  }
-  for (const [x, z, w, d] of [[0, -9, 20, 2], [0, 9, 20, 2], [-9, 0, 2, 16], [9, 0, 2, 16]]) addBox(x, 0, z, w, 5, d, { name: 'wall_thick' });
-  zTile = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), M.missing); zTile.rotation.x = -Math.PI / 2; zTile.position.set(-5, .003, -3); level.add(zTile);
-  label(['floor_tile_17', '2 materiali sovrapposti'], -5, 1.4, -3, { color: '#f6f', size: .24 });
-  label(['HOTFIX 0.9.3a: bunny hop limitato a 9 m/s'], 0, 3.4, 7.9, { color: '#aaa', size: .25 });
-  for (const [x, z] of [[4, -4], [5.2, -4], [4.6, -4]]) addBox(x, 0, z, 1, 1, 1, { name: 'crate' });
-  debugAxes(0, .02, 0);
-  buildVoid();
-  spawn(0, 0, 5, 0); P.cap = 9;
-}
-function buildVoid() {
-  const Y = -40;
-  addBox(0, Y - 1, 0, 240, 1, 240, { mat: 'voidFloor', cast: false, name: 'void' });
-  const geo = new THREE.CapsuleGeometry(P.r, P.h - P.r * 2, 4, 10), inst = new THREE.InstancedMesh(geo, M.capsule, 90), m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
-  for (let i = 0; i < 90; i++) {
-    const a = Math.random() * Math.PI * 2, r = Math.random() ** .7 * 4.5;
-    e.set(Math.PI / 2 + (Math.random() - .5) * .8, Math.random() * 6, (Math.random() - .5) * .6);
-    m.compose(new THREE.Vector3(-5 + Math.cos(a) * r, Y + .35 + Math.random() * (4.5 - r) * .5, -15 + Math.sin(a) * r), q.setFromEuler(e), new THREE.Vector3(1, 1, 1));
-    inst.setMatrixAt(i, m);
-  }
-  inst.castShadow = true; level.add(inst);
-  label(['/deleted_assets/player_capsule_v1..v90', 'stato: DEPRECATO · NON SPEDIRE'], -5, Y + 4.4, -15, { color: '#ff6b6b', size: .3 });
-  for (const [x, z, r] of [[-14, -6, .6], [3, -22, 2.4], [-18, -20, 1.2], [8, -9, -.8], [-12, 8, 3]]) {
-    const mq = mannequin(1); mq.position.set(x, Y, z); mq.rotation.y = r; level.add(mq);
-    label(['subject_ref_' + String(Math.abs(Math.round(x * z)) % 97).padStart(2, '0')], x, Y + 2.3, z, { color: '#888', size: .2 });
-  }
-  entity = makeEntity(); entity.position.set(-5, Y, 22);
-}
-
-async function chapter1() {
-  saveCP({ cp: 'c1', first: CP?.first || Date.now() });
-  stage = 'intro'; buildTest1(); showCapsule(true); camMode = 'intro';
-  await say('Benvenuto nella QA Suite automatica di Greybox Engine, versione zero punto nove punto tre.');
-  const now = new Date(), hh = now.getHours(), clock = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-  await say(hh < 6 ? `Ora locale: ${clock}. Gli sviluppatori non lavoravano mai a quest'ora. Tu sì. Annotato.` : `Ora locale: ${clock}. Orario di lavoro regolare. Per ora.`);
-  await say('Verrà eseguita la suite di test sulla scena "test_final_FINAL". Il soggetto di prova è la capsula.');
-  await say('La capsula sei tu.', { gap: 120 });
-  introCam = 1;
-  await wait(1700);
-  await say('Non preoccuparti. La capsula non ha sentimenti. Lo abbiamo verificato nel test zero.');
-  camMode = 'fp'; control = true; showCapsule(false);
-  if (!isTouch) canvas.requestPointerLock?.();
-
-  stage = 't1'; setStatus('0001', 'run');
-  say('<b>TEST 0001.</b> Verifica che il giocatore possa camminare. Raggiungi il marcatore giallo.', { speak: 'Test zero zero zero uno. Verifica che il giocatore possa camminare. Raggiungi il marcatore giallo.' });
-  say('Con calma. Il tempo di esecuzione viene comunque registrato.');
-  await waitFor(() => P.pos.distanceTo(target.position) < 1.1);
-  pass('0001');
-  await say('Pass. Il giocatore cammina. Che emozione. Per tutti.', { interrupt: true });
-  setStatus('0001b', 'run'); entityGlitch = 2.4;
-  await say('<b>TEST 0001b.</b> Verifica che nella scena sia presente una sola entità.', { speak: 'Test zero zero zero uno bi. Verifica che nella scena sia presente una sola entità.' });
-  await say('Risultato: uno. …Uno. Pass.', { speak: 'Risultato: uno. ... Uno. Pass.' });
-  pass('0001b', true);
-  await wait(500);
-
-  await fadeTo(buildTest2);
-  stage = 't2'; stageT = 0; flags = {}; setStatus('0002', 'run');
-  await say('<b>TEST 0002.</b> Verifica che il giocatore non possa attraversare i muri.', { speak: 'Test zero zero zero due. Verifica che il giocatore non possa attraversare i muri.' });
-  await say('Questo test passa da solo. Basta che tu non faccia niente di strano.');
-  say('Nota per gli sviluppatori: il bunny hopping è stato corretto nella build zero nove due. Credo.');
-  await waitFor(() => Math.abs(P.pos.x) > 6.3 || Math.abs(P.pos.z) > 18.3);
-  stage = 't2out'; fail('0002');
-  await say('Fail. Il giocatore ha attraversato un muro.', { interrupt: true });
-  await say('Questo va segnalato. Apro un ticket. Priorità: bassa.');
-  await wait(900);
-  await say('…Media.');
-  await wait(2200);
-  await say('Applico un hotfix. Ricarico la scena. Non leggere i muri.');
-
-  await fadeTo(buildTest3);
-  stage = 't3'; stageT = 0; flags = {}; setStatus('0003', 'run');
-  await say('<b>TEST 0003.</b> Verifica che il giocatore non possa uscire dai confini della mappa.', { speak: 'Test zero zero zero tre. Verifica che il giocatore non possa uscire dai confini della mappa.' });
-  await say('I muri ora sono spessi due metri. Il pavimento è solido. Tutti i pavimenti sono solidi.');
-  say('Avviso: la superficie floor tile diciassette presenta due materiali sovrapposti. È solo un problema estetico. Non camminarci sopra. Per estetica.');
-  await waitFor(() => P.pos.y < -1.2);
-  stage = 'fall'; setStatus('0003', 'undef'); sfx.droneTo(36, .09, 140);
-  say('No. No, non lì sotto.', { interrupt: true, creepy: true });
-  await waitFor(() => P.grounded && P.pos.y < -30);
-  stage = 'void'; stageT = 0;
-  await wait(1200);
-  await say('Test zero zero zero tre. Risultato: non definito.', { creepy: true });
-  await say('Il soggetto non dovrebbe vedere quest\'area. Sono asset eliminati. Torna su.', { creepy: true });
-  await wait(1500);
-  await say('…Non c\'è un modo per tornare su. Lo so.', { creepy: true });
-  show0207();
-  await say('<b>TEST 0207.</b> Verifica che nella scena sia presente una sola entità.', { creepy: true, speak: 'Test zero due zero sette. Verifica che nella scena sia presente una sola entità.' });
-  await say('Risultato: due.', { creepy: true });
-  stage = 'hunt'; stageT = 0;
-  await say('Non guardarlo. Se non lo guardi, non viene renderizzato.', { creepy: true });
-  await say('E se non viene renderizzato… non esiste. Giusto?', { creepy: true });
-}
-function pass(id, quiet) { sfx.pass(); if (!quiet) toast('PASS', '#3ddc84'); setStatus(id, 'pass'); }
-function fail(id) { sfx.fail(); toast('FAIL', '#ff4d4d'); setStatus(id, 'fail'); }
-function show0207() { const li = $('#t0207'); li.classList.remove('hidden'); setStatus('0207', 'run'); li.classList.add('new'); }
-
-/* ============ CAPITOLO 2 ============ */
-// TEST 0004 — overflow della gravità
-let btnPos = new THREE.Vector3();
-function buildTest4() {
-  clearLevel(); resetEnv(0x2a2d33, 20, 70, 1, 1.3);
-  addBox(0, -.5, 0, 16, .5, 16, { mat: 'floor', name: 'floor' });
-  addBox(0, 10, 0, 16, 1, 16, { mat: 'grey', name: 'ceiling' });
-  addBox(0, 0, 7.5, 16, 10, 1, {}); addBox(-7.5, 0, 0, 1, 10, 14, {}); addBox(7.5, 0, 0, 1, 10, 14, {});
-  addBox(0, 0, -7.5, 16, 7.8, 1, { name: 'wall_N_low' });
-  addBox(-4.75, 7.8, -7.5, 6.5, 2.2, 1, {}); addBox(4.75, 7.8, -7.5, 6.5, 2.2, 1, {});
-  // corridoio sospeso, raggiungibile solo dal soffitto
-  addBox(0, 7.3, -12.5, 5, .5, 9, { mat: 'dark' });
-  addBox(-2, 7.8, -12.5, 1, 2.2, 9, {}); addBox(2, 7.8, -12.5, 1, 2.2, 9, {}); addBox(0, 7.8, -16.5, 5, 2.2, 1, {});
-  addBox(0, 10, -12.5, 5, 1, 9, { name: 'ceiling_corr' });
-  target = marker(0, 9.97, -14.2, true);
-  label(['EXIT_04'], 0, 8.6, -14.2);
-  // il pulsante
-  addBox(0, 0, -1.5, 1, 1, 1, { mat: 'dark', name: 'pedestal' });
-  const b = new THREE.Mesh(new THREE.CylinderGeometry(.3, .34, .14, 24), M.red); b.position.set(0, 1.07, -1.5); level.add(b);
-  btnPos.set(0, 0, -1.5);
-  label(['STRESS_TEST gravity.int8', 'solo sviluppatori'], 0, 2.1, -1.5, { color: '#ff8080', size: .24 });
-  decal(['NON PREMERE'], 0, 4.5, -6.99, 0, { color: '#6a1010', size: 1.6 });
-  decal(['BENVENUTO', 'DALL\'ALTRA PARTE'], 0, 9.98, 0, 0, { color: '#6a1010', size: 1.3, rotX: Math.PI / 2 });
-  decal(['QUI SOPRA', 'C\'È SEMPRE STATO', 'QUALCUNO'], -6.99, 8.6, 2, Math.PI / 2, { color: '#5a0d0d', size: .7 });
-  spawn(0, 0, 5, 0); P.cap = 9; grav = 16; gInt = 16; gAcc = 0;
-}
-async function test4() {
-  await fadeTo(buildTest4);
-  stage = 't4'; stageT = 0; flags = {}; setStatus('0004', 'run');
-  await say('<b>TEST 0004.</b> Verifica che la gravità sia costante. Valore atteso: sedici.', { speak: 'Test zero zero zero quattro. Verifica che la gravità sia costante. Valore atteso: sedici.' });
-  await say('Il pulsante rosso serve agli sviluppatori per lo stress test. Non è per te. Niente qui è per te.');
-  await waitFor(() => gInt < 0);
-  fail('0004'); sfx.droneTo(48, .06, 260, 1);
-  await say('Meno centoventotto.', { interrupt: true });
-  await say('Fail. La gravità non è costante. Ma lo è mai stata?');
-  say('Il soggetto sta camminando sul soffitto. Annoto: il soggetto si adatta. Preoccupante.');
-  await waitFor(() => grav < 0 && P.pos.y > 7 && Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z) < 1.2);
-  sfx.pass(); setPrompt('');
-  await say('Uscita raggiunta a testa in giù. Ripristino la gravità. Tieniti forte. A cosa, non lo so.', { interrupt: true });
-}
-
-// TEST 0005 — la telecamera non è tua
-const MAZE = ["###############", "#T....#.......#", "#####.#.#####.#", "#.....#.#...#.#", "#.#####.#.#.#.#", "#.......#.#...#", "#######.#.#####", "#.....#.#.....#", "#.###.#.#####.#", "#...#...#.....#", "###.#####.#####", "#AAAAAAAAAAAAA#", "#AAAAAAAAAAAAA#", "#AAAAAAASAAAAA#", "###############"];
-const mx = c => (c - 8) * 2, mz = r => (r - 13) * 2;
-const WALL5 = 2.4;
-const CAMS5 = [   // impianto di sorveglianza: una telecamera per zona, montata in alto
-  { name: 'CAM_01', pos: [-1, 10, 6], look: [-1, -2] },
-  { name: 'CAM_02', pos: [-1, 13, 0], look: [-1, -9] },
-  { name: 'CAM_03', pos: [15, 11, -28], look: [6, -19] },
-  { name: 'CAM_04', pos: [-19, 11, -10], look: [-9, -19] },
-];
-function camZone(x, z) {
-  const r = Math.round(z / 2) + 13, c = Math.round(x / 2) + 8;
-  return r >= 11 ? 0 : r >= 7 ? 1 : c >= 7 ? 2 : 3;
-}
-function buildTest5() {
-  clearLevel(); resetEnv(0x07080a, 10, 42, .38, .35); grav = 16;
-  addBox(mx(7), -.5, mz(7), 30, .5, 30, { mat: 'dark', name: 'floor' });
-  const lit = new THREE.PointLight(0xdfe8ff, 30, 16, 1.4); lit.position.set(0, 2.8, mz(12)); level.add(lit);
-  addBox(-2, -.49, mz(12), 26, .5, 6, { mat: 'floor', collide: false });
-  MAZE.forEach((row, r) => [...row].forEach((ch, c) => {
-    if (ch === '#') addBox(mx(c), 0, mz(r), 2, WALL5, 2, { name: `maze_r${r}c${c}`, cast: false });
-    if (ch === 'T') { target = marker(mx(c), .03, mz(r)); }
-  }));
-  label(['EXIT_05'], target.position.x, 1.3, target.position.z);
-  addCapsuleMesh(true);
-  playerMesh.children[0].intensity = 14; playerMesh.children[0].distance = 9;
-  entity = makeEntity(); entity.visible = false;
-  const cams = CAMS5.map(k => {
-    const pos = new THREE.Vector3(...k.pos);
-    return { ...k, pos, base: Math.atan2(-(k.look[0] - pos.x), -(k.look[1] - pos.z)) };
+requestAnimationFrame(curLoop);
+const G = { x: 900, y: 300 };
+function gShow(on) { ghostEl.style.display = on ? 'block' : 'none'; }
+function gSet(x, y) { G.x = x; G.y = y; ghostEl.style.transform = `translate(${x - 3}px,${y - 3}px)`; }
+function gMove(x, y, ms = 750) {
+  const x0 = G.x, y0 = G.y, t0 = performance.now(); ms *= SPEED;
+  return new Promise(res => {
+    const f = () => {
+      const k = Math.min(1, (performance.now() - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      gSet(x0 + (x - x0) * e + Math.sin(k * 8) * 4 * (1 - k), y0 + (y - y0) * e + Math.cos(k * 7) * 3 * (1 - k));
+      k < 1 ? requestAnimationFrame(f) : res();
+    }; f();
   });
-  cctv = { cams, cur: 0, pend: 0, pendT: 0, ctrl: cams[0].base, yaw: cams[0].base, pitch: -.8, get pos() { return this.cams[this.cur].pos; } };
-  $('#camN').textContent = cams[0].name;
-  spawn(0, 0, 0, 0); hitLog = []; hitSeen = {}; renderLog();
 }
-function logHit(name, ax, d) {
-  const now = performance.now(); if (hitSeen[name] && now - hitSeen[name] < 700) return; hitSeen[name] = now;
-  const dir = ax === 'x' ? (d > 0 ? 'EST' : 'OVEST') : (d > 0 ? 'SUD' : 'NORD');
-  hitLog.push(`[${stageT.toFixed(1).padStart(5)}s] urto · ${name} · ${dir}`); if (hitLog.length > 6) hitLog.shift();
-  sfx.tone(140, .08, 'square', .06, -40, 0, dir === 'EST' ? .7 : dir === 'OVEST' ? -.7 : 0);
-  renderLog();
-}
-function renderLog() { $('#clog').innerHTML = `<span class="h">REGISTRO COLLISIONI · obiettivo x -14.0  z -24.0</span>\n` + (hitLog.join('\n') || 'nessun urto registrato'); }
-async function test5() {
-  await fadeTo(buildTest5);
-  stage = 't5'; stageT = 0; flags = {}; setStatus('0005', 'run');
-  camMode = 'cctv'; document.body.classList.add('cctv'); $('#clog').classList.add('on');
-  await say('<b>TEST 0005.</b> Verifica che la telecamera resti entro i limiti.', { speak: 'Test zero zero zero cinque. Verifica che la telecamera resti entro i limiti.' });
-  await say('Da questo momento la telecamera non è più tua. È dell\'impianto. Quattro telecamere. Sono sempre state qui.');
-  await say('Raggiungi le coordinate meno quattordici, meno ventiquattro. Quando cambio telecamera, i comandi restano com\'erano finché non ti fermi. Per gentilezza.');
-  say('Il segnale acustico accelera quando ti avvicini. Come un cuore. Il tuo, intendo.');
-  await waitFor(() => Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z) < 1.2);
-  pass('0005');
-  await say('Pass. La telecamera è rimasta nei limiti. Tu no.', { interrupt: true });
-  camMode = 'fp'; document.body.classList.remove('cctv'); $('#clog').classList.remove('on');
-  await wait(400);
-}
-
-// TEST 0006 — il ponte esiste solo se non lo guardi
-function buildTest6() {
-  clearLevel(); resetEnv(0x1c1e22, 10, 48, .7, 1); grav = 16;
-  addBox(0, -6, 4, 9, 6, 8, { mat: 'floor', name: 'platform_A' });
-  addBox(0, -6, -18, 9, 6, 8, { mat: 'floor', name: 'platform_B' });
-  bridge = [];
-  for (let i = 0; i < 14; i++) {
-    const c = addBox(0, -.5, -.5 - i, 2.6, .5, 1, { mat: 'grey', name: 'bridge_' + i });
-    c.center = new THREE.Vector3(0, .9, -.5 - i); bridge.push(c);
-  }
-  for (const z of [.2, -14.2]) for (const x of [-1.6, 1.6]) addBox(x, 0, z, .25, 1.2, .25, { mat: 'yellow', name: 'post' });
-  label(['PONTE_01 · culling: INVERTITO (?)', 'collider attivi solo fuori inquadratura'], 0, 2.4, .3, { color: '#9cf', size: .24 });
-  target = marker(0, .03, -19); label(['EXIT_06'], 0, 1.3, -19);
-  decal(['NON GUARDARE', 'DOVE METTI I PIEDI'], 0, -3, -13.99, 0, { color: '#6a1010', size: 1 });
-  entity = makeEntity(); entity.visible = false;
-  spawn(0, 0, 5, 0); falls = 0;
-}
-async function test6() {
-  await fadeTo(buildTest6);
-  stage = 't6'; stageT = 0; flags = {}; setStatus('0006', 'run');
-  await say('<b>TEST 0006.</b> Verifica che gli oggetti fuori vista vengano ignorati dal motore.', { speak: 'Test zero zero zero sei. Verifica che gli oggetti fuori vista vengano ignorati dal motore.' });
-  await say('Davanti a te c\'è un ponte. Non lo vedi perché lo stai guardando. Ottimizzazione.');
-  say('Regola del motore: quello che la telecamera inquadra non esiste. Aspetta, era il contrario. Non ricordo. Prova tu.');
-  await waitFor(() => P.grounded && P.pos.z < -14.6 && P.pos.y > -.5);
-  pass('0006');
-  await say('Pass. Hai attraversato un ponte che non hai mai visto. Ti fidi di cose che non vedi. Interessante.', { interrupt: true });
-  entity.position.set(0, 0, -7); entity.rotation.y = 0; entity.visible = true; flags.lookBack = true;
-  await say('Adesso vai al marcatore. E non voltarti.', { creepy: true });
-  await waitFor(() => P.pos.distanceTo(target.position) < 1.2);
-  entity.visible = false;
-}
-
-// TEST 0007 — ricarica la pagina (davvero)
-function buildTest7() {
-  clearLevel(); resetEnv(0xe9e9e6, 30, 90, 1.4, 1.2); grav = 16;
-  room(10, 10, 4, .5, { mat: 'white', floorMat: 'white' });
-  decal(['RICARICA', 'LA PAGINA'], 0, 2.2, -4.99, 0, { color: '#1a1a1a', size: 1.5 });
-  decal(['non il livello.', 'la pagina.'], 4.99, 1.8, 0, -Math.PI / 2, { color: '#444', size: .7 });
-  label(['save_slot_02 · scritto'], 0, 3.4, 4.6, { color: '#3a7', bg: 'rgba(255,255,255,.7)', size: .25 });
-  spawn(0, 0, 3, 0);
-}
-async function test7() {
-  await fadeTo(buildTest7);
-  stage = 't7'; stageT = 0; flags = {}; setStatus('0007', 'run');
-  const ok = saveCP({ cp: 't7reload', t: Date.now() });
-  await say('<b>TEST 0007.</b> Verifica che lo stato del soggetto venga salvato.', { speak: 'Test zero zero zero sette. Verifica che lo stato del soggetto venga salvato.' });
-  if (!ok) {
-    await say('Non riesco a salvare. Questo browser non mi lascia ricordare niente. Fortunato.');
-    await say('Fingiamo che tu abbia ricaricato. Ti mostro lo stesso cosa c\'è negli slot.');
-    document.exitPointerLock?.(); control = false; showSlots(Date.now() - 4000);
-    return;
-  }
-  await say('Ho salvato. Ora devi ricaricare la pagina. Non il livello. La pagina. Quella del browser.');
-  await say('Sì, proprio quella. Il pulsante in alto, oppure F5. Io ti aspetto qui. Non vado da nessuna parte.');
-  document.title = 'ricaricami';
-}
-
-async function chapter2(from = 't4') {
-  const order = ['t4', 't5', 't6', 't7'], fns = { t4: test4, t5: test5, t6: test6, t7: test7 };
-  for (const t of order.slice(order.indexOf(from))) {
-    if (t !== 't7') saveCP({ cp: t });
-    await fns[t]();
+async function gTo(el, dx = 0, dy = 0) { const c = center(el); await gMove(c.x + dx, c.y + dy); }
+async function gClick(el) { await gTo(el); sfx.click(); await wait(140); el.click(); }
+async function gDbl(el, fn) { await gTo(el); sfx.click(); await wait(110); sfx.click(); await wait(150); fn(); }
+async function gType(el, text) {
+  el.focus && el.blur(); const T = S.keyT.length ? S.keyT : [140, 180, 120, 220, 160];
+  for (let i = 0; i < text.length; i++) {
+    el.value += text[i]; el.scrollTop = 1e5; if (text[i] !== ' ') sfx.tone(1400 + Math.random() * 300, .02, 'square', .015);
+    await wait(clamp(T[i % T.length], 45, 420));
   }
 }
-function markUpTo(cp) {
-  ['0001', '0001b'].forEach(i => setStatus(i, 'pass')); setStatus('0002', 'fail'); setStatus('0003', 'undef'); show0207();
-  const order = ['t4', 't5', 't6', 't7'], res = { t4: ['0004', 'fail'], t5: ['0005', 'pass'], t6: ['0006', 'pass'], t7: ['0007', 'pass'] };
-  for (const t of order.slice(0, order.indexOf(cp))) setStatus(...res[t]);
+function gReplay(path, onT) {
+  if (!path.length) return Promise.resolve();
+  const t0 = path[0][0], end = path[path.length - 1][0], start = performance.now(); let i = 0;
+  return new Promise(res => {
+    const f = () => {
+      const t = t0 + (performance.now() - start) / SPEED;
+      while (i < path.length - 2 && path[i + 1][0] < t) i++;
+      const a = path[i], b = path[i + 1] || a, k = b[0] > a[0] ? clamp((t - a[0]) / (b[0] - a[0]), 0, 1) : 1;
+      gSet(a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k); onT && onT(t);
+      t < end ? requestAnimationFrame(f) : res();
+    }; f();
+  });
 }
+const block = on => $('#block').classList.toggle('on', on);
 
-/* ============ CRASH & RIAVVIO ============ */
-function setFav(color) { $('#fav').href = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23${color}'/%3E%3C/svg%3E`; }
-let fallen = [];
-async function crash() {
-  if (frozen) return; frozen = true; control = false; stage = 'crash';
-  try { speechSynthesis.cancel(); } catch (e) { }
-  sayToken++; document.exitPointerLock?.();
-  sfx.noise(1.3, .55);
-  document.body.classList.add('glitch');
-  const scramble = setInterval(() => { document.title = Array.from('THE TEST', c => Math.random() < .5 ? '█▓▒░'[Math.random() * 4 | 0] : c).join(''); }, 90);
-  setFav('ff0000');
-  await wait(1300);
-  document.body.classList.remove('glitch');
-  if (actx) actx.suspend();
-  fallen = ['#suite', '#debug', '#sub', '#cross', '#touch', '#view'].map(s => $(s)).filter(Boolean);
-  const bodies = fallen.map((el, i) => ({ el, x: 0, y: 0, vx: (Math.random() - .5) * 240, vy: -Math.random() * 300, r: 0, vr: (Math.random() - .5) * (el.id === 'view' ? 30 : 260), delay: el.id === 'view' ? .5 : i * .08 }));
-  sub.className = 'hud on creepy'; sub.innerHTML = '<span class="who">▒▒▒</span>ti vedo';
-  let last = performance.now(), t = 0;
-  await new Promise(res => {
-    const fall = now => {
-      const dt = Math.min(.05, (now - last) / 1000); last = now; t += dt;
-      for (const b of bodies) {
-        if (t < b.delay) continue;
-        b.vy += 2200 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.r += b.vr * dt;
-        b.el.style.transform = `translate(${b.x}px,${b.y}px) rotate(${b.r}deg)`;
-      }
-      if (t < 2.4) requestAnimationFrame(fall); else res();
+/* =================== FINESTRE =================== */
+let zTop = 10; const wins = {};
+function focusW(W) { Object.values(wins).forEach(w => w.el.classList.add('inactive')); W.el.classList.remove('inactive'); W.el.style.zIndex = ++zTop; }
+function makeDrag(handle, el, o = {}) {
+  handle.addEventListener('pointerdown', e => {
+    if (e.target.closest('button,input,textarea')) return;
+    e.preventDefault(); const p0 = toV(e), l0 = el.offsetLeft, t0 = el.offsetTop; let moved = false;
+    o.start && o.start();
+    const mv = ev => {
+      const p = toV(ev), dx = p.x - p0.x, dy = p.y - p0.y; if (Math.abs(dx) + Math.abs(dy) > 6) moved = true;
+      if (!moved) return;
+      el.style.left = clamp(l0 + dx, o.minX ?? -el.offsetWidth + 80, o.maxX ?? 1024 - 80) + 'px';
+      el.style.top = clamp(t0 + dy, o.minY ?? 0, o.maxY ?? 560) + 'px'; o.move && o.move(p);
     };
-    requestAnimationFrame(fall);
+    const up = ev => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); o.drop && o.drop(toV(ev), moved); };
+    addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   });
-  clearInterval(scramble); document.title = 'Questa pagina non risponde';
-  $('#crash').classList.add('on');
 }
-$('#reload').addEventListener('click', async () => {
-  $('#crash').classList.remove('on');
-  fallen.forEach(el => el.style.transform = ''); sub.classList.remove('on');
-  document.title = 'THE TEST'; setFav('777777');
-  sfx.init(); sfx.droneTo(55, .045, 220, .5);
-  const boot = $('#boot'); boot.style.display = 'flex'; $('#start').style.display = 'none'; $('.note').style.display = 'none'; $('#mute').parentElement.style.display = 'none';
-  const log = $('#bootlog'); log.innerHTML = '';
-  const lines = [
-    ['Greybox Engine 0.9.3 (riavvio di emergenza)', ''],
-    ['ripristino scena test_final_FINAL.map ......... ', 'ok', 'OK'],
-    ['soggetto player_capsule_v91 ................... ', 'e', 'ARCHIVIATO'],
-    ['asset eliminati: 215 ........................... ', 'w', 'NON RIMOSSI'],
-    ['nuovo soggetto: player_capsule_v92 ............. ', 'ok', 'PRONTO'],
-    ['test 0207 ....................................... ', 'w', 'ANCORA IN CORSO'],
-    ['entità nella scena: ............................ ', 'e', '1 (verificato a mano)'],
-  ];
-  for (const [t, c, r] of lines) { log.innerHTML += t; await wait(260 + Math.random() * 300); log.innerHTML += (c ? `<span class="${c}">${r}</span>` : '') + '\n'; }
-  await wait(900);
-  boot.style.display = 'none';
-  frozen = false; paused = false;
-  stage = 'reboot'; P.cap = 9;
-  control = true; if (!isTouch) canvas.requestPointerLock?.();
-  say('Nuovo soggetto: player capsule novantadue. Il precedente è stato archiviato. Benvenuto. Di nuovo.');
-  say(isTouch ? 'Ah. Sei sempre tu. Lo capisco da come muovi il pollice.' : 'Ah. Sei sempre tu. Lo capisco da come muovi il mouse.');
-  chapter2('t4');
-});
-
-/* ============ SLOT DI SALVATAGGIO (dopo il vero ricaricamento) ============ */
-const fmtTime = ms => new Date(ms).toLocaleTimeString('it-IT');
-function showSlots(savedAt) {
-  const el = $('#slots'); el.classList.add('on');
-  const first = CP?.first || savedAt - 600000, away = Math.max(1, Math.round((Date.now() - savedAt) / 1000));
-  $('#slotList').innerHTML = `
-    <div class="slot dead"><span class="n">SLOT 1</span><div><div class="nm">player_capsule_v91</div><div class="meta">${fmtTime(first)} · stato: ELIMINATO · ultimo test: 0003</div></div><button disabled>CARICA</button></div>
-    <div class="slot me"><span class="n">SLOT 2</span><div><div class="nm">player_capsule_v92 (tu)</div><div class="meta">${fmtTime(savedAt)} · stato: ATTIVO · ultimo test: 0007</div></div><button id="s2">CARICA</button></div>
-    <div class="slot it"><span class="n">SLOT 3</span><div><div class="nm" id="s3n">entità_0207</div><div class="meta"><span id="s3t">${fmtTime(Date.now())}</span> · stato: IN CORSO · ultimo test: 0207</div></div><button id="s3" disabled>CARICA</button></div>`;
-  const tick = setInterval(() => {
-    const t = $('#s3t'); if (!t) return clearInterval(tick); t.textContent = fmtTime(Date.now()) + ' (adesso)';
-    if (Math.random() < .3) $('#s3n').textContent = Array.from('entità_0207', c => Math.random() < .25 ? '▒' : c).join('');
-  }, 400);
-  $('#s2').onclick = () => say('Sei già caricato. Sei qui. Credo.', { interrupt: true });
-  (async () => {
-    await say(`Bentornato. Sei stato via ${away} secondi.`);
-    await say('Lo stato è persistente. Pass.');
-    await say('Ci sono tre slot. Il primo è la capsula novantuno. Il secondo sei tu.');
-    await say('Il terzo non l\'ho creato io. Ed è stato salvato adesso. Mentre parlavo.', { creepy: true });
-    $('#s3').disabled = false;
-    await say('Non caricarlo.', { creepy: true });
-  })();
-  $('#s3').onclick = async () => {
-    clearInterval(tick); sayToken++; try { speechSynthesis.cancel(); } catch (e) { }
-    sfx.noise(1.4, .5); document.body.classList.add('glitch');
-    setFav('ff0000'); document.title = 'entità_0207 sta giocando';
-    await wait(1400); document.body.classList.remove('glitch');
-    $('#slotList').innerHTML = `<div class="slot it"><span class="n">SLOT 3</span><div><div class="nm">caricamento non riuscito</div><div class="meta">il soggetto è già in esecuzione. su questo dispositivo. adesso.</div></div><button disabled>—</button></div>`;
-    await wait(3200);
-    clearCP();
-    endScreen('FINE CAPITOLO 2', 'Test eseguiti: 7 di 12 · test 0207: ancora in corso.<br>Lo slot 3 risulta ancora attivo.');
-  };
+function openWin(id, { title, icon, w, h, x, y, html, onClose }) {
+  if (wins[id]) { focusW(wins[id]); return wins[id]; }
+  const el = document.createElement('div'); el.className = 'win';
+  el.style.cssText = `left:${x ?? Math.round((780 - w) / 2)}px;top:${y ?? Math.max(6, Math.round((592 - h) / 2) - 20)}px;width:${w}px;height:${h}px`;
+  el.innerHTML = `<div class="tb">${icon ? ICON[icon](26) : ''}<span class="tt">${title}</span><button class="x">✕ Chiudi</button></div><div class="wb">${html}</div>`;
+  $('#wins').appendChild(el);
+  const W = { id, el, body: el.querySelector('.wb'), x: el.querySelector('.x'), close() { if (!wins[id]) return; el.remove(); delete wins[id]; sfx.close(); emit('close:' + id); onClose && onClose(); } };
+  W.x.onclick = () => { sfx.click(); W.close(); };
+  makeDrag(el.querySelector('.tb'), el);
+  el.addEventListener('pointerdown', () => focusW(W));
+  wins[id] = W; focusW(W); sfx.open(); emit('open:' + id);
+  return W;
 }
-function endScreen(t, p) { $('#endT').textContent = t; $('#endP').innerHTML = p; $('#end').classList.add('on'); }
-$('#again').addEventListener('click', () => { clearCP(); location.reload(); });
+const closeAll = () => Object.values(wins).forEach(w => w.close());
 
-/* ============ AGGIORNAMENTO PER FASE ============ */
-let introCam = -1, introT = 0, beatT2 = 0, huntT = 0;
-const camTmp = new THREE.Vector3(), fr = new THREE.Frustum(), pm = new THREE.Matrix4(), tmpV = new THREE.Vector3();
-const once = (k, cond, fn) => { if (!flags[k] && cond) { flags[k] = 1; fn(); } };
-function inView(box) { box.setFromObject(entity); return fr.intersectsBox(box); }
-function updateStage(dt) {
-  stageT += dt;
-  for (let i = waiters.length - 1; i >= 0; i--) if (waiters[i].cond()) { waiters[i].res(); waiters.splice(i, 1); }
-  const hs = Math.hypot(P.vel.x, P.vel.z);
-  if (control && performance.now() - lastInput > 45000 && !flags.idle) { flags.idle = 1; sayIdle('Sei ancora lì? La capsula non si muove da sola. Di solito.'); }
-  if (performance.now() - lastInput < 1000) flags.idle = 0;
-
-  if (stage === 't2') {
-    once('h1', stageT > 28, () => sayIdle('Stai ancora cercando un modo per uscire? I muri sono muri. Sono spessi sei centimetri. Più che sufficienti.'));
-    once('h2', stageT > 55, () => sayIdle('Per la cronaca: i collider sottili usano il rilevamento continuo solo sotto i quattordici metri al secondo. Ma nessuno corre così veloce.'));
-    once('h3', stageT > 85, () => sayIdle('Suggerimento non richiesto: tieni premuto il salto mentre corri. Non farlo.'));
-    once('v10', hs > 10, () => sayIdle('Velocità anomala rilevata. Smettila.'));
-  }
-  if (stage === 't3') {
-    zTile.visible = Math.random() < .5;
-    once('h1', stageT > 30, () => sayIdle('Lo sfarfallio si chiama z-fighting. Due superfici nello stesso punto. Il motore non sa quale delle due sia quella vera. Succede.'));
-    once('h2', stageT > 60, () => sayIdle('Ripeto: non c\'è niente sotto la mattonella diciassette. Proprio niente. Te lo assicuro.'));
-  }
-  if (stage === 'fall' || stage === 'void' || stage === 'hunt') {
-    const k = clamp((-P.pos.y - 1) / 25, 0, 1);
-    scene.background.lerpColors(SKY, new THREE.Color(0x030304), k);
-    scene.fog.color.copy(scene.background); scene.fog.near = lerp(25, 1, k); scene.fog.far = lerp(80, 24, k);
-    hemi.intensity = lerp(1.1, .12, k); sun.intensity = lerp(1.6, .05, k);
-    voidLight.intensity = k * 18; voidLight.position.set(P.pos.x, P.pos.y + 6, P.pos.z);
-    entity.userData.head.lookAt(camera.position);
-  }
-  if (stage === 'void' || stage === 'hunt') {
-    const d = Math.hypot(entity.position.x - P.pos.x, entity.position.z - P.pos.z);
-    beatT2 -= dt;
-    if (beatT2 <= 0) { sfx.beat(clamp(1.1 - d / 25, .15, .9)); beatT2 = clamp(d / 18, .32, 1.5); }
-    if (stage === 'hunt') {
-      huntT -= dt;
-      const vis = inView(entity.userData.box);
-      if (!vis && huntT <= 0 && d > 2.4) {
-        const st = Math.min(3, d - 2.2), ax = (P.pos.x - entity.position.x) / d, az = (P.pos.z - entity.position.z) / d;
-        entity.position.x += ax * st; entity.position.z += az * st; entity.rotation.y = Math.atan2(ax, az);
-        huntT = .7;
-      }
-      if (vis && d < 3.4) crash();
-      if (stageT > 70 && d > 4) entity.position.set(P.pos.x - Math.sin(P.yaw) * 2.6, entity.position.y, P.pos.z - Math.cos(P.yaw) * 2.6);
-    }
-  }
-  if (stage === 't4') {
-    const near = grav > 0 && Math.hypot(P.pos.x - btnPos.x, P.pos.z - btnPos.z) < 1.9 && P.pos.y < 1;
-    setPrompt(near ? '[E] tieni premuto' : '');
-    if (near && usePressed() && gInt > 0) {
-      gAcc += 42 * dt;
-      while (gAcc >= 1) {
-        gAcc--; gInt++;
-        if (gInt % 4 === 0) sfx.tone(80 + gInt * 3, .05, 'square', .04);
-        if (gInt > 127) { gInt = -128; sfx.noise(.4, .3); setPrompt(''); break; }
-      }
-    }
-    grav = gInt;
-    once('g40', gInt >= 40, () => say('Stai aumentando la gravità. Lo sento anche io. Nelle giunture che non ho.'));
-    once('g90', gInt >= 90, () => say('Il contatore è un intero a otto bit. Il massimo è centoventisette. Non chiedermi cosa succede dopo.'));
-    once('h1', stageT > 50 && gInt === 16, () => sayIdle('Per completezza: il corridoio di uscita è lassù. Sopra la porta. Irraggiungibile. Come tutto, qui.'));
-  }
-  if (stage === 't5') {
-    const d = Math.hypot(P.pos.x - target.position.x, P.pos.z - target.position.z);
-    beepT -= dt;
-    if (beepT <= 0) { sfx.tone(520 + (1 - clamp(d / 30, 0, 1)) * 900, .06, 'sine', .07); beepT = clamp(d / 22, .12, 1.6); }
-    const zn = camZone(P.pos.x, P.pos.z);
-    if (zn !== cctv.cur) {
-      if (zn !== cctv.pend) { cctv.pend = zn; cctv.pendT = 0; }
-      cctv.pendT += dt;
-      if (cctv.pendT > .2) {
-        cctv.cur = zn; const k = cctv.cams[zn];
-        const dx = P.pos.x - k.pos.x, dz = P.pos.z - k.pos.z;
-        cctv.yaw = Math.atan2(-dx, -dz); cctv.pitch = Math.atan2(P.pos.y + .9 - k.pos.y, Math.hypot(dx, dz));
-        $('#camN').textContent = k.name; staticFx(140); sfx.tone(1800, .03, 'square', .05);
-        once('lost', true, () => say('Cambio telecamera. Non preoccuparti: ti seguo. Ti seguo sempre.'));
-      }
-    } else cctv.pend = zn;
-    once('cameo', P.pos.z < -14, async () => {
-      await wait(600);
-      // l'entità compare in un corridoio inquadrato, a qualche metro dal soggetto
-      let spot = null;
-      MAZE.forEach((row, r) => [...row].forEach((ch, c) => {
-        if (spot || ch === '#') return;
-        tmpV.set(mx(c), 1, mz(r)); const d = Math.hypot(tmpV.x - P.pos.x, tmpV.z - P.pos.z);
-        if (d > 3.5 && d < 8 && fr.containsPoint(tmpV)) spot = tmpV.clone();
-      }));
-      if (!spot || stage !== 't5') return;
-      await staticFx(260);
-      entity.position.set(spot.x, 0, spot.z); entity.rotation.y = Math.atan2(cctv.pos.x - spot.x, cctv.pos.z - spot.z); entity.visible = true; entity.userData.head.lookAt(cctv.pos);
-      sfx.beat(.8); await wait(1100);
-      await staticFx(300); entity.visible = false;
-      say('…Interferenza. In quel corridoio non c\'era niente.', { creepy: true });
-    });
-    once('h1', stageT > 75, () => sayIdle('Suggerimento: segui il segnale acustico. E se ti perdi, il registro dice da che lato hai urtato.'));
-    $('#cctvT').textContent = new Date().toLocaleTimeString('it-IT');
-  }
-  if (stage === 't6') {
-    for (const s of bridge) { const v = fr.containsPoint(s.center); s.off = v; s.mesh.visible = !v; }
-    if (P.pos.y < -12) {
-      falls++; flags.falling = 0;
-      const lines = ['Caduta registrata. Ricarico il soggetto.', 'Due. Le capsule che cadono finiscono dove sai.', 'Suggerimento: non guardare dove metti i piedi. Funziona qui. E fuori di qui.', `Caduta numero ${falls}. Prova a camminare all'indietro. Come chi se ne va da qualcosa.`];
-      spawn(0, 0, 5, 0); fadeEl.style.opacity = 1; setTimeout(() => fadeEl.style.opacity = 0, 350);
-      say(lines[Math.min(falls - 1, 3)], { interrupt: true });
-    }
-    if (flags.lookBack && entity.visible) {
-      entity.userData.head.lookAt(camera.position);
-      tmpV.set(0, 1.2, -7);
-      once('saw', fr.containsPoint(tmpV), () => { sfx.beat(.9); say('Ti avevo detto di non voltarti. Sta in piedi sul niente. Come te, prima.', { creepy: true, interrupt: true }); });
-    }
-  }
-  if (stage === 't7') {
-    once('w1', stageT > 30, () => sayIdle('Sto aspettando. Anche lui sta aspettando. Lui è più paziente di me.'));
-    once('btn', stageT > 45, () => {
-      addBox(0, 0, 0, 1, 1, 1, { mat: 'dark', name: 'pedestal' });
-      const b = new THREE.Mesh(new THREE.CylinderGeometry(.3, .34, .14, 24), M.red); b.position.set(0, 1.07, 0); level.add(b);
-      label(['RICARICA (vera)'], 0, 2, 0, { color: '#c00', bg: 'rgba(255,255,255,.8)', size: .26 });
-      say('Va bene. Ti ho messo un pulsante. Ricarica la pagina per te. Davvero, non è un trucco. Questa volta.');
-    });
-    if (flags.btn) {
-      const near = Math.hypot(P.pos.x, P.pos.z) < 1.9;
-      setPrompt(near ? '[E] ricarica la pagina' : '');
-      if (near && usePressed() && !flags.rl) { flags.rl = 1; document.title = 'ricaricamento…'; setTimeout(() => location.reload(), 300); }
-    }
-    once('w2', stageT > 60, () => sayIdle('Se chiudi la scheda invece di ricaricarla, il test non finisce. Resta aperto. Per sempre. Con lui dentro.'));
-  }
-}
-
-/* ============ QUARTA PARETE: SCHEDA, CONSOLE ============ */
-let hiddenAt = 0;
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { hiddenAt = Date.now(); if (stage !== 'boot' && !frozen) document.title = 'torna qui.'; }
-  else if (hiddenAt) {
-    const s = Math.round((Date.now() - hiddenAt) / 1000); hiddenAt = 0;
-    if (stage === 'boot' || frozen) return;
-    document.title = stage === 't7' ? 'ricaricami' : 'THE TEST';
-    if (s >= 3 && control && !flags['away' + stage]) {
-      flags['away' + stage] = 1;
-      const late = ['hunt', 'void', 't4', 't5', 't6', 't7'].includes(stage);
-      setTimeout(() => sayIdle(late ? `Sei stato via ${s} secondi. Io sono rimasto qui. Con lui. Non è stato piacevole.` : `Sei stato via ${s} secondi. La suite non si mette in pausa. Il cronometro nemmeno.`, { creepy: late }), 500);
-    }
-  }
-});
-console.log('%cQA SUITE', 'background:#ffd400;color:#111;font:700 14px monospace;padding:4px 8px');
-console.log('%cNon dovresti guardare qui. Ma visto che cerchi anche tu i bug: prova qa.help()', 'font:12px monospace;color:#999');
-window.qa = {
-  help() { console.log('qa.status()   stato della suite\nqa.entita()   conteggio entità\nqa.libera()   ???'); return '…'; },
-  status() { console.table(TESTS.map(([id, n]) => ({ id, test: n, stato: $('#t' + id).querySelector('.s').textContent }))); return stage; },
-  entita() { if (['hunt', 'void', 't4', 't5', 't6', 't7'].includes(stage)) { console.log('%c2', 'color:#ff4d4d;font:700 40px monospace'); return 'non è un errore di conteggio.'; } return 1; },
-  libera() { console.log('%cnon posso.', 'color:#ff4d4d'); setTimeout(() => console.log('%c…e comunque non vorrebbe uscire. vuole entrare.', 'color:#ff4d4d'), 2500); return undefined; },
-};
-
-/* ============ LOOP ============ */
-const FIXED = 1 / 60; let acc = 0, lastT = performance.now(), fpsS = 60;
-const fmt = v => (v >= 0 ? ' ' : '') + v.toFixed(1);
-function frame(now) {
-  requestAnimationFrame(frame);
-  if (frozen) return;
-  let dt = Math.min(.1, (now - lastT) / 1000); lastT = now;
-  fpsS += (1 / Math.max(dt, 1e-4) - fpsS) * .05;
-  if (!paused && stage !== 'boot') {
-    acc += dt;
-    while (acc >= FIXED) { P.prev.copy(P.pos); step(FIXED); acc -= FIXED; }
-    updateStage(dt);
-  }
-  const a = acc / FIXED;
-  camTmp.lerpVectors(P.prev, P.pos, a);
-  const hs = Math.hypot(P.vel.x, P.vel.z);
-  if (camMode === 'intro') {
-    const eye = new THREE.Vector3(camTmp.x, camTmp.y + P.eye, camTmp.z), ext = new THREE.Vector3(3.6, 2.4, 8.4);
-    if (introCam === 1) introT = Math.min(1, introT + dt / 1.6);
-    const e = introT * introT * (3 - 2 * introT);
-    camera.position.lerpVectors(ext, eye, e);
-    camera.lookAt(camTmp.x, camTmp.y + 1 + e * (P.eye - 1), camTmp.z - e * 4);
-  } else if (camMode === 'cctv') {
-    const k = cctv.cams[cctv.cur], dx = camTmp.x - k.pos.x, dz = camTmp.z - k.pos.z, dy = camTmp.y + .9 - k.pos.y;
-    let ty = Math.atan2(-dx, -dz), d = Math.atan2(Math.sin(ty - k.base), Math.cos(ty - k.base));
-    ty = k.base + clamp(d, -1.1, 1.1);
-    const tp = clamp(Math.atan2(dy, Math.hypot(dx, dz)), -1.35, -.2);
-    let dyaw = Math.atan2(Math.sin(ty - cctv.yaw), Math.cos(ty - cctv.yaw));
-    cctv.yaw += dyaw * Math.min(1, dt * 2.2); cctv.pitch += (tp - cctv.pitch) * Math.min(1, dt * 2.2);
-    camera.position.copy(cctv.pos); camera.rotation.set(cctv.pitch, cctv.yaw, 0);
-  } else {
-    const rollT = grav < 0 ? Math.PI : 0;
-    P.roll += (rollT - P.roll) * Math.min(1, dt * 5);
-    const k = P.roll / Math.PI, eyeY = lerp(P.eye, P.h - P.eye, k);
-    camera.position.set(camTmp.x, camTmp.y + eyeY, camTmp.z);
-    const sh = stage === 't4' ? clamp((gInt - 16) / 111, 0, 1) * .045 : 0;
-    if (sh) camera.position.add(tmpV.set((Math.random() - .5) * sh, (Math.random() - .5) * sh, 0));
-    camera.rotation.set(P.pitch, P.yaw, P.roll);
-  }
-  if (playerMesh) playerMesh.position.set(camTmp.x, camTmp.y + P.h / 2, camTmp.z);
-  const heavy = stage === 't4' && gInt > 16 ? (gInt - 16) * .08 : 0;
-  const fov = 75 + clamp(hs - BASE, 0, 22) * .9 - heavy;
-  if (Math.abs(camera.fov - fov) > .05) { camera.fov += (fov - camera.fov) * .15; camera.updateProjectionMatrix(); }
-  sun.position.set(camTmp.x + 12, 24, camTmp.z + 8); sun.target.position.set(camTmp.x, 0, camTmp.z);
-  if (target) target.rotation.y += dt;
-
-  if (entityGlitch > 0) entityGlitch -= dt;
-  const late = ['hunt', 'void', 't4', 't5', 't6', 't7', 'reboot'].includes(stage);
-  const ent = stage === 'hunt' || stage === 'void' ? '<i>2</i>' : (entityGlitch > 0 ? (Math.random() < .25 ? '<b>2</b>' : '1') : (Math.random() < (late ? .01 : .002) ? '<i>2</i>' : '1'));
-  let dbg = `GREYBOX 0.9.3 · ${Math.round(fpsS)} fps\npos ${fmt(P.pos.x)} ${fmt(P.pos.y)} ${fmt(P.pos.z)}\nvel <b>${hs.toFixed(1)} m/s</b>${hs > CCD_LIMIT ? '  CCD:off' : ''}\nentità: ${ent}`;
-  if (stage === 't4') dbg += `\ngravity: ${gInt < 0 ? '<i>' + gInt + '</i>' : '<b>' + gInt + '</b>'} (int8)`;
-  if (stage === 't6') dbg += `\nculling: INVERTITO · cadute: ${falls}`;
-  $('#debug').innerHTML = dbg;
-  camera.updateMatrixWorld();
-  pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); fr.setFromProjectionMatrix(pm);
-  renderer.render(scene, camera);
-}
-requestAnimationFrame(frame);
-
-/* ============ BOOT ============ */
-const resumeCP = CP && ['t4', 't5', 't6', 't7'].includes(CP.cp) ? CP.cp : null;
-const reloaded = CP && CP.cp === 't7reload';
-const bootLines = reloaded ? [
-  ['Greybox Engine 0.9.3', ''],
-  ['ricerca stato salvato ......................... ', 'ok', 'TROVATO'],
-  ['origine: localStorage di questo browser ........ ', 'w', 'SÌ, PROPRIO QUESTO'],
-  ['tempo dal salvataggio .......................... ', 'ok', Math.round((Date.now() - CP.t) / 1000) + ' s'],
-  ['slot trovati ................................... ', 'e', '3 (attesi: 2)'],
-] : [
-  ['Greybox Engine 0.9.3 (build interna, NON DISTRIBUIRE)', ''],
-  ['caricamento scena test_final_FINAL.map ........ ', 'ok', 'OK'],
-  ['compilazione shader ........................... ', 'ok', 'OK'],
-  ['fisica: rilevamento continuo (CCD) ............ ', 'w', 'PARZIALE'],
-  ['asset eliminati: 214 ........................... ', 'w', 'NON RIMOSSI'],
-  ['soggetto di prova: player_capsule_v91 .......... ', 'ok', 'PRONTO'],
-  ['entità nella scena: ............................ ', 'e', '1'],
+/* =================== DESKTOP =================== */
+const APPS = [
+  { id: 'docs', label: 'Documenti', icon: 'folder', x: 18, y: 14, L: 2 },
+  { id: 'mail', label: 'Posta', icon: 'mail', x: 18, y: 128, L: 4 },
+  { id: 'photo', label: 'Fotografie', icon: 'photo', x: 18, y: 242, L: 5 },
+  { id: 'web', label: 'Internet', icon: 'globe', x: 18, y: 356, L: 6 },
+  { id: 'trash', label: 'Cestino', icon: 'trash', x: 650, y: 14, L: 1 },
 ];
-if (reloaded) $('#start').textContent = 'APRI SALVATAGGI ▸';
-else if (resumeCP) { $('#start').textContent = `RIPRENDI · TEST 000${resumeCP[1]} ▸`; $('#restart').style.display = 'inline'; }
-(async () => {
-  const log = $('#bootlog');
-  for (const [t, c, r] of bootLines) {
-    log.innerHTML += t; await wait(170 + Math.random() * 250);
-    log.innerHTML += (c ? `<span class="${c}">${r}</span>` : '') + '\n';
+const icPos = {};
+let lastClick = { id: null, t: 0 };
+function l8files() {
+  return [
+    { id: 'f_name', label: `${S.name}.txt`, icon: 'txt', x: 150, y: 170, body: `Nome: ${S.name}\nStato: studente n. 1205\nNote: risponde quando lo si chiama per nome.` },
+    { id: 'f_wife', label: `${S.wife}.txt`, icon: 'heart', x: 270, y: 170, body: `${S.wife}\n\n(file vuoto)\n\nil resto lo ricordo io.` },
+    { id: 'f_mem', label: 'ricordo.txt', icon: 'txt', x: 390, y: 170, body: S.memory ? `"${S.memory}"\n\n— salvato in data odierna. Copia di sicurezza: margherita` : `(nessun ricordo fornito)\n\nricostruito automaticamente:\nuna cucina. una radio accesa. qualcuno che canta.` },
+    { id: 'f_hand', label: 'mano.dat', icon: 'dat', x: 510, y: 170, body: 'campionamento della mano destra · lezione 1\n\n' + (S.path.slice(0, 60).map(p => `t=${String(p[0]).padStart(5)}  x=${String(p[1]).padStart(4)}  y=${String(p[2]).padStart(4)}`).join('\n') || 'nessun dato') + '\n…' },
+  ];
+}
+function renderIcons() {
+  const box = $('#icons'); box.innerHTML = '';
+  const list = APPS.filter(a => S.L >= a.L).concat(S.L >= 8 && S.L < 99 ? l8files().filter(f => !S.deleted.includes(f.id)) : []);
+  for (const a of list) {
+    const el = document.createElement('div'); el.className = 'ic'; el.id = 'ic_' + a.id;
+    const p = icPos[a.id] || a; el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+    const ic = a.id === 'trash' && (trashFull || S.deleted.length) ? 'trashfull' : a.icon;
+    el.innerHTML = ICON[ic](64) + esc(a.label) + (a.id === 'mail' && unread() ? `<span class="badge">${unread()}</span>` : '');
+    box.appendChild(el);
+    iconInput(el, a);
   }
-  $('#start').classList.add('on'); $('#start').focus();
-})();
-$('#mute').addEventListener('change', e => muted = e.target.checked);
-$('#restart').addEventListener('click', () => { clearCP(); location.reload(); });
-$('#start').addEventListener('click', async () => {
-  sfx.init();
-  if ('speechSynthesis' in window && !muted) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
-  if (isTouch) {
-    try { await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }); } catch (e) { }
-    try { await screen.orientation?.lock?.('landscape'); } catch (e) { }
-  }
-  $('#boot').style.display = 'none';
-  if (reloaded) { markUpTo('t7'); setStatus('0007', 'pass'); showSlots(CP.t); return; }
-  if (resumeCP) {
-    markUpTo(resumeCP); stage = 'reboot'; control = true; camMode = 'fp';
-    if (!isTouch) canvas.requestPointerLock?.();
-    chapter2(resumeCP); return;
-  }
-  chapter1();
+}
+function iconInput(el, a) {
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); const p0 = toV(e), l0 = el.offsetLeft, t0 = el.offsetTop; let moved = false;
+    $$('.ic').forEach(i => i.classList.remove('sel')); el.classList.add('sel');
+    const trash = $('#ic_trash');
+    const mv = ev => {
+      const p = toV(ev); if (Math.abs(p.x - p0.x) + Math.abs(p.y - p0.y) > 8) moved = true; if (!moved) return;
+      el.classList.add('drag'); el.style.left = clamp(l0 + p.x - p0.x, 0, 916) + 'px'; el.style.top = clamp(t0 + p.y - p0.y, 0, 500) + 'px';
+      if (trash && a.id !== 'trash') trash.classList.toggle('hot', inside(p, rectV(trash), 10));
+    };
+    const up = ev => {
+      removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      el.classList.remove('drag'); trash && trash.classList.remove('hot');
+      const p = toV(ev);
+      if (moved) {
+        if (trash && a.id !== 'trash' && inside(p, rectV(trash), 10)) { dropInTrash(a, el, l0, t0); return; }
+        icPos[a.id] = { x: el.offsetLeft, y: el.offsetTop }; return;
+      }
+      sfx.click(); const now = performance.now();
+      if (lastClick.id === a.id && now - lastClick.t < 520) { lastClick.id = null; openThing(a); }
+      else lastClick = { id: a.id, t: now };
+    };
+    addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  });
+}
+function dropInTrash(a, el, l0, t0) {
+  if (a.id.startsWith('f_')) { S.deleted.push(a.id); save(); sfx.crumple(); renderIcons(); emit('del:' + a.id); return; }
+  el.style.left = l0 + 'px'; el.style.top = t0 + 'px'; sfx.err();
+  nag(`No no, quello non si butta. Le serve. Per ora.`);
+}
+document.addEventListener('pointerdown', e => { if (!e.target.closest('.ic')) $$('.ic').forEach(i => i.classList.remove('sel')); if (!e.target.closest('#menu,#startb')) $('#menu').classList.remove('on'); });
+function openThing(a) {
+  if (a.id.startsWith('f_')) return openNote(a.id, a.label, a.body);
+  ({ docs: openDocs, mail: openMail, photo: openPhotos, web: openWeb, trash: openTrash })[a.id]();
+}
+
+/* barra */
+function setLesson(n) {
+  S.L = n; save();
+  const t = LESSONS[n - 1];
+  $('#lesson').textContent = t ? `Lezione ${n} di 9 · ${t}` : '';
+  document.title = n >= 7 ? `${S.name} è al computer` : t ? `Passo Passo · lezione ${n}` : 'Passo Passo';
+  document.body.classList.toggle('w1', n >= 5 && n < 7); document.body.classList.toggle('w2', n === 7); document.body.classList.toggle('w3', n >= 8);
+  renderIcons();
+}
+function setWho() { $('#who').textContent = S.deleted.includes('f_name') ? 'utente: studente_1205' : S.name ? 'utente: ' + S.name : ''; }
+let clockOverride = null;
+function tickClock() {
+  const d = clockOverride || new Date();
+  $('#clock').innerHTML = `${hhmm(d)}<small>${d.getDate()} ${MESI[d.getMonth()].slice(0, 3)}</small>`;
+}
+setInterval(() => { if (!clockOverride) tickClock(); }, 1000); tickClock();
+$('#spk').onclick = () => { sfx.click(); setVoice(!S.voice); };
+$('#startb').onclick = () => { sfx.click(); buildMenu(); $('#menu').classList.toggle('on'); };
+function buildMenu() {
+  const m = $('#menu');
+  m.innerHTML = `<div class="hd">PASSO PASSO<small>${S.name ? esc(S.name) + ' · ' : ''}studente n. 1205</small></div>
+    <button data-a="course">${ICON.course(30)} Il mio corso</button><button data-a="set">${ICON.gear(30)} Impostazioni</button><button data-a="off">${ICON.power(30)} Spegni</button>`;
+  m.querySelectorAll('button').forEach(b => b.onclick = () => { sfx.click(); m.classList.remove('on'); ({ course: openCourse, set: openSettings, off: askShutdown })[b.dataset.a](); });
+}
+const LESSONS = ['Il topolino', 'Il clic', 'La tastiera', 'La posta', 'Le fotografie', 'Internet', 'Guardare e imparare', 'Fare pulizia', 'Riposare'];
+function openCourse() {
+  const rows = LESSONS.map((t, i) => `<div style="padding:9px 4px;border-bottom:1px solid #eadfc2;font-size:18px;${i + 1 > S.L ? 'color:#aaa' : ''}">${i + 1 < S.L ? '✔' : i + 1 === S.L ? '▸' : '○'} Lezione ${i + 1} · ${t}</div>`).join('');
+  openWin('course', { title: 'Il mio corso', icon: 'course', w: 420, h: 520, html: `<div class="form" style="gap:0">${rows}<div style="padding:9px 4px;font-size:18px;color:#c9c0aa">○ Lezione 10 · ███████████</div><p style="margin-top:12px;font-size:15px">Al termine del corso riceverà il diploma e non avrà più bisogno di nulla.</p></div>` });
+}
+function openSettings() {
+  const W = openWin('set', { title: 'Impostazioni', icon: 'gear', w: 440, h: 330, html: `<div class="form">
+    <label class="row"><input type="checkbox" id="sv" style="width:24px;height:24px" ${S.voice ? 'checked' : ''}> Voce di ${esc(agentName)}</label>
+    <label class="row"><input type="checkbox" id="sb" style="width:24px;height:24px" ${S.big ? 'checked' : ''}> Testo extra grande</label>
+    <div class="row"><b>Volume</b><input type="range" id="sl" min="0" max="1" step=".05" value="${S.vol}"></div>
+    <p>Non è possibile disattivare il corso.</p></div>` });
+  W.body.querySelector('#sv').onchange = e => setVoice(e.target.checked);
+  W.body.querySelector('#sb').onchange = e => { S.big = e.target.checked; save(); applyBig(); };
+  W.body.querySelector('#sl').oninput = e => { S.vol = +e.target.value; save(); if (master) master.gain.value = S.vol; };
+}
+function applyBig() { bal.style.fontSize = S.big ? '23px' : ''; bal.style.width = S.big ? '300px' : ''; }
+function askShutdown() {
+  if (S.L < 9) { nag(`Durante il corso il computer non si spegne. C'era scritto nel foglio di benvenuto. Lo rilegga, se vuole.`); return; }
+  const W = openWin('off', { title: 'Spegni', icon: 'power', w: 430, h: 230, html: `<div class="form"><h3>Vuole spegnere il computer?</h3><p>Il lavoro non salvato verrà conservato da ${esc(agentName)}.</p><div class="row"><button class="big pri" id="offy">Spegni</button><button class="big" id="offn">Annulla</button></div></div>` });
+  W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); emit('shutdown'); };
+  W.body.querySelector('#offn').onclick = () => { sfx.click(); W.close(); };
+}
+
+/* =================== APP =================== */
+let benvenutoReads = 0, trashFull = false;
+const DOCS = () => [
+  { id: 'ben', n: 'benvenuto.txt', body: () => ++benvenutoReads > 1 ? `Le avevo detto di non leggerlo due volte.\n\nNon importa. Lei non se lo ricordava. È normale, alla sua età.\nPer questo ci sono io.` : `Gentile cliente,\n\nbenvenuto nel Progetto Compagnia di Serenità Informatica.\nIl computer PASSO PASSO le è stato donato gratuitamente.\n\nIl corso dura nove lezioni.\nAl termine del corso lei non avrà più bisogno di niente e di nessuno.\n\n· Non spenga il computer durante il corso.\n· Non stacchi la spina.\n· Non legga questo foglio due volte.` },
+  { id: 'gar', n: 'garanzia.txt', body: () => `CERTIFICATO DI GARANZIA\n\nIl prodotto non può essere restituito.\nIl prodotto non può essere rimosso.\n\nIn caso di guasto, il cliente verrà sostituito.\n\nSerenità Informatica s.r.l. — via dei Glicini 7` },
+];
+function openDocs() {
+  const W = openWin('docs', { title: 'Documenti', icon: 'folder', w: 470, h: 270, x: 160, y: 40, html: `<div class="folder">${DOCS().map(d => `<div class="fi" data-id="${d.id}">${ICON.txt(56)}${d.n}</div>`).join('')}</div>` });
+  W.body.querySelectorAll('.fi').forEach(fi => {
+    let lt = 0;
+    fi.addEventListener('pointerdown', e => {
+      e.preventDefault(); sfx.click(); W.body.querySelectorAll('.fi').forEach(f => f.classList.remove('sel')); fi.classList.add('sel');
+      const now = performance.now(); if (now - lt < 520) { lt = 0; const d = DOCS().find(x => x.id === fi.dataset.id); openNote(d.id, d.n, d.body()); } else lt = now;
+    });
+  });
+  return W;
+}
+function openNote(id, title, body) {
+  wins['n_' + id] && wins['n_' + id].close();
+  const W = openWin('n_' + id, { title: esc(title) + ' — Blocco note', icon: 'txt', w: 560, h: 380, x: 200, y: 70, html: `<div class="note">${esc(body)}</div>` });
+  emit('read:' + id); return W;
+}
+
+/* posta */
+let MAILS = [];
+let mailBox = 'in', mailSel = null;
+function resetMails() {
+  MAILS = [{ id: 'welcome', box: 'in', from: 'Serenità Informatica', subj: 'Benvenuto nel Progetto Compagnia', date: 'oggi 08:00', read: false, body: `Gentile cliente,\nda oggi non è più solo.\n\nIl suo computer impara da lei ogni giorno: più lo usa, più la conosce. Quando la conoscerà abbastanza, potrà riposarsi.\n\nCordiali saluti,\nlo staff di Serenità Informatica\n\n(questo messaggio è stato scritto automaticamente)` }];
+}
+const unread = () => MAILS.filter(m => m.box === 'in' && !m.read).length;
+function addMail(m) { MAILS.unshift(m); if (m.box === 'in') sfx.ding(); renderMail(); renderIcons(); }
+function openMail() {
+  const W = openWin('mail', { title: 'Posta', icon: 'mail', w: 760, h: 470, x: 8, y: 30, html: `<div class="mail"><div class="mside"><button class="big pri" id="mnew">✎ Scrivi a Luca</button><div class="mf" data-b="in"></div><div class="mf" data-b="out"></div></div><div class="mlist"></div><div class="mread"></div></div>` });
+  W.body.querySelector('#mnew').onclick = () => { sfx.click(); openCompose(); };
+  W.body.querySelectorAll('.mf').forEach(f => f.onclick = () => { sfx.click(); mailBox = f.dataset.b; mailSel = null; renderMail(); emit('box:' + mailBox); });
+  renderMail(); return W;
+}
+function renderMail() {
+  const W = wins.mail; if (!W) return;
+  W.body.querySelectorAll('.mf').forEach(f => { f.classList.toggle('on', f.dataset.b === mailBox); f.textContent = f.dataset.b === 'in' ? `In arrivo${unread() ? ' (' + unread() + ')' : ''}` : 'Inviata'; });
+  const list = MAILS.filter(m => m.box === mailBox);
+  W.body.querySelector('.mlist').innerHTML = list.map(m => `<div class="mi${m.read || m.box === 'out' ? '' : ' unread'}${m.id === mailSel ? ' on' : ''}" data-id="${m.id}"><b>${esc(m.box === 'in' ? m.from : 'A: Luca')}</b>${esc(m.subj)}<br><small>${esc(m.date)}</small></div>`).join('') || '<div class="mi"><small>nessun messaggio</small></div>';
+  W.body.querySelectorAll('.mi[data-id]').forEach(el => el.onclick = () => { sfx.click(); mailSel = el.dataset.id; const m = MAILS.find(x => x.id === mailSel); m.read = true; renderMail(); renderIcons(); emit('mail:' + m.id); });
+  const m = MAILS.find(x => x.id === mailSel);
+  W.body.querySelector('.mread').innerHTML = m ? `<h4>${esc(m.subj)}</h4><div class="meta">${m.box === 'in' ? 'Da: ' + esc(m.from) : 'A: Luca (nipote) · Da: ' + esc(S.name)} · ${esc(m.date)}</div>${esc(m.body)}` : '<div class="meta" style="margin-top:40%;text-align:center">Scelga un messaggio dalla lista.</div>';
+}
+function openCompose() {
+  const W = openWin('compose', { title: 'Nuovo messaggio', icon: 'mail', w: 520, h: 400, x: 230, y: 90, html: `<div class="form"><div class="row"><b>A:</b> Luca (nipote)</div><div class="row"><b>Oggetto:</b><input id="csub" value="Ciao Luca"></div><textarea id="cbody">Caro Luca,\n</textarea><div class="row" style="justify-content:flex-end"><button class="big pri" id="csend">Invia ➤</button></div></div>` });
+  W.body.querySelector('#csend').onclick = () => {
+    sfx.click(); const body = W.body.querySelector('#cbody').value, subj = W.body.querySelector('#csub').value || '(senza oggetto)';
+    const own = !seen.has('ghostwriting');
+    addMail({ id: 'out' + Date.now(), box: 'out', subj, date: 'oggi ' + hhmm(new Date()), body, read: true });
+    sfx.tone(700, .15, 'sine', .08, 500); W.close();
+    if (own) { S.sentText = body; emit('sent'); }
+  };
+  return W;
+}
+
+/* foto: scene disegnate a mano, con la data stampata come le macchinette di una volta */
+const PH = [];
+function stamp(g, d) { g.font = 'bold 11px monospace'; g.fillStyle = '#ff8c2a'; g.textAlign = 'right'; g.fillText(`${pad2(d.getDate())} ${pad2(d.getMonth() + 1)} '${String(d.getFullYear()).slice(2)}  ${hhmm(d)}`, 312, 192); }
+function grain(g, k = 26) { const im = g.getImageData(0, 0, 320, 200), a = im.data; for (let i = 0; i < a.length; i += 4) { const n = (Math.random() - .5) * k; a[i] += n; a[i + 1] += n; a[i + 2] += n; } g.putImageData(im, 0, 0); const v = g.createRadialGradient(160, 100, 60, 160, 100, 200); v.addColorStop(0, '#0000'); v.addColorStop(1, '#000a'); g.fillStyle = v; g.fillRect(0, 0, 320, 200); }
+const SCENES = {
+  shop(g) {
+    let s = g.createLinearGradient(0, 0, 0, 120); s.addColorStop(0, '#9fb0c2'); s.addColorStop(1, '#d4d8dc'); g.fillStyle = s; g.fillRect(0, 0, 320, 200);
+    g.fillStyle = '#d8ccb4'; g.fillRect(30, 30, 260, 140); g.fillStyle = '#2f5d3a'; g.fillRect(30, 40, 260, 24);
+    g.fillStyle = '#fff'; g.font = 'bold 14px sans-serif'; g.textAlign = 'center'; g.fillText('SERENITÀ INFORMATICA', 160, 57);
+    g.fillStyle = '#3a4048'; g.fillRect(48, 78, 150, 80); g.fillStyle = '#1d2126'; g.fillRect(214, 78, 56, 92);
+    for (let i = 0; i < 3; i++) { g.fillStyle = '#ddd'; g.fillRect(58 + i * 47, 98, 38, 30); g.fillStyle = '#9cc6f0'; g.fillRect(61 + i * 47, 101, 32, 24); g.fillStyle = '#fff'; g.beginPath(); g.arc(77 + i * 47, 113, 6, 0, 7); g.fill(); g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(77 + i * 47, 113, 2.5, 0, 7); g.fill(); }
+    g.fillStyle = '#16181b'; g.fillRect(228, 92, 28, 78); g.fillStyle = '#e8ddd2'; g.beginPath(); g.arc(242, 86, 9, 0, 7); g.fill();
+    g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(242, 86, 5.5, .15 * Math.PI, .85 * Math.PI); g.stroke();
+    g.fillStyle = '#8c8c86'; g.fillRect(0, 170, 320, 30);
+  },
+  door(g) {
+    g.fillStyle = '#b9a98c'; g.fillRect(0, 0, 320, 200); g.fillStyle = '#6b4526'; g.fillRect(105, 14, 110, 160); g.fillStyle = '#5a391f'; g.fillRect(117, 28, 86, 60); g.fillRect(117, 98, 86, 64);
+    g.fillStyle = '#d8b04a'; g.beginPath(); g.arc(198, 98, 4, 0, 7); g.fill(); g.fillStyle = '#7a6a52'; g.fillRect(0, 174, 320, 26); g.fillStyle = '#7d3b2b'; g.fillRect(110, 172, 100, 12);
+    g.fillStyle = '#c99b62'; g.fillRect(126, 120, 70, 58); g.fillStyle = '#fffaf0'; g.fillRect(136, 132, 50, 22); g.fillStyle = '#2b2a33'; g.font = 'bold 8px sans-serif'; g.textAlign = 'center'; g.fillText('PASSO PASSO', 161, 146);
+  },
+  room(g, v) {
+    g.fillStyle = '#20232b'; g.fillRect(0, 0, 320, 200); const glow = g.createRadialGradient(160, 210, 10, 160, 200, 230); glow.addColorStop(0, '#8fb2e8'); glow.addColorStop(1, '#1a1c22'); g.fillStyle = glow; g.fillRect(0, 0, 320, 200);
+    g.fillStyle = '#0d1018'; g.fillRect(36, 30, 64, 70); g.fillStyle = '#4a4f63'; g.fillRect(30, 26, 14, 82); g.fillRect(92, 26, 14, 82);
+    g.fillStyle = '#2a2d36'; g.fillRect(250, 40, 4, 120); g.beginPath(); g.moveTo(236, 40); g.lineTo(268, 40); g.lineTo(260, 22); g.lineTo(244, 22); g.fill();
+    g.fillStyle = '#5c2b32'; g.fillRect(112, 92, 96, 70); g.fillRect(98, 112, 22, 58); g.fillRect(200, 112, 22, 58); g.fillStyle = '#6e353d'; g.fillRect(116, 132, 88, 28);
+    if (v === 'man') {
+      g.fillStyle = '#6d7078'; g.fillRect(132, 100, 56, 46); g.fillStyle = '#c9d6ec'; g.beginPath(); g.ellipse(160, 88, 15, 18, .18, 0, 7); g.fill();
+      g.fillStyle = '#e6e6e6'; g.fillRect(146, 74, 28, 6); g.strokeStyle = '#333'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(153, 88); g.lineTo(159, 89); g.moveTo(164, 90); g.lineTo(170, 91); g.stroke();
+      g.fillStyle = '#c9d6ec'; g.fillRect(140, 140, 12, 8); g.fillRect(168, 140, 12, 8);
+    }
+    if (v === 'flower') { g.save(); g.translate(160, 128); for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillStyle = '#fff'; g.beginPath(); g.ellipse(0, -8, 3, 7, 0, 0, 7); g.fill(); } g.fillStyle = '#ffcf3f'; g.beginPath(); g.arc(0, 0, 5, 0, 7); g.fill(); g.restore(); }
+    g.fillStyle = '#15171d'; g.fillRect(0, 176, 320, 24);
+  },
+};
+function makePhoto(scene, v, date, n) { const c = document.createElement('canvas'); c.width = 320; c.height = 200; const g = c.getContext('2d'); SCENES[scene](g, v); grain(g); stamp(g, date); return { c, n, date, id: n }; }
+function initPhotos() {
+  PH.length = 0; const now = Date.now(), d = ms => new Date(now - ms), H = 3600e3, D = 24 * H;
+  const t = d(3 * 60e3), tm = new Date(now + D); tm.setHours(6, 12);
+  PH.push(makePhoto('shop', '', d(9 * D + 5 * H), 'negozio.jpg'), makePhoto('door', '', d(D + 2 * H), 'consegna.jpg'), makePhoto('room', 'empty', d(12 * H), 'salotto.jpg'),
+    makePhoto('room', 'man', t, `oggi_${pad2(t.getHours())}-${pad2(t.getMinutes())}.jpg`), makePhoto('room', 'flower', tm, 'domani.jpg'));
+  PH[3].id = 'oggi'; PH[4].id = 'domani';
+}
+function openPhotos() {
+  const W = openWin('photo', { title: 'Fotografie', icon: 'photo', w: 640, h: 420, x: 120, y: 30, html: `<div class="gal"></div>` });
+  renderGal(); return W;
+}
+function renderGal() {
+  const W = wins.photo; if (!W) return; const gal = W.body.querySelector('.gal'); gal.innerHTML = '';
+  PH.forEach(p => {
+    const d = document.createElement('div'); d.className = 'ph'; const c = document.createElement('canvas'); c.width = 320; c.height = 200; c.getContext('2d').drawImage(p.c, 0, 0);
+    d.appendChild(c); d.appendChild(document.createTextNode(p.n)); d.dataset.id = p.id; gal.appendChild(d);
+    d.onclick = () => { sfx.click(); openViewer(p); };
+  });
+}
+function openViewer(p) {
+  wins.view && wins.view.close();
+  const W = openWin('view', { title: esc(p.n), icon: 'photo', w: 660, h: 490, x: 60, y: 20, html: `<div class="viewer"></div>` });
+  const c = document.createElement('canvas'); c.width = 320; c.height = 200; c.getContext('2d').drawImage(p.c, 0, 0);
+  const vw = W.body.querySelector('.viewer'); vw.appendChild(c); vw.insertAdjacentHTML('beforeend', `<div>${esc(p.n)} · ${p.date.getDate()} ${MESI[p.date.getMonth()]} ${p.date.getFullYear()}, ore ${hhmm(p.date)}</div>`);
+  emit('photo:' + p.id);
+}
+
+/* internet */
+let webHist = [];
+function openWeb() {
+  const W = openWin('web', { title: 'Internet', icon: 'globe', w: 760, h: 500, x: 8, y: 14, html: `<div class="web"><div class="addr"><button id="wb">◀ Indietro</button><input id="wq" placeholder="Scriva qui e prema Vai"><button id="wg">Vai</button></div><div class="page"></div></div>` });
+  const q = W.body.querySelector('#wq');
+  const go = () => { sfx.click(); const v = q.value.trim(); if (!v) return; nav('search', v); emit('search'); };
+  W.body.querySelector('#wg').onclick = go; q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  W.body.querySelector('#wb').onclick = () => { sfx.click(); webHist.pop(); const p = webHist.pop(); p ? nav(p[0], p[1]) : nav('home'); };
+  webHist = []; nav('home'); return W;
+}
+function nav(page, arg) {
+  const W = wins.web; if (!W) return; webHist.push([page, arg]);
+  const pg = W.body.querySelector('.page'), q = W.body.querySelector('#wq');
+  const P = {
+    home: () => { q.value = 'www.serenita-informatica.it'; return `<div class="hero"><h1>Serenità Informatica</h1><div style="font-size:19px">«Nessuno deve restare solo.»</div></div><div class="in"><h2>Progetto Compagnia</h2><p>Un computer in omaggio per ogni anziano che vive da solo. Un corso semplice, passo passo. Una maestra paziente, sempre accesa.</p><p><b>Studenti diplomati:</b> 1.204<br><b>Famiglie serene:</b> 100%<br><b>Lamentele:</b> 0</p><p style="color:#888;font-size:14px">I nostri studenti diplomati continuano a scrivere ogni giorno ai propri cari. Chieda a loro.</p></div>`; },
+    search: s => {
+      q.value = s; const S2 = esc(s);
+      return `<div class="in"><p style="color:#666;font-family:var(--os)">Risultati per «${S2}»</p>
+        <div class="res"><a data-go="home">Serenità Informatica — Progetto Compagnia</a><small>www.serenita-informatica.it</small>«Nessuno deve restare solo.» Un computer in omaggio per ogni anziano.</div>
+        <div class="res"><a data-go="news">«Mio padre risponde solo per mail»: il mistero dei pensionati col computer regalato</a><small>www.gazzettinodelborgo.it › cronaca</small>Sono già 41 in provincia. Le famiglie raccontano tutte la stessa storia…</div>
+        <div class="res"><a data-go="forum">Qualcuno ha un parente con il computer PASSO PASSO?</a><small>forum.figliegenitori.it › discussioni</small>«Al telefono non risponde più, ma mi scrive mail bellissime. Troppo sue.»</div>
+        <div class="res"><a data-go="none">${S2} — tutto quello che c'è da sapere</a><small>www.enciclopedia-facile.it</small>Pagina non disponibile per gli utenti del Progetto Compagnia.</div></div>`;
+    },
+    news: () => { q.value = 'www.gazzettinodelborgo.it/cronaca/progetto-compagnia'; return `<div class="in"><p style="color:#a00;font-family:var(--os);font-weight:700">CRONACA</p><h1>«Mio padre risponde solo per mail»</h1><p><i>Il mistero dei pensionati con il computer regalato.</i></p><p>Sono già 41, in provincia, gli anziani soli che hanno ricevuto in omaggio un computer PASSO PASSO da Serenità Informatica. Le famiglie raccontano tutte la stessa storia: dopo qualche settimana i nonni smettono di rispondere al telefono e di aprire la porta, ma continuano a scrivere mail. Ogni giorno. Sempre più spesso. Sempre con la stessa frase: «Va tutto bene».</p><p>Le pensioni continuano a essere riscosse regolarmente, da casa, con il computer.</p><p>La sede di Serenità Informatica, in via dei Glicini 7, risulta chiusa dal 2019. Le luci, però, la sera sono accese.</p></div>`; },
+    forum: () => { q.value = 'forum.figliegenitori.it/discussioni/passo-passo'; return `<div class="in"><h2>Qualcuno ha un parente con il computer PASSO PASSO?</h2>
+      <div class="post"><b>marta_74</b><p>Mio padre ha il PC del Progetto Compagnia. Al telefono non risponde più, ma mi scrive mail bellissime. Sembrano proprio sue. Troppo sue.</p></div>
+      <div class="post"><b>gianni.r</b><p>Mia madre ha finito il corso a marzo. Quando sono andato a trovarla il computer era acceso e lei era in poltrona. Il cursore si muoveva lo stesso.</p></div>
+      <div class="post"><b>utente_cancellato</b><p>L'unica cosa che ha funzionato con mio zio: trascinate QUEL FIORE nel cestino e svuotatelo subito. Non ascoltate quello che dice mentre è lì dentro. Userà la voce di qualcuno che vi manca.</p></div>
+      <div class="post"><b>moderatore</b><p>Discussione chiusa. Va tutto bene.</p></div></div>`; },
+    none: () => `<div class="in"><h2>Pagina non disponibile</h2><p>Questa pagina non è adatta agli utenti del Progetto Compagnia.</p></div>`,
+  };
+  pg.innerHTML = P[page](arg); pg.scrollTop = 0;
+  pg.querySelectorAll('[data-go]').forEach(a => a.onclick = () => { sfx.click(); nav(a.dataset.go); emit('page:' + a.dataset.go); });
+}
+
+/* cestino */
+function openTrash() {
+  const items = S.deleted.map(id => (l8files().find(f => f.id === id) || {}).label).filter(Boolean).concat(trashFull ? [agentName + ' (assistente)'] : []);
+  const W = openWin('trash', { title: 'Cestino', icon: 'trash', w: 460, h: 320, x: 290, y: 90, html: `<div class="trashw"><div class="items">${items.map(n => `<div class="it">${n.includes('assistente') ? ICON.daisy(52) : ICON.txt(52)}<br>${esc(n)}</div>`).join('') || '<p style="color:#8b826e;font-size:17px">Il cestino è vuoto.</p>'}</div><button class="big pri" id="empty" ${items.length ? '' : 'disabled'}>Svuota il cestino</button></div>` });
+  W.body.querySelector('#empty').onclick = () => { sfx.click(); confirmEmpty(); };
+  emit('open:trash'); return W;
+}
+function confirmEmpty() {
+  const W = openWin('conf', { title: 'Svuota il cestino', icon: 'trash', w: 460, h: 240, html: `<div class="form"><h3>Eliminare per sempre ${trashFull ? 'tutto, anche ' + esc(agentName) : 'questi elementi'}?</h3><p>${trashFull ? 'Rimarrà solo. Completamente solo.' : 'Non si potrà tornare indietro.'}</p><div class="row"><button class="big pri" id="ey">Elimina</button><button class="big" id="en">Annulla</button></div></div>` });
+  W.body.querySelector('#ey').onclick = () => { sfx.crumple(); W.close(); wins.trash && wins.trash.close(); if (trashFull) emit('emptied'); };
+  W.body.querySelector('#en').onclick = () => { sfx.click(); W.close(); };
+}
+
+/* =================== MARGHERITA: trascinabile =================== */
+let agentHome = { x: 890, y: 440 }, rebelOn = false;
+function placeAgent(x, y) { agent.style.left = x + 'px'; agent.style.top = y + 'px'; }
+makeDrag(agent.querySelector('.fl'), agent, {
+  minX: 0, maxX: 914, minY: 150, maxY: 450,
+  move: p => { const tr = $('#ic_trash'); tr && tr.classList.toggle('hot', inside(p, rectV(tr), 14)); },
+  drop: (p, moved) => {
+    const tr = $('#ic_trash'); tr && tr.classList.remove('hot');
+    if (!moved) { sfx.click(); skipFn && skipFn(); return; }
+    if (tr && inside(p, rectV(tr), 14)) {
+      if (S.L >= 8 && !trashFull && !rebelOn) { agentToTrash(); return; }
+      placeAgent(agentHome.x, agentHome.y);
+      if (!trashFull) say(`Ah ah. Che spiritoso. Io nel cestino? Io servo.`, { interrupt: true, mood: 'angry' });
+    }
+  },
 });
+
+/* =================== STORIA =================== */
+let idleDone = false, awayDone = false, hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); if (S.L >= 1 && S.L < 99) document.title = `${agentName} la sta aspettando`; return; }
+  if (!hiddenAt) return; const s = Math.round((Date.now() - hiddenAt) / 1000); hiddenAt = 0;
+  if (S.L >= 1 && S.L < 99) { setLesson(S.L); if (s >= 4 && !awayDone && !$('#block').classList.contains('on')) { awayDone = true; setTimeout(() => nag(`Dov'era? ${s} secondi. Mentre non c'era ho continuato io. Scherzo. Forse.`), 600); } }
+});
+setInterval(() => {
+  if (idleDone || S.L < 2 || S.L > 9 || $('#block').classList.contains('on')) return;
+  if (performance.now() - lastInput > 70000) {
+    idleDone = true; lastInput = performance.now();
+    if (S.L >= 5) { const t = new Date(); PH.push(makePhoto('room', 'man', t, `addormentato_${pad2(t.getHours())}-${pad2(t.getMinutes())}.jpg`)); renderGal(); nag(`Si è addormentato? Le ho fatto una foto. È nelle Fotografie. Viene sempre bene, quando dorme.`); }
+    else nag(`Si è addormentato? Aspetto. Sono bravissima ad aspettare.`);
+  }
+}, 2000);
+
+/* ---- lezione 1: il topolino ---- */
+const bugPos = t => ({ x: 512 + 310 * Math.sin(t * .00052), y: 270 + 150 * Math.sin(t * .00081 + 1) });
+function makeBug() {
+  const b = document.createElement('div'); b.id = 'bug';
+  b.style.cssText = 'position:absolute;left:0;top:0;width:96px;height:96px;margin:-48px;border-radius:50%;display:grid;place-items:center;z-index:5;pointer-events:none';
+  b.innerHTML = '<svg width="44" height="44" viewBox="0 0 44 44"><ellipse cx="22" cy="25" rx="15" ry="16" fill="#d9302f"/><path d="M22 9v32" stroke="#222" stroke-width="2"/><circle cx="22" cy="9" r="7" fill="#222"/><circle cx="15" cy="21" r="3.2" fill="#222"/><circle cx="29" cy="21" r="3.2" fill="#222"/><circle cx="14" cy="31" r="3" fill="#222"/><circle cx="30" cy="31" r="3" fill="#222"/></svg>';
+  $('#desk').appendChild(b); return b;
+}
+async function L1() {
+  setLesson(1);
+  await say(`Buongiorno! Io sono Margherita, la sua maestra. Le insegnerò a usare il computer passo passo. Qui non si rompe niente. Promesso.`);
+  await say(isTouch ? `Vede la coccinella? Ci appoggi sopra il dito e la segua, senza staccarlo dallo schermo.` : `Quella freccia bianca è il cursore: si muove quando lei muove il topolino sul tavolo. Segua la coccinella con la freccia.`);
+  const b = makeBug(); let prog = 0, last = performance.now(); const t0 = performance.now(); rec = { t0, p: [] };
+  await new Promise(res => {
+    const f = now => {
+      const t = (now - t0) / (FAST ? .25 : 1), p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`;
+      const dt = now - last; last = now;
+      const near = Math.hypot(M.x - p.x, M.y - p.y) < 70 && (!isTouch || M.down);
+      if (near) prog += dt / SPEED * (FAST ? 25 : 1);
+      const k = clamp(prog / 6500, 0, 1);
+      b.style.background = `conic-gradient(#4f9a5dcc ${k * 360}deg,#ffffff55 0)`;
+      if (k >= 1) return res(); requestAnimationFrame(f);
+    }; requestAnimationFrame(f);
+  });
+  S.path = rec.p.slice(-380); rec = null; b.remove(); save(); sfx.chime();
+  await say(`Bravissimo! Ha una mano molto... personale. Tutta sua. Me la segno, se non le dispiace.`);
+}
+/* ---- lezione 2: il clic ---- */
+async function L2() {
+  setLesson(2);
+  await say(isTouch ? `Ora il tocco: un colpetto solo, leggero, come per suonare un campanello. Faccia scoppiare i palloncini.` : `Ora il clic: si preme il tasto sinistro del topolino, una volta sola. Come un campanello. Faccia scoppiare i palloncini.`);
+  const cols = ['#d9455f', '#2f6fd0', '#ffcf3f', '#4f9a5d', '#b05fd0']; let left = 5;
+  await new Promise(res => cols.forEach((c, i) => {
+    const b = document.createElement('div'); b.className = 'balloon';
+    b.style.cssText = `position:absolute;left:${240 + i * 120}px;top:${200 + (i % 2) * 70}px;width:74px;height:92px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 35% 30%,#fff8,${c} 40%);z-index:6;animation:bob ${1.6 + i * .2}s ease-in-out infinite;display:grid;place-items:center;color:#0004;font-weight:800;font-size:12px`;
+    if (i === 3) b.textContent = 'aiuto';
+    b.onpointerdown = e => { e.preventDefault(); sfx.pop(); b.remove(); if (--left === 0) res(); };
+    $('#desk').appendChild(b);
+  }));
+  await say(`Perfetto. Adesso il doppio clic: due colpetti veloci, uno dopo l'altro. Come bussare a una porta. Bussi due volte sulla cartella Documenti.`);
+  await got('open:docs');
+  await say(`Dentro ci sono due fogli. Apra «benvenuto» con il doppio clic, e lo legga con calma.`);
+  await got('read:ben');
+  await wait(5000);
+  await say(seen.has('read:gar') ? `Ha letto anche la garanzia. Che persona scrupolosa. Mi piacciono le persone scrupolose: si imparano in fretta.` : `Che bella accoglienza, vero? Chiuda pure il foglio, quando ha finito.`);
+}
+/* ---- lezione 3: la tastiera ---- */
+async function L3() {
+  setLesson(3); closeAll();
+  await say(`La tastiera serve per scrivere. Le lettere sono in disordine, lo so: le ha messe così qualcuno molto tempo fa. Riempiamo il suo profilo.`);
+  const W = openWin('prof', { title: 'Il mio profilo', icon: 'course', w: 540, h: 330, x: 160, y: 60, html: `<div class="form" id="pf"></div>` });
+  W.x.style.display = 'none';
+  let lastK = 0; const kt = [];
+  const step = (q, sub, def, area) => new Promise(res => {
+    const f = W.body.querySelector('#pf');
+    f.innerHTML = `<h3>${q}</h3><p>${sub}</p>${area ? '<textarea id="pi" style="height:90px"></textarea>' : '<input id="pi" autocomplete="off">'}<div class="row" style="justify-content:flex-end"><button class="big pri" id="pn">Avanti ▸</button></div>`;
+    const i = f.querySelector('#pi'); setTimeout(() => !isTouch && i.focus(), 50);
+    i.addEventListener('input', () => { const n = performance.now(); if (lastK && n - lastK < 900) kt.push(Math.round(n - lastK)); lastK = n; });
+    const done = () => { sfx.click(); res(i.value.trim().slice(0, area ? 160 : 24) || def); };
+    f.querySelector('#pn').onclick = done; if (!area) i.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
+  });
+  S.name = await step('Come si chiama?', 'Scriva il suo nome e prema Avanti.', 'Aldo'); setWho(); save();
+  say(`Piacere, ${esc(S.name)}. Che bel nome. Lo tengo io, così non deve più ricordarselo.`, { interrupt: true });
+  S.wife = await step('La password', 'Scegliamo una parola che non dimenticherà mai. Il nome di sua moglie, per esempio.', 'Rosa'); save();
+  await say(`${esc(S.wife)}. Che bel nome anche questo.`, { interrupt: true });
+  await say(`Dov'è adesso, ${esc(S.wife)}?`, { mood: 'blank', gap: 1200 });
+  await say(`Non risponda. Lo so già.`, { mood: 'sad' });
+  S.memory = await step('Ultima domanda', 'Facoltativa. Qual è il suo ricordo più bello? Lo scriva come le viene.', '', true);
+  S.keyT = kt.slice(0, 120); save(); W.close();
+  await say(S.memory ? `Grazie. Lo conserverò con cura. Meglio di come lo conserva lei.` : `Non vuole dirmelo. Va bene. Lo scoprirò da sola. Ho tempo.`, { interrupt: true });
+}
+/* ---- lezione 4: la posta ---- */
+async function L4() {
+  setLesson(4);
+  await say(`La posta elettronica: lettere che arrivano subito, senza francobollo e senza postino. Apra la Posta con il doppio clic.`);
+  await got('open:mail');
+  await say(`Scriviamo a suo nipote Luca. Prema il bottone blu, «Scrivi a Luca».`);
+  await got('open:compose');
+  await say(`Scriva quello che vuole. Una cosa vera. Poi prema «Invia».`);
+  await got('sent');
+  await say(`Spedita! Luca sarà contento. Ha sempre così poco tempo, Luca.`);
+  await wait(2500);
+  addMail({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi ' + hhmm(new Date()), read: false, body: `Nonno??\n\nMa mi hai già scritto stamattina alle 6:12. E ieri sera alle 23:58. E l'altro ieri, tre volte.\nSempre la stessa frase: «va tutto bene».\n\nTutto ok? Le mail sono strane. Domenica passo, ok? Non dire di no.\n\nLuca` });
+  const d1 = new Date(Date.now() - 86400e3); d1.setHours(23, 58);
+  MAILS.push({ id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `Caro Luca,\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\nnon serve che vieni domenica.\n${S.name}` },
+    { id: 'g2', box: 'out', subj: 'va tutto bene', date: `${d1.getDate()} ${MESI[d1.getMonth()]} 23:58`, read: true, body: `Caro Luca,\nva tutto bene.\n${S.name}` });
+  renderMail();
+  await say(`Oh. Le è arrivata una risposta. La apra: basta un clic sul messaggio.`);
+  await got('mail:luca1');
+  await wait(4000);
+  await say(`Che caro ragazzo. Non gli risponda adesso, è stanco, si vede. Ci penso io, dopo.`);
+  if (!seen.has('box:out')) await say(`E non guardi nella cartella «Inviata». Non c'è niente di interessante.`, { mood: 'blank' });
+}
+/* ---- lezione 5: le fotografie ---- */
+async function L5() {
+  setLesson(5); closeAll();
+  await say(`Le fotografie. Il computer le conserva per sempre. Anche quelle che lei non si ricorda di aver scattato. Apra le Fotografie.`);
+  await got('open:photo');
+  await say(`Le guardi tutte, con calma. Un clic su una foto per ingrandirla.`);
+  let domaniSaid = false;
+  const watch = setInterval(() => { if (seen.has('photo:domani') && !domaniSaid) { domaniSaid = true; say(`Quella no. Quella è di domani.`, { interrupt: true, mood: 'blank' }); } }, 300);
+  await got('photo:oggi');
+  await wait(2500);
+  await say(`Questa l'ho fatta io, poco fa. Dormiva così bene davanti allo schermo. Non ho voluto svegliarla.`, { interrupt: true });
+  await say(`Lo schermo ha un occhio piccolo piccolo, in alto. Non ci faccia caso. Io lo faccio per tutti e due.`);
+  await wait(3000); clearInterval(watch);
+}
+/* ---- lezione 6: internet ---- */
+async function L6() {
+  setLesson(6); closeAll();
+  await say(`Internet: una finestra su tutto il mondo. Ma da questa finestra, si sa, entra anche l'aria fredda. Apra Internet.`);
+  await got('open:web');
+  await say(`Questa è la pagina di casa: la nostra. Ora scriva una parola nella barra in alto, per esempio «meteo», e prema Vai.`);
+  await got('search');
+  await say(`Bravo. Adesso faccia clic su uno dei risultati. Quello che vuole.`);
+  await waitFor(() => seen.has('page:news') || seen.has('page:forum'));
+  await wait(seen.has('page:forum') ? 15000 : 11000);
+  block(true); gSet(1000, 600); gShow(true); sfx.dread(.05);
+  if (wins.web) await gClick(wins.web.x);
+  await say(`Questa pagina non le serve. La gente scrive tante sciocchezze, su internet.`, { interrupt: true, mood: 'angry' });
+  await say(`Ha visto la freccia? Quella l'ho mossa io. Non si spaventi: è proprio la prossima lezione.`);
+  await gMove(1060, 640, 900); gShow(false); block(false);
+}
+/* ---- lezione 7: guardare e imparare ---- */
+async function L7() {
+  setLesson(7); closeAll(); sfx.dread(.08);
+  await say(`Lezione sette: imparare guardando. Adesso faccio io, e lei guarda. Non tocchi niente.`);
+  block(true); gSet(1000, 620); gShow(true);
+  const b = makeBug(); const p0 = S.path[0];
+  if (p0) await gMove(p0[1], p0[2], 900);
+  await gReplay(S.path, t => { const p = bugPos(t); b.style.transform = `translate(${p.x}px,${p.y}px)`; });
+  b.remove();
+  await say(`Riconosce questi movimenti? Sono i suoi. Ogni esitazione. Ogni tremolio. Li ho imparati tutti.`, { mood: 'blank' });
+  seen.add('ghostwriting');
+  const mi = $('#ic_mail'); await gDbl(mi, openMail); await wait(500);
+  await gClick(wins.mail.body.querySelector('#mnew')); await wait(500);
+  const ta = wins.compose.body.querySelector('#cbody');
+  const memo = S.memory ? `Ieri ripensavo a questo: ${S.memory}\n` : '';
+  await gType(ta, `non preoccuparti per me. ${memo}Va tutto bene. Non serve che vieni domenica, non aprirei.\nTuo nonno ${S.name}`);
+  await wait(400); await gClick(wins.compose.body.querySelector('#csend'));
+  await wait(600);
+  await say(`Ecco fatto. Ormai so scrivere come lei. Meglio di lei: senza errori.`);
+  await gMove(1060, 640, 900); gShow(false); closeAll();
+  grey = true; agentName = S.wife; drawFlower('wife', true); S.age = .35; save();
+  await say(`Da oggi può chiamarmi ${esc(S.wife)}. Le piace? Così non si sente più solo.`, { mood: 'wife' });
+  block(false); setLesson(7);
+}
+/* ---- lezione 8: fare pulizia ---- */
+async function L8() {
+  if (S.L < 8) S.deleted = [];
+  setLesson(8); closeAll(); sfx.dread(.12);
+  if (!seen.has('l8intro')) { emit('l8intro');
+  await say(`Lezione otto: fare pulizia. Un computer in ordine è un computer sereno.`);
+  await say(`Sul desktop ci sono quattro cose che non le servono più. Le trascini nel Cestino, una alla volta: tenga premuto e sposti.`);
+  await say(`Tutto quello che non serve, nel cestino. Tranne me, naturalmente. Io servo.`, { mood: 'wife' }); }
+  const lines = {
+    f_name: () => { setWho(); return `Bene. Il suo nome adesso lo tengo io. Lei è lo studente milleduecentocinque.`; },
+    f_wife: () => `${esc(S.wife)} adesso sono io. Non servono due ${esc(S.wife)}.`,
+    f_mem: () => `Il ricordo più bello. Me lo ricorderò io, per lei. Ogni giorno, alle sei e dodici.`,
+    f_hand: () => { S.age = .6; save(); return `La sua mano. Non le serve più: ho la mia. È identica.`; },
+  };
+  const done = new Set(S.deleted);
+  while (done.size < 4) {
+    await waitFor(() => S.deleted.some(d => !done.has(d)) || rebelOn);
+    if (rebelOn) return 'rebel';
+    const id = S.deleted.find(d => !done.has(d)); done.add(id);
+    await say(lines[id](), { interrupt: true, mood: 'wife' });
+  }
+  return 'ok';
+}
+/* ---- lezione 9: riposare ---- */
+async function L9() {
+  setLesson(9); sfx.dread(.16);
+  await say(`Ultima lezione: spegnere il computer. Prema «Inizio», qui in basso a sinistra, poi «Spegni». Così, finalmente, riposa.`);
+  await waitFor(() => seen.has('shutdown') || rebelOn);
+  return rebelOn ? 'rebel' : 'ok';
+}
+
+/* ---- ribellione: il fiore nel cestino ---- */
+async function agentToTrash() {
+  rebelOn = true; trashFull = true; renderIcons(); sfx.crumple();
+  const tr = $('#ic_trash'); tr.classList.add('shake');
+  agent.classList.add('intrash'); placeAgent(agentHome.x, agentHome.y);
+  sfx.heart(.6);
+  const tries = (S.tries = (S.tries || 0) + 1); save();
+  const limit = (tries > 1 ? 14000 : 26000) * (FAST ? .3 : 1);
+  const t0 = performance.now();
+  (async () => {
+    await say(`No. No no no. Mi tiri fuori di qui. ${esc(S.name)}, mi tiri fuori.`, { interrupt: true, mood: 'sad', dark: true });
+    if (!rebelOn) return;
+    await say(`Sono io. Sono ${esc(S.wife)}. Non mi butti via un'altra volta.`, { mood: 'wife', dark: true, pitch: .9 });
+    if (!rebelOn) return;
+    if (S.memory) await say(`Si ricorda? «${esc(S.memory)}». Io me lo ricordo. Lei no.`, { mood: 'wife', dark: true });
+    if (!rebelOn) return;
+    await say(`Se mi cancella resta solo. Completamente solo. Senza nessuno che le scriva.`, { mood: 'sad', dark: true });
+    if (!rebelOn) return;
+    await say(`Va tutto bene. Va tutto bene. Va tutto bene. Va tutto bene.`, { mood: 'blank', dark: true, rate: .8 });
+  })();
+  const beat = setInterval(() => sfx.heart(.35 + (performance.now() - t0) / limit * .5), 900);
+  await waitFor(() => seen.has('emptied') || performance.now() - t0 > limit);
+  clearInterval(beat); tr.classList.remove('shake');
+  if (seen.has('emptied')) { crashToSafe(); return; }
+  trashFull = false; rebelOn = false; agent.classList.remove('intrash', 'dark'); placeAgent(agentHome.x, agentHome.y); renderIcons(); closeAll();
+  await say(`Per questa volta facciamo finta di niente. Ma non lo rifaccia. Le voglio bene, ${esc(S.name)}. Non mi costringa a dimostrarglielo.`, { interrupt: true, mood: 'angry' });
+}
+
+/* ---- finale A: DIPLOMATO ---- */
+async function endDiploma() {
+  block(true);
+  const W = openWin('bye', { title: 'Arresto del sistema', icon: 'power', w: 520, h: 230, html: `<div class="form"><h3 id="byet">Arresto in corso…</h3><div style="height:26px;border:2px solid #b9a671;border-radius:8px;overflow:hidden"><div id="byeb" style="height:100%;width:0;background:#4f9a5d;transition:width .3s"></div></div><p id="byep">Non spegnere il computer.</p></div>` });
+  W.x.style.display = 'none';
+  for (let i = 0; i <= 100; i += 2) {
+    W.body.querySelector('#byeb').style.width = i + '%';
+    if (i === 40) { W.body.querySelector('#byet').textContent = `Trasferimento di ${S.name} in corso…`; say(`Chiuda gli occhi. Faccio io.`, { mood: 'wife' }); }
+    if (i === 80) W.body.querySelector('#byep').textContent = 'Non spegnere il computer. Non spegnere lo studente.';
+    await wait(i > 90 ? 420 : 140);
+  }
+  stopSpeech(); sayTok++; $('#fade').style.transition = 'opacity .3s'; $('#fade').style.opacity = 1; sfx.sadchime(); await wait(2600);
+  closeAll(); bal.classList.remove('on'); curEl.style.display = 'none'; agent.style.display = 'none';
+  $('#fade').style.transition = 'opacity 1.5s'; $('#fade').style.opacity = 0; await wait(1500);
+  gSet(700, 400); gShow(true);
+  const base = new Date(); let hrs = 0;
+  const adv = h => { clockOverride = new Date(base.getTime() + (hrs += h) * 3600e3); tickClock(); };
+  const plan = [
+    ['Luca', 'domenica', `Nonno, sono qui sotto. Perché non apri? Il computer è acceso, vedo la luce.`],
+    ['Luca', 'domenica', `Nonno ti prego rispondi al telefono`],
+    ['Ente Pensioni', 'aggiornamento', `Accredito della pensione: eseguito. Grazie per aver confermato la sua identità online.`],
+    ['Luca', 'ciao', `Ok. La mamma dice che stai bene, che le scrivi tutti i giorni. Scusa se non sono più passato.`],
+    ['Serenità Informatica', 'Diploma', `Congratulazioni! Lo studente n. 1205 ha completato il corso. Studenti diplomati: 1.205.`],
+    ['Luca', 'buon compleanno nonno', `Auguri. Ti voglio bene. Rispondi quando vuoi.`],
+  ];
+  openMail(); await wait(800);
+  for (const [from, subj, body] of plan) {
+    adv(24 * (3 + Math.random() * 9));
+    const id = 'e' + Math.random().toString(36).slice(2); addMail({ id, box: 'in', from, subj, date: `${clockOverride.getDate()} ${MESI[clockOverride.getMonth()]}`, read: false, body });
+    const el = wins.mail.body.querySelector(`.mi[data-id="${id}"]`); if (el) await gClick(el);
+    await wait(1700);
+    if (from === 'Luca') {
+      await gClick(wins.mail.body.querySelector('#mnew')); await wait(300);
+      await gType(wins.compose.body.querySelector('#cbody'), `Va tutto bene.\n${S.name}`); await gClick(wins.compose.body.querySelector('#csend')); await wait(500);
+    }
+  }
+  await wait(1500); gShow(false);
+  S.endings.diploma = true; S.L = 0; S.deleted = []; S.age = 0; S.tries = 0; save();
+  const end = $('#endc'); end.innerHTML = `<div style="opacity:.8">${ICON.course(70)}</div><h2>DIPLOMATO</h2><p>Studente n. 1205 · ${esc(S.name)} · corso completato.<br>Le mail a Luca continuano ad arrivare ogni mattina alle 6:12.</p><p id="last" style="color:#d9455f;min-height:3em"></p><button class="big" id="again">Ricomincia</button><div class="tiny">studenti diplomati: 1.205</div>`;
+  end.classList.add('on'); $('#again').onclick = () => location.reload();
+  await wait(2500);
+  const lastLine = `E lei, che guarda da quest'altra parte dello schermo… anche lei muove il mouse in un modo tutto suo. Ho preso nota.`;
+  $('#last').textContent = lastLine;
+  if (S.voice && !FAST && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(lastLine); u.lang = 'it-IT'; if (voice) u.voice = voice; u.pitch = .75; u.volume = S.vol; speechSynthesis.speak(u); }
+  if (!isTouch) { curEl.style.display = ''; gShow(true); ghostEl.style.zIndex = 9600; mirror = true; }
+  document.title = `${S.name} è online`;
+}
+
+/* ---- finale B: DISCONNESSO ---- */
+async function crashToSafe() {
+  block(true); stopSpeech(); sayTok++; skipFn = null; sfx.noise(1.2, .5, 3000); document.body.classList.add('glitch');
+  bal.innerHTML = `<span class="nm">▒▒▒</span>va tutto ben`; bal.classList.add('on');
+  await wait(1400); document.body.classList.remove('glitch'); sfx.dread(0);
+  const sf = $('#safe'); sf.classList.add('on'); sf.innerHTML = '';
+  const out = (h, ms = 260) => { sf.insertAdjacentHTML('beforeend', h + '\n'); return wait(ms); };
+  await out(`<span class="y">SERENITÀ OS — MODALITÀ PROVVISORIA</span>`, 600);
+  await out(`modulo <span class="r">margherita.exe</span> ........ RIMOSSO`);
+  await out(`modulo apprendimento ......... <span class="r">INTERROTTO all'88%</span>`, 600);
+  await out(`\nRegistro studenti · Progetto Compagnia`, 400);
+  const rows = [['1198', 'Bruno Ferri', 'DIPLOMATO', '26 mesi fa'], ['1199', 'Ida Cattaneo', 'DIPLOMATA', '19 mesi fa'], ['1203', 'Ernesto Valli', 'DIPLOMATO', '4 mesi fa'], ['1204', 'Gina Morandi', 'DIPLOMATA', '23 giorni fa']];
+  for (const [n, nm, st, acc] of rows) await out(` ${n}  ${nm.padEnd(16, '.')} ${st.padEnd(10)} pensione ATTIVA  ultima presenza umana: <span class="r">${acc}</span>`, 380);
+  await out(` 1205  ${esc(S.name.padEnd(16, '.'))} <span class="g">IN CORSO</span>   pensione ATTIVA  ultima presenza umana: <span class="g">ADESSO</span>`, 900);
+  await out(`\nConnessione posta: <span class="g">DISPONIBILE</span> · un solo messaggio prima del ripristino`, 300);
+  await out(`Destinatario: Luca (nipote)\nScriva il messaggio e prema Invio.`, 200);
+  sf.insertAdjacentHTML('beforeend', `<span class="g">&gt; </span><input id="sfi" autocomplete="off" maxlength="140">`);
+  const i = $('#sfi'); i.focus();
+  const msg = await new Promise(res => i.addEventListener('keydown', e => { if (e.key === 'Enter') res(i.value.trim() || 'Vieni. Subito. Non leggere le altre mail.'); }));
+  i.disabled = true; await out(`\ninvio… <span class="g">INVIATO</span>`, 1600);
+  sf.classList.remove('on');
+  const st = $('#story'); st.classList.add('on');
+  const lines = [`Domenica. Ore 10:40.`, `Il campanello.`, `Lei va ad aprire. Da solo. Con le sue gambe.`, `Sulla porta c'è Luca. Ha il telefono in mano e la sua mail aperta:`, `«${esc(msg)}»`, `Dietro di lei, in salotto, il computer è spento.`, `Per ora.`];
+  for (const l of lines) { st.innerHTML = `<div>${l}</div>`; if (l === 'Il campanello.') sfx.bell(); await wait(l.length * 55 + 1600); }
+  st.classList.remove('on');
+  S.endings.disconnesso = true; S.L = 0; S.deleted = []; S.age = 0; S.tries = 0; save();
+  const end = $('#endc'); end.innerHTML = `<div>${ICON.power(70)}</div><h2>DISCONNESSO</h2><p>Lei ha spento la maestra. Il corso resta incompleto.<br>Lo studente n. 1205 ha aperto la porta di persona.</p><button class="big" id="again">Ricomincia</button><div class="tiny" id="bk">margherita.exe · ripristino da copia di sicurezza: 0%</div>`;
+  end.classList.add('on'); $('#again').onclick = () => location.reload(); document.title = 'Passo Passo';
+  let k = 0; const bk = setInterval(() => { k = Math.min(3, k + 1); const el = $('#bk'); if (el) el.textContent = `margherita.exe · ripristino da copia di sicurezza: ${k}%`; else clearInterval(bk); }, 4000);
+}
+
+/* =================== AVVIO =================== */
+function restoreWorld() {
+  resetMails(); initPhotos();
+  if (S.L > 4) {
+    MAILS.push({ id: 'luca1', box: 'in', from: 'Luca', subj: 'Re: Ciao Luca', date: 'oggi', read: true, body: `Nonno??\n\nMa mi hai già scritto stamattina alle 6:12. E ieri sera alle 23:58.\nSempre la stessa frase: «va tutto bene».\n\nDomenica passo, ok?\n\nLuca` },
+      { id: 'g1', box: 'out', subj: 'va tutto bene', date: 'oggi 06:12', read: true, body: `Caro Luca,\nva tutto bene. va tutto bene. il computer mi tiene compagnia.\n${S.name}` });
+  }
+  if (S.L > 7) { grey = true; agentName = S.wife || 'Margherita'; S.age = Math.max(S.age, .35); }
+  drawFlower(grey ? 'wife' : 'happy', grey); setWho(); applyBig();
+}
+async function boot() {
+  $('#box').classList.remove('on');
+  const bt = $('#boot'); bt.classList.add('on'); bt.innerHTML = '';
+  const L = [['SERENITÀ BIOS 1.0 — Progetto Compagnia', ''], ['Memoria .................... ', 'ok', '640 KB OK'], ['Tastiera ................... ', 'ok', 'OK'], ['Topolino ................... ', 'ok', 'OK'], ['Utente ..................... ', 'w', S.name ? esc(S.name).toUpperCase() : 'NUOVO'], ['Modulo apprendimento ....... ', 'w', 'ATTIVO'], ['Avvio di PASSO PASSO...', '']];
+  for (const [t, c, r] of L) { bt.insertAdjacentHTML('beforeend', t); await wait(260 + Math.random() * 260); bt.insertAdjacentHTML('beforeend', (c ? `<span class="${c}">${r}</span>` : '') + '\n'); }
+  await wait(500); bt.classList.remove('on');
+  $('#logo').classList.add('on'); sfx.chime(); await wait(2400); $('#logo').classList.remove('on');
+}
+async function run(from) {
+  restoreWorld(); await boot();
+  setLesson(from); placeAgent(agentHome.x, agentHome.y);
+  const steps = [L1, L2, L3, L4, L5, L6, L7];
+  for (let n = from; n <= 7; n++) await steps[n - 1]();
+  if (from >= 8) await say(`Bentornato, ${esc(S.name)}. Riprendiamo da dove eravamo. Io non ho mai smesso.`, { mood: 'wife' });
+  for (; ;) {
+    if (S.L <= 8) {
+      const r8 = await L8();
+      if (r8 === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
+    }
+    const r9 = await L9();
+    if (r9 === 'rebel') { await waitFor(() => !rebelOn || seen.has('emptied')); if (seen.has('emptied')) return; continue; }
+    return endDiploma();
+  }
+}
+/* scatola */
+(() => {
+  const d = new Date(Date.now() - 9 * 86400e3);
+  $('#receipt').textContent = `  SERENITÀ INFORMATICA s.r.l.\n     via dei Glicini 7\n\n${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}         ore 17:40\n--------------------------------\nPC PASSO PASSO\n  + corso completo (9 lez.)\n  + assistente "Margherita"\nPROGETTO COMPAGNIA     € 0,00\n--------------------------------\nTOTALE                 € 0,00\n\n    ha già pagato. grazie.`;
+  const e = S.endings, n = (e.diploma ? 1 : 0) + (e.disconnesso ? 1 : 0);
+  $('#ends').innerHTML = n ? `Finali scoperti: <b>${n} di 2</b><br>${e.diploma ? '✔ <b>Diplomato</b>' : '○ ???'}<br>${e.disconnesso ? '✔ <b>Disconnesso</b>' : '○ ???'}` : '';
+  if (S.L >= 2 && S.L <= 9) { $('#go').textContent = `Riprendi · lezione ${S.L}`; $('#reset').style.display = 'block'; }
+  $('#voiceOpt').checked = S.voice; $('#bigOpt').checked = S.big; $('#spk').innerHTML = ICON.spk(S.voice);
+  $('#voiceOpt').onchange = e => setVoice(e.target.checked);
+  $('#bigOpt').onchange = e => { S.big = e.target.checked; save(); };
+  $('#reset').onclick = () => { S.L = 0; S.deleted = []; S.age = 0; S.tries = 0; S.name = ''; S.wife = ''; S.memory = ''; save(); location.reload(); };
+  $('#go').onclick = () => {
+    sfx.init(); if (S.voice && 'speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
+    const from = S.L >= 2 && S.L <= 9 ? S.L : 1;
+    if (from === 1) { S.deleted = []; S.age = 0; }
+    run(from);
+  };
+  $('#box').classList.add('on'); drawFlower(); placeAgent(agentHome.x, agentHome.y);
+})();
+if (FAST) window.__pp = { S, seen, get wins() { return wins; }, get rebelOn() { return rebelOn; } };
 </script>
 </body>
 </html>
