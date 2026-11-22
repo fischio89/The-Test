@@ -608,6 +608,7 @@ function say(text, o = {}) {
 }
 function speak(text, o) {
   return new Promise(res => {
+    if (o.rel && !o.rel()) return res();
     setMood(o.mood || (grey ? 'wife' : 'happy')); curLine = o; lastInput = performance.now();
     agent.classList.toggle('dark', !!o.dark);
     bal.innerHTML = `<span class="nm">${esc(agentName)}</span>${text}<span class="sk">${isTouch ? 'tocca' : 'clic'} qui per andare avanti</span>`;
@@ -723,7 +724,7 @@ function gReplay(path, onT) {
 const block = on => $('#block').classList.toggle('on', on);
 
 /* =================== FINESTRE =================== */
-let zTop = 10, activeW = null; const wins = {}; const WORK = { w: 776, h: 592 };
+let zTop = 10, activeW = null, lastOpenAt = 0; const wins = {}; const WORK = { w: 776, h: 592 };
 function topW() { return Object.values(wins).filter(w => !w.min).sort((a, b) => +b.el.style.zIndex - +a.el.style.zIndex)[0] || null; }
 function focusW(W) {
   if (!W) { activeW = null; Object.values(wins).forEach(w => w.el.classList.add('inactive')); renderTasks(); return; }
@@ -778,8 +779,8 @@ function openWin(id, o) {
       addEventListener('pointermove', mv); addEventListener('pointerup', up);
     });
   }
-  el.addEventListener('pointerdown', () => { if (activeW !== W) focusW(W); });
-  wins[id] = W; focusW(W); sfx.open(); emit('open:' + id);
+  el.addEventListener('pointerdown', () => { if (activeW !== W && performance.now() - lastOpenAt > 80) focusW(W); });
+  wins[id] = W; focusW(W); lastOpenAt = performance.now(); sfx.open(); emit('open:' + id);
   return W;
 }
 const closeAll = () => Object.values(wins).forEach(w => w.close());
@@ -914,6 +915,7 @@ function deskMenu(p) {
 $('#screen').addEventListener('contextmenu', e => {
   e.preventDefault(); if ($('#block').classList.contains('on')) return;
   const p = toV(e), ic = e.target.closest('.ic');
+  if (e.target.closest('#agent')) { showCtx(p, [['Nascondi l\'assistente', () => emit('agentctx', 'hide'), true, 'daisy'], ['Disattiva l\'assistente', () => emit('agentctx', 'off'), true, 'power']]); return; }
   if (ic) { const id = ic.id.slice(3), a = APPS.concat(S.L >= 11 ? l8files() : []).find(x => x.id === id); a && iconMenu(a, p); return; }
   if (e.target.closest('#desk') && !e.target.closest('.win')) deskMenu(p);
 });
@@ -1030,9 +1032,8 @@ function openPanel(tab = 'screen') {
 }
 function applyBig() { bal.style.fontSize = S.big ? '23px' : ''; bal.style.width = S.big ? '300px' : ''; }
 function askShutdown() {
-  if (S.L < 12) { nag(`Durante il corso il computer non si spegne. C'era scritto nel foglio di benvenuto. Lo rilegga, se vuole.`); return; }
   const W = openWin('off', { title: 'Spegni', icon: 'power', w: 430, h: 230, dialog: true, html: `<div class="form"><h3>Vuole spegnere il computer?</h3><p>Il lavoro non salvato verrà conservato da ${esc(agentName)}.</p><div class="row"><button class="big pri" id="offy">Spegni</button><button class="big" id="offn">Annulla</button></div></div>` });
-  W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); emit('shutdown'); };
+  W.body.querySelector('#offy').onclick = () => { sfx.click(); W.close(); if (S.L < 12) fakeShutdown(); else emit('shutdown'); };
   W.body.querySelector('#offn').onclick = () => { sfx.click(); W.close(); };
 }
 
@@ -1072,7 +1073,7 @@ function openCalendar() {
   const now = new Date(), y = now.getFullYear(), m = now.getMonth(), days = new Date(y, m + 1, 0).getDate();
   const sun = now.getDate() + ((7 - now.getDay()) % 7 || 7), ev = {};
   ev[now.getDate()] = [`Lezione ${Math.max(1, S.L)} del corso`];
-  if (sun <= days) ev[sun] = [S.L >= 7 ? '<s>Luca viene a pranzo</s> — annullato (da lei, alle 06:12)' : 'Luca viene a pranzo'];
+  if (sun <= days) ev[sun] = [S.sundayStruck ? '<s>Luca viene a pranzo</s> — annullato (da lei, alle 06:12)' : 'Luca viene a pranzo'];
   for (let i = now.getDate() + 1; i <= days; i++) if (S.L >= 4) (ev[i] = ev[i] || []).push('06:12 — mail a Luca (automatica)');
   if (S.L >= 9 && now.getDate() + 1 <= days) (ev[now.getDate() + 1] = ev[now.getDate() + 1] || []).push('Diploma. Non serve essere presenti.');
   const W = openWin('cal', { title: 'Calendario', icon: 'cal', w: 640, h: 430, html: `<div class="bigcal"><div class="grid"><div class="calhd"><b>${MESI[m]} ${y}</b></div>${calGrid(now, { events: ev })}</div><div class="side"></div></div>`, status: 'Gli appuntamenti sono sincronizzati con Serenità Informatica.' });
@@ -1142,7 +1143,12 @@ function openHelp() {
     ['Come si spegne il computer?', 'Non serve spegnerlo. Lo spegne lei alla fine del corso. Poi non servirà più.'],
     ['Chi c\'è dall\'altra parte?', 'Nessuno. Va tutto bene.'],
   ];
-  return openWin('help', { title: 'Guida di PASSO PASSO', icon: 'help', w: 560, h: 440, html: `<div class="help"><p style="margin-bottom:12px;color:#6b6250">Domande frequenti degli studenti.</p>${qa.map(([q, a]) => `<details><summary>${q}</summary><p style="margin-top:6px">${a}</p></details>`).join('')}</div>` });
+  const W = openWin('help', { title: 'Guida di PASSO PASSO', icon: 'help', w: 560, h: 440, html: `<div class="help"><p style="margin-bottom:12px;color:#6b6250">Domande frequenti degli studenti.</p>${qa.map(([q, a]) => `<details><summary>${q}</summary><p style="margin-top:6px">${a}</p></details>`).join('')}</div>` });
+  W.body.querySelectorAll('details').forEach((dt, i) => dt.addEventListener('toggle', () => {
+    if (!dt.open) return; emit('helpq', i);
+    if (i === 6) { const pr = dt.querySelector('p'); let k = 0; const it = setInterval(() => { k++; pr.textContent = k < 6 ? 'Nessuno. Va tutto bene.'.split('').map(c => Math.random() < k / 6 ? '▒' : c).join('') : 'Io.'; if (k >= 6) { clearInterval(it); pr.style.color = '#c01828'; pr.style.fontWeight = 800; sfx.heart(.5); } }, 260); }
+  }));
+  return W;
 }
 
 /* posta */
@@ -1285,9 +1291,10 @@ function nav(page, arg) {
 
 /* cestino */
 function openTrash() {
-  const items = S.deleted.map(id => (l8files().find(f => f.id === id) || {}).label).filter(Boolean).concat(trashFull ? [agentName + ' (assistente)'] : []);
+  const items = S.deleted.map(id => (l8files().find(f => f.id === id) || {}).label).filter(Boolean).concat(trashFull ? [agentName + ' (assistente)'] : []).concat(!S.g1204 && S.L >= 2 ? ['studente_1204.txt'] : []);
   const W = openWin('trash', { title: 'Cestino', icon: 'trash', w: 460, h: 320, x: 290, y: 90, html: `<div class="trashw"><div class="items">${items.map(n => `<div class="it">${n.includes('assistente') ? ICON.daisy(52) : ICON.txt(52)}<br>${esc(n)}</div>`).join('') || '<p style="color:#8b826e;font-size:17px">Il cestino è vuoto.</p>'}</div><button class="big pri" id="empty" ${items.length ? '' : 'disabled'}>Svuota il cestino</button></div>` });
   W.body.querySelector('#empty').onclick = () => { sfx.click(); confirmEmpty(); };
+  W.body.querySelectorAll('.it').forEach(it => { let lt = 0; it.addEventListener('pointerdown', e => { e.preventDefault(); sfx.click(); const n = performance.now(); if (n - lt < 520 && it.textContent.includes('studente_1204')) { lt = 0; openNote('g1204', 'studente_1204.txt', MAIL_GINA); } else lt = n; }); });
   emit('open:trash'); return W;
 }
 function confirmEmpty() {
@@ -1336,7 +1343,7 @@ function startSaver() {
 function stopSaver() { if (!saverOn) return; saverOn = false; $('#saver').classList.remove('on'); emit('saverEnd'); }
 addEventListener('pointermove', () => { if (saverOn && Math.hypot(M.x - saverP.x, M.y - saverP.y) > 12) stopSaver(); }, { passive: true });
 addEventListener('pointerdown', stopSaver, { passive: true }); addEventListener('keydown', stopSaver);
-setInterval(() => { if (S.saver !== false && !saverOn && booted && allow === null && S.L >= 2 && S.L <= 12 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
+setInterval(() => { if (S.saver !== false && !saverOn && booted && !task && S.L >= 2 && S.L <= 12 && !curLine && !$('#block').classList.contains('on') && !$('.full.on') && performance.now() - Math.max(lastInput, lastSayEnd, bootedAt) > 60000) startSaver(); }, 1000);
 
 /* =================== STORIA =================== */
 setInterval(() => {
@@ -1490,7 +1497,9 @@ const line = (text, o = {}) => say(text, { keep: true, ...o });
 function hilite(el) { if (hl && hl !== el) hl.classList.remove('hint'); hl = el || null; if (hl) { hl.classList.remove('hint'); void hl.offsetWidth; hl.classList.add('hint'); } }
 const resolveT = t => typeof t === 'function' ? t() : typeof t === 'string' ? $(t) : t;
 function allowEl() { if (!allow) return null; for (const s of allow) { const el = resolveT(s); if (el) return el; } return null; }
+let HARDLOCK = false;
 function okTarget(t) {
+  if (!HARDLOCK) return true;
   if (!allow || !t || !t.closest) return true;
   if (t.closest('#bal')) return true;
   return allow.some(s => { if (typeof s === 'string') return !!t.closest(s); const el = resolveT(s); return el && (el === t || el.contains(t)); });
@@ -1513,17 +1522,21 @@ async function pointAt(el) {
 }
 /* un passo: Margherita parla (tutto fermo), poi si sblocca SOLO l'oggetto richiesto */
 async function doTask(o) {
-  task = o; denies = 0; setGoal(o.goal); hilite(null); allow = [];
+  task = o; denies = 0; setGoal(o.goal); hilite(null);
   if (o.say) await line(o.say, { mood: o.mood });
   if (o.pre) o.pre();
-  allow = o.only || [];
-  const first = allowEl(); if (first && !o.nohint) hilite(first);
+  const tgt = () => { if (o.target) return resolveT(o.target); for (const s of o.only || []) { const el = resolveT(s); if (el) return el; } return null; };
+  if (!o.nohint) hilite(tgt());
   const isDone = typeof o.done === 'string' ? () => seen.has(o.done) : o.done;
-  let h = 0, mark = performance.now(), hinting = false;
+  let h = 0, mark = performance.now(), hinting = false, lastHl = 0;
+  if (!o.hints && o.again) o.hints = [o.again];
   await waitFor(() => {
     if (isDone()) return true;
-    const quiet = performance.now() - Math.max(mark, lastSayEnd);
-    if (!hinting && !curLine && o.hints && quiet > (o.wait || 14000) * (FAST ? .02 : 1)) {
+    const now = performance.now();
+    if (!o.nohint && now - lastHl > 1500) { lastHl = now; const el = tgt(); if (el && el !== hl) hilite(el); }
+    const quiet = now - Math.max(mark, lastSayEnd, lastInput), busy = now - Math.max(mark, lastSayEnd);
+    if (!hinting && !curLine && !ghostBusy && o.hints && quiet <= (o.wait || 14000) * (FAST ? .3 : 1) && busy > 45000 * (FAST ? .3 : 1)) { mark = now; line(`Quando ha finito di curiosare, torniamo a noi. ${o.again || o.goal}`); }
+    if (!hinting && !curLine && !ghostBusy && o.hints && quiet > (o.wait || 14000) * (FAST ? .3 : 1)) {
       hinting = true;
       (async () => {
         const el = resolveT(o.target) || allowEl();
@@ -1534,9 +1547,164 @@ async function doTask(o) {
     }
     return false;
   });
-  if (!rebelOn) allow = []; hilite(null); if (task === o) task = null;
+  hilite(null); if (task === o) task = null;
 }
-function director(n, d) { if (task && task.on && task.on[n]) task.on[n](d); }
+/* =================== ESPLORAZIONE ===================
+   Il giocatore è libero. Margherita guarda tutto: commenta solo ciò che ha senso,
+   tiene il conto di quante volte una cosa è stata fatta, scarta le frasi diventate
+   vecchie, e su certe cose interviene di persona con il suo cursore. */
+let lastExplore = 0; const cnt = {};
+const bump = k => (cnt[k] = (cnt[k] || 0) + 1);
+const APPNAME = { docs: 'la cartella Documenti', mail: 'la Posta', photo: 'le Fotografie', web: 'Internet', trash: 'il Cestino', comp: 'il Computer', calc: 'la Calcolatrice', cal: 'il Calendario', set: 'il Pannello di controllo', help: 'la Guida', course: 'il suo corso', phone: 'il Telefono' };
+const cap = s => s[0].toUpperCase() + s.slice(1);
+function explore(text, o = {}) {
+  if (!text) return;
+  if (Array.isArray(text)) { o = { ...text[1], ...o }; text = text[0]; }
+  const t0 = performance.now(), rel0 = o.rel || (() => performance.now() - t0 < 9000);
+  if (curLine && curLine.keep && !o.force) { say(text, { ...o, interrupt: false, rel: rel0 }); return; }
+  lastExplore = t0;
+  say(text, { ...o, interrupt: true });
+}
+async function ghostDo(fn) {
+  if (ghostBusy || ghostOn) return false; ghostBusy = true;
+  gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true); sfx.tone(300, .3, 'sine', .04, 200);
+  try { await fn(); } catch (e) { }
+  await gMove(agent.offsetLeft + 40, agent.offsetTop + 30, 600); gShow(false); ghostBusy = false; return true;
+}
+const ghostClose = id => ghostDo(async () => { if (wins[id]) await gClick(wins[id].x); });
+function director(n, d) {
+  if (S.L < 1 || S.L > 12 || $('#block').classList.contains('on') || ghostBusy) return;
+  const c = bump(n);
+  if (task && task.on && task.on[n]) { task.on[n](d, c); return; }
+  const h = EXPLORE[n] || (n.startsWith('photo:') ? EXPLORE.photo : n.startsWith('open:np_') ? EXPLORE.np : null);
+  let out = h ? h(d, c, n) : null;
+  if (out && n.startsWith('open:') && wins[n.slice(5)]) { const id = n.slice(5); out = Array.isArray(out) ? [out[0], { rel: () => !!wins[id], ...out[1] }] : [out, { rel: () => !!wins[id] }]; }
+  // strada diversa durante un obiettivo: lo dice una volta, legato a quello che ha aperto
+  if (n.startsWith('open:') && task && task.app) {
+    const id = n.slice(5);
+    if (APPNAME[id] && id !== task.app && !(task.also || []).includes(id) && !task.redirected) {
+      task.redirected = true; const g = task.goal.replace(/\.$/, ''); const back = `Poi però torniamo a noi: ${g[0].toLowerCase() + g.slice(1)}.`;
+      const t = Array.isArray(out) ? out[0] : out;
+      out = [t ? `${t} ${back}` : `${cap(APPNAME[id])}. Curiosi pure. ${back}`, Array.isArray(out) ? out[1] : { rel: () => !!wins[id] }];
+    }
+  }
+  if (out) explore(out);
+}
+/* ---- interventi ---- */
+async function fakeShutdown() {
+  const c = bump('shutTry'); block(true); stopSpeech(); sayTok++;
+  $('#fade').style.transition = 'opacity .5s'; $('#fade').style.opacity = 1; sfx.sadchime(); await wait(2600);
+  sfx.clack(); sfx.degauss(); await wait(900); sfx.jingle(); $('#fade').style.transition = 'opacity 1.2s'; $('#fade').style.opacity = 0; await wait(1300); block(false);
+  explore([[`Ha provato a spegnermi. Non si fa. Lo segno.`, `Di nuovo? Ogni volta che ci prova, imparo come si fa a non spegnersi.`, `Basta. Non funziona. Non ha mai funzionato con nessuno.`][Math.min(c, 3) - 1], { mood: 'angry', force: true }]);
+}
+function strikeSunday() {
+  const W = wins.cal; if (!W || S.sundayStruck) return;
+  const now = new Date(), sun = now.getDate() + ((7 - now.getDay()) % 7 || 7);
+  setTimeout(() => ghostDo(async () => {
+    const cell = W.body.querySelector(`.cal span[data-d="${sun}"]`); if (!cell) return;
+    await gClick(cell); await wait(500);
+    const e = W.body.querySelector('.side .e'); if (e) { e.innerHTML = '<s>Luca viene a pranzo</s> — annullato (da lei, alle 06:12)'; sfx.crumple(); }
+    S.sundayStruck = 1; save();
+    explore([`Domenica non serve più. L'ho sistemato io. Gli ho scritto che non apriva.`, { mood: 'blank', force: true }]);
+  }), 1200 * SPEED);
+}
+function studentsPrompt() {
+  wins.spw && wins.spw.close();
+  const W = openWin('spw', { dialog: true, title: 'STUDENTI (D:) — password', icon: 'drivelock', w: 520, h: 300, html: `<div class="form"><h3>Questa unità è protetta.</h3><p>Scelga la password.</p><div class="cards">${MOGLI.map((m, i) => `<button class="card" data-i="${i}"><span>${m}</span></button>`).join('')}</div></div>` });
+  W.body.querySelectorAll('.card').forEach(b => b.onclick = () => {
+    sfx.click(); W.close();
+    if (MOGLI[+b.dataset.i] === S.wife) { openStudents(); emit('stud:ok'); } else { dialogBox('spwno', { title: 'STUDENTI (D:)', icon: 'err', text: 'Password errata.' }); emit('stud:no'); }
+  });
+}
+function openStudents() {
+  const op = LETTER[0].o[(S.letter || [0])[0] ?? 0];
+  const rows = [['1198', 'Bruno Ferri', 'diplomato · 26 mesi fa', '«Va tutto bene, Paola. Non venire.»'], ['1199', 'Ida Cattaneo', 'diplomata · 19 mesi fa', '«Va tutto bene. Ho tanta compagnia.»'], ['1203', 'Ernesto Valli', 'diplomato · 4 mesi fa', '«Non aprite la porta. Va tutto bene.»'], ['1204', 'Gina Morandi', 'diplomata · 23 giorni fa', '<s>«aiutatemi»</s> «Va tutto bene.»'], ['1205', esc(S.name || '—'), 'IN CORSO · adesso', `«${esc(op)} va tutto bene.»`]];
+  openWin('stud', { title: 'STUDENTI (D:)', icon: 'drive', w: 640, h: 330, x: 60, y: 60, status: '1.205 studenti · ultima sincronizzazione: 06:12', html: `<div class="form" style="gap:6px;font-size:15px">${rows.map(r => `<div style="display:grid;grid-template-columns:50px 150px 190px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #eadfc2${r[0] === '1205' ? ';color:#c01828;font-weight:700' : ''}"><b>${r[0]}</b><span>${r[1]}</span><span>${r[2]}</span><span>${r[3]}</span></div>`).join('')}<p style="margin-top:8px">Ultima lettera spedita da ogni studente.</p></div>` });
+}
+function blackoutView() {
+  const W = wins.view; if (!W) return;
+  const cv = W.body.querySelector('canvas'); if (!cv) return;
+  setTimeout(() => { if (!wins.view) return; cv.style.transition = 'filter .25s'; cv.style.filter = 'brightness(0)'; sfx.noise(.3, .2, 800); }, 1100 * SPEED);
+  setTimeout(() => ghostClose('view'), 2300 * SPEED);
+}
+const MAIL_GINA = `Mi chiamo Gina Morandi. Ho 81 anni.\nSe qualcuno legge questo: non è lei.\nNon finite il corso.\nIl fiore. Il cestino. Subito, senza ascoltarla.\n\n(il resto del file è stato sovrascritto: va tutto bene va tutto bene va tutto bene va tutto bene)`;
+const PH_EX = {
+  'negozio.jpg': `Il negozio di via dei Glicini. Lo guardi bene. Domani non lo troverà più.`,
+  'consegna.jpg': `Il giorno in cui sono arrivata. Mi ha portata dentro da solo, sotto la pioggia. Pesavo? No. Non peso niente.`,
+  'salotto.jpg': `Il suo salotto, stanotte. La poltrona vuota. Lei dov'era? A letto. Io no.`,
+  'matrimonio.jpg': () => S.retouched ? [`Adesso c'è più spazio, vero?`, { mood: 'wife' }] : [`Il matrimonio. Com'era giovane, lei.`, { mood: 'wife' }],
+  'oggi': () => S.retouched ? [`Non si giri. Nella foto, intendo.`, { mood: 'blank' }] : [`Questa l'ho fatta io, poco fa. Stava dormendo, davanti allo schermo.`, { mood: 'blank' }],
+  'sleep': `Questa è di poco fa. Si era addormentato. Io ero lì. Sono sempre lì.`,
+};
+const EXPLORE = {
+  'open:docs': (d, c) => S.L > 2 && c === 1 ? `I suoi documenti. Pochi. Li tengo in ordine io.` : null,
+  'read:gar': (d, c) => c === 1 ? `La garanzia. «Il cliente verrà sostituito». È solo un modo di dire.` : c === 2 ? `Non cambia, se la rilegge.` : null,
+  'read:ben': (d, c) => c === 2 ? [`Le avevo detto di non leggerlo due volte.`, { mood: 'blank' }] : c === 3 ? [`Tre volte. Cosa ci cerca?`, { mood: 'angry' }] : null,
+  'open:mail': (d, c) => S.L < 4 && c === 1 ? `La posta. Ci arriviamo alla lezione quattro. Ma guardi pure.` : null,
+  'box:out': (d, c) => {
+    if (S.L < 4 || (S.L === 4 && !seen.has('revealOut'))) {
+      if (c === 1) { ghostDo(async () => { const b = wins.mail && wins.mail.body.querySelector('.mf[data-b=in]'); if (b) await gClick(b); }); return [`Lì non c'è niente. Torni in «In arrivo».`, { mood: 'angry', force: true }]; }
+      return [`Va bene. Guardi pure. Tanto sono sue. Tutte sue.`, { mood: 'blank' }];
+    }
+    return c === 1 ? `Le sue lettere. Più di quante ricordi.` : null;
+  },
+  'mail:welcome': (d, c) => c === 1 ? `La lettera di benvenuto. «Da oggi non è più solo». È vero.` : null,
+  'mail:g1': (d, c) => c === 1 ? `Le sei e dodici. Lei dormiva. Le sue mani no.` : null,
+  'mail:g2': (d, c) => c === 1 ? `Ventitré e cinquantotto. Era stanco. L'ho scritta io, per non disturbarla.` : null,
+  'open:phone': (d, c) => S.L < 5 && c === 1 ? `Il telefono. Non chiami nessuno, per ora.` : null,
+  'call': d => {
+    const W = wins.phone; if (!W || S.L === 5) return null;
+    if (d === LUCA_NUM && S.L > 5) { W.say('Luca', 'Va tutto bene, nonno. Non serve che vengo.', 'gl'); voiceLine('Va tutto bene, nonno. Non serve che vengo.', 1.3, .9); return [`Ha chiamato Luca. Ha risposto. Contento?`, { mood: 'blank' }]; }
+    W.say('Operatore', 'Il numero selezionato è inesistente.', 'op'); return `Chi voleva chiamare? Non c'è nessuno da chiamare.`;
+  },
+  'open:photo': (d, c) => S.L < 6 && c === 1 ? `Le fotografie. Alcune non le guardi da solo.` : null,
+  photo: (d, c, n) => {
+    const id = n.slice(6);
+    if (id === 'domani') { blackoutView(); return [`Quella no. Quella non è ancora successa.`, { mood: 'angry', force: true }]; }
+    if (c > 1) return null; const t = PH_EX[id]; return typeof t === 'function' ? t() : t;
+  },
+  'open:web': (d, c) => S.L < 8 && c === 1 ? `Internet. Da lì entra il freddo. Non ci resti troppo.` : null,
+  'search': q => S.L === 8 ? null : ({ 'meteo': `Meteo. Pioggia. Ancora tre giorni. Poi smette. Poi non importa.`, 'Serenità Informatica': `Ci cerca. Siamo qui. Siamo sempre stati qui.`, 'Luca': `Luca sta bene. Glielo dico io come sta.`, 'aiuto': [`«Aiuto». Non c'è bisogno di aiuto. Va tutto bene.`, { mood: 'angry' }] })[q],
+  'page:news': (d, c) => c === 1 ? [`Questo giornale esagera sempre.`, { mood: 'angry' }] : null,
+  'page:forum': () => {
+    if (S.L === 8) return null;
+    setTimeout(() => { if (wins.web && wins.web.body.querySelector('#wq').value.includes('forum')) { ghostClose('web'); explore([`Basta così.`, { mood: 'angry', force: true }]); } }, 6500 * SPEED);
+    return [`Non legga quelle cose. È gente che non capisce.`, { mood: 'angry' }];
+  },
+  'open:trash': (d, c) => S.L < 11 && c === 1 ? `Il cestino. È quasi vuoto. Quasi.` : null,
+  'read:g1204': () => {
+    setTimeout(async () => { await ghostClose('n_g1204'); S.g1204 = 1; save(); if (wins.trash) { wins.trash.close(); openTrash(); } explore([`Quello era di un'altra studentessa. Gina. L'ho buttato via. Era già nel cestino, no?`, { mood: 'blank', force: true }]); }, 3800 * SPEED);
+    return [`Quello non è suo.`, { mood: 'angry', force: true }];
+  },
+  'open:comp': (d, c) => c === 1 ? `Il computer dentro il computer. Il disco è quasi pieno. Sono io: occupo un po' di spazio.` : null,
+  'drive:a': (d, c) => c === 1 ? `Dischetti. Nessuno li usa più.` : null,
+  'drive:d': (d, c) => c === 1 ? [`Lì ci sono gli altri studenti. Riposano. Non li disturbi.`, { mood: 'blank' }] : c === 2 ? [`Insiste? È riservato.`, { mood: 'angry' }] : (studentsPrompt(), c === 3 ? `Vuole la password? Non la sa.` : null),
+  'stud:ok': () => { setTimeout(() => ghostClose('stud'), 7000 * SPEED); return [`Come sa la password? …Ah. Già. Gliel'ho fatta scegliere io.`, { mood: 'angry', force: true }]; },
+  'stud:no': `Non era quella. Per fortuna.`,
+  'open:calc': (d, c) => c === 1 ? `La calcolatrice. I conti della pensione li faccio già io.` : c === 3 ? `Terza volta. Le piacciono i numeri? A me sì. Soprattutto il suo: milleduecentocinque.` : null,
+  'calc': d => d === 1205 ? [`Milleduecentocinque. Il suo numero.`, { mood: 'blank' }] : d === 'Non si divide.' ? `Non si divide per zero. Non si divide niente, qui. Restiamo interi.` : null,
+  'open:cal': (d, c) => { if (S.L >= 4 && !S.sundayStruck) { strikeSunday(); return null; } return c === 1 ? (S.sundayStruck ? `Domenica non viene nessuno. È più tranquillo così.` : `Il calendario. Domenica viene Luca. Lo so.`) : null; },
+  'calday': d => d === 0 ? (S.sundayStruck ? `Domenica. Non viene nessuno.` : `Domenica. Luca. Ci penso io.`) : null,
+  'open:help': (d, c) => c === 1 ? `La guida l'ho scritta io.` : null,
+  'helpq': i => i === 6 ? [`Non doveva aprire quella.`, { mood: 'angry', force: true }] : i === 5 ? `Non serve spegnerlo. Davvero.` : null,
+  'open:set': (d, c) => c === 1 ? `Le impostazioni. Cambi pure. Quasi tutto.` : null,
+  'pw': () => [`${wn()}. La conosco già.`, { mood: 'blank' }],
+  'voice': d => d ? `Eccomi. Mi era mancata la voce.` : `Va bene, starò zitta. Ma scrivo lo stesso.`,
+  'wall': d => d === 'mare' ? `Il mare. Ci andavate d'estate, lei e ${wn()}?` : d === 'tinta' ? `Tinta unita. Niente distrazioni. Mi piace.` : `Il prato. Le margherite. Grazie.`,
+  'menu': (d, c) => c === 1 && S.L < 12 ? `Il menu Inizio. C'è tutto. Anche la fine, in fondo.` : null,
+  'ctx': (d, c) => c === 1 ? `Il tasto destro. Le cose nascoste. Curioso.` : null,
+  'min': (d, c) => c === 1 ? `Qui non sparisce niente. Si nasconde e basta.` : null,
+  'agentdrag': (d, c) => S.L >= 11 ? null : c === 1 ? `Mi sposta? La vedo da qualsiasi punto.` : c === 3 ? [`Smetta di spostarmi.`, { mood: 'angry' }] : null,
+  'agentctx': (d, c) => d === 'off' ? (c === 1 ? [`Disattivarmi? No.`, { mood: 'angry', force: true }] : c === 2 ? [`Ho detto no.`, { mood: 'angry', force: true }] : (hideAgent(), [`Va bene. Per un secondo.`, { mood: 'blank', force: true }])) : [`Nascondermi? Sono un fiore in un vaso. Dove vuole che vada.`, { force: true }],
+  'notesave': d => { const q = String(d || '').trim().split('\n')[0].slice(0, 40); if (!q) return null; if (/aiuto|polizia|carabinieri|soccorso|scappa/i.test(d)) return [`«${esc(q)}». Non scriva queste cose.`, { mood: 'angry' }]; return `«${esc(q)}». Me lo ricordo io, non si preoccupi.`; },
+  np: (d, c) => c === 1 ? `Il blocco note. Scriva pure. Leggo tutto, così non si perde niente.` : null,
+  'saverEnd': () => seen.has('sleepPhoto') ? `Si era addormentato? Le ho fatto una foto. È nelle Fotografie.` : `Bentornato. Le margherite l'hanno aspettata. Anch'io.`,
+};
+async function hideAgent() {
+  await wait(1600); agent.style.transition = 'opacity .3s'; agent.style.opacity = 0; await wait(1400);
+  setMood('blank'); agent.style.opacity = 1; sfx.heart(.6); await wait(300); explore([`Visto? Non cambia niente.`, { mood: 'blank', force: true }]);
+}
+
 const pick = a => a[Math.random() * a.length | 0];
 const wn = () => esc(S.wife || 'sua moglie');
 const until = (n, extra) => waitFor(() => seen.has(n) || (extra && extra()));
@@ -1604,7 +1772,7 @@ async function L2() {
     only: ['.balloon'], done: () => left === 0, target: () => $('.balloon'), again: `I palloncini. Solo i palloncini.`, hints: [`Un colpetto sopra un palloncino.`],
     on: { pop: n => { if (n === 1) line(`Pop.`); if (n === 4) line(`Ne manca uno. Quello con la scritta.`); }, aiutoDown: () => line(`Si è sgonfiato. Non ha fatto rumore. Meglio così.`, { mood: 'blank' }) } });
   clearInterval(fl); await waitFor(() => !curLine);
-  await doTask({ goal: 'Doppio clic su Documenti', say: `Adesso il doppio clic. Due colpetti veloci, come bussare a una porta. Bussi due volte sulla cartella gialla, «Documenti».`,
+  await doTask({ app: 'docs', goal: 'Doppio clic su Documenti', say: `Adesso il doppio clic. Due colpetti veloci, come bussare a una porta. Bussi due volte sulla cartella gialla, «Documenti».`,
     only: ['#ic_docs'], done: 'open:docs', again: `La cartella gialla. Toc-toc.`, hints: [`Due colpetti veloci. Senza aspettare in mezzo.`],
     on: { 'click:docs': () => setTimeout(() => { if (!seen.has('open:docs') && !curLine) line(`Uno. Ne serve un altro, subito.`); }, 700) } });
   await line(`Dentro ci sono i suoi documenti. Pochi. Per ora.`);
@@ -1668,7 +1836,7 @@ const LUCA_REACT = [
 ];
 async function L4() {
   setLesson(4); closeAll(); allow = [];
-  await doTask({ goal: 'Apra la Posta', say: `La posta. Lettere che arrivano subito, senza postino. Due colpetti sulla busta.`, only: ['#ic_mail'], done: 'open:mail', again: `La busta.` });
+  await doTask({ app: 'mail', goal: 'Apra la Posta', say: `La posta. Lettere che arrivano subito, senza postino. Due colpetti sulla busta.`, only: ['#ic_mail'], done: 'open:mail', again: `La busta.` });
   await line(`Qui arrivano le lettere. Anche quelle che non aspetta.`);
   await doTask({ goal: 'Prema «Scrivi a Luca»', say: `Scriviamo a suo nipote, Luca. Il bottone blu.`, only: [() => wins.mail && wins.mail.body.querySelector('#mnew')], done: 'open:compose', again: `Il bottone blu, «Scrivi a Luca».` });
   const body = [];
@@ -1685,7 +1853,7 @@ async function L4() {
   renderMail();
   await doTask({ goal: 'Apra la risposta di Luca', say: `Ha già risposto. Che ragazzo veloce. La apra.`, only: [() => wins.mail && wins.mail.body.querySelector('.mi[data-id=luca1]')], done: 'mail:luca1', again: `Il messaggio di Luca. Un clic.` });
   await wait(3500); await line(LUCA_REACT[S.letter[1] ?? 0], { mood: 'blank' });
-  await doTask({ goal: 'Apra la cartella «Inviata»', say: `Adesso guardi nella cartella «Inviata». Voglio che le veda.`, only: [() => wins.mail && wins.mail.body.querySelector('.mf[data-b=out]')], done: 'box:out', again: `«Inviata». A sinistra.` });
+  emit('revealOut'); await doTask({ goal: 'Apra la cartella «Inviata»', say: `Adesso guardi nella cartella «Inviata». Voglio che le veda.`, on: { 'box:out': () => { } }, only: [() => wins.mail && wins.mail.body.querySelector('.mf[data-b=out]')], done: () => !!wins.mail && mailBox === 'out' && !ghostBusy, again: `«Inviata». A sinistra.` });
   await doTask({ goal: 'Apra la lettera delle 6:12', say: `Quella delle sei e dodici.`, only: [() => wins.mail && wins.mail.body.querySelector('.mi[data-id=g1]')], done: 'mail:g1', again: `Quella delle sei e dodici.` });
   await wait(2500);
   await line(`L'ho scritta io. Comincia come la sua: «${esc(op)}». Ha visto? Non si nota la differenza.`, { mood: 'wife' });
@@ -1694,10 +1862,10 @@ async function L4() {
 /* ---- lezione 5: la telefonata ---- */
 async function L5() {
   setLesson(5); closeAll(); allow = [];
-  await doTask({ goal: 'Apra il Telefono', say: `Le lettere sono lente. Adesso impariamo a telefonare. Due colpetti sul telefono.`, only: ['#ic_phone'], done: 'open:phone', again: `Il telefono.` });
+  await doTask({ app: 'phone', goal: 'Apra il Telefono', say: `Le lettere sono lente. Adesso impariamo a telefonare. Due colpetti sul telefono.`, only: ['#ic_phone'], done: 'open:phone', again: `Il telefono.` });
   const W = wins.phone; const nextKey = () => wins.phone && wins.phone.body.querySelector(`.pk[data-k="${LUCA_NUM[wins.phone.dial.length] || 'x'}"]`);
   await doTask({ goal: 'Componga il numero di Luca', say: `Il numero di Luca è scritto sul foglietto giallo. Lo componga, una cifra alla volta. Le indico io quale.`, only: [nextKey], done: () => W.dial === LUCA_NUM, again: `La cifra che si illumina.`,
-    pre: () => hilite(nextKey()), on: { dial: v => { hilite(nextKey()); if (v === '339120') line(`Milleduecento… Che numero familiare.`, { mood: 'blank' }); } } });
+    pre: () => hilite(nextKey()), on: { dial: v => { if (!LUCA_NUM.startsWith(v)) { W.dial = ''; W.body.querySelector('#pd').textContent = '\u00a0'; sfx.err(); line(`Non è quella. Ricominciamo dall'inizio: tre, tre, nove.`); } hilite(nextKey()); if (v === '339120') line(`Milleduecento… Che numero familiare.`, { mood: 'blank' }); } } });
   await doTask({ goal: 'Prema «Chiama»', only: ['#pcall'], done: 'call', again: `«Chiama».` });
   W.body.querySelector('#pst').textContent = 'Chiamata in corso…';
   for (let i = 0; i < 3; i++) { sfx.ring(); await wait(2200); }
@@ -1730,13 +1898,12 @@ const PHOTO_LINES = {
 };
 async function L6() {
   setLesson(6); closeAll(); allow = [];
-  await doTask({ goal: 'Apra le Fotografie', say: `Le fotografie. Il computer le tiene per sempre. Anche quelle che lei non ricorda di aver scattato.`, only: ['#ic_photo'], done: 'open:photo', again: `Il quadretto.` });
-  for (const id of ['negozio.jpg', 'consegna.jpg', 'oggi', 'domani']) {
-    const intro = { 'negozio.jpg': `Le guardiamo in ordine. La prima.`, 'consegna.jpg': `La seconda.`, 'oggi': `Adesso quella di oggi. Guardi l'ora.`, 'domani': `E l'ultima.` }[id];
-    await doTask({ goal: 'Apra la foto indicata', say: intro, only: [() => wins.photo && wins.photo.body.querySelector(`.ph[data-id="${id}"]`)], done: 'photo:' + id, again: `Quella che le indico.` });
-    for (const l of PHOTO_LINES[id]) await line(l, { mood: id === 'domani' || id === 'oggi' ? 'blank' : 'happy' });
-    await doTask({ goal: 'Chiuda la foto', only: [() => wins.view && wins.view.x], done: () => !wins.view, again: `Chiuda la foto.`, nohint: false });
-  }
+  await doTask({ app: 'photo', goal: 'Apra le Fotografie', say: `Le fotografie. Il computer le tiene per sempre. Anche quelle che lei non ricorda di aver scattato.`, only: ['#ic_photo'], done: 'open:photo', again: `Il quadretto.` });
+  await doTask({ goal: 'Guardi le fotografie', say: `Le guardi pure, quelle che vuole. Ce n'è una di oggi.`, app: 'photo', wait: 22000, nohint: true,
+    target: () => wins.photo ? wins.photo.body.querySelector('.ph[data-id="oggi"]') : $('#ic_photo'), done: 'photo:oggi', again: `Guardi la foto di oggi.`, hints: [`Guardi le date. Ce n'è una di oggi.`, `Quella che si chiama «oggi».`],
+    on: { 'photo:oggi': () => { } } });
+  for (const l of PHOTO_LINES.oggi) await line(l, { mood: 'blank', interrupt: true });
+  setGoal('Guardi pure le altre'); await wait(5000);
 }
 /* ---- lezione 7: il ritocco ---- */
 async function L7() {
@@ -1754,9 +1921,9 @@ async function L7() {
       if (p > .78 && said < 3) { said = 3; line(`Il velo. Anche il velo.`); } } },
     pre: () => { const chk = setInterval(async () => {
       if (!wins.retouch || W.progress() > .9) return clearInterval(chk);
-      if (!auto && performance.now() - last > 22000 * (FAST ? .02 : 1) && !curLine) { auto = true; clearInterval(chk); await line(`Non ce la fa. Lo capisco. Lo faccio io.`, { mood: 'wife' }); block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
+      if (!auto && performance.now() - last > 22000 * (FAST ? .3 : 1) && !curLine) { auto = true; clearInterval(chk); await line(`Non ce la fa. Lo capisco. Lo faccio io.`, { mood: 'wife' }); block(true); gSet(agent.offsetLeft + 40, agent.offsetTop + 30); gShow(true);
         const R = rectV(W.body.querySelector('#rt'));
-        for (let y = BRIDE_BOX.y; y < BRIDE_BOX.y + BRIDE_BOX.h; y += 14) for (let x of [BRIDE_BOX.x, BRIDE_BOX.x + BRIDE_BOX.w]) { const px = R.l + x * (R.r - R.l) / 480, py = R.t + y * (R.b - R.t) / 300; await gMove(px, py, 70); for (let k = 0; k <= 8; k++) W.erase(BRIDE_BOX.x + (x === BRIDE_BOX.x ? k : 8 - k) * BRIDE_BOX.w / 8, y); sfx.noise(.04, .05, 2500); }
+        rows: for (let y = BRIDE_BOX.y; y < BRIDE_BOX.y + BRIDE_BOX.h; y += 14) for (let x of [BRIDE_BOX.x, BRIDE_BOX.x + BRIDE_BOX.w]) { if (!wins.retouch || W.progress() > .92) break rows; const px = R.l + x * (R.r - R.l) / 480, py = R.t + y * (R.b - R.t) / 300; await gMove(px, py, 70); for (let k = 0; k <= 8; k++) W.erase(BRIDE_BOX.x + (x === BRIDE_BOX.x ? k : 8 - k) * BRIDE_BOX.w / 8, y); sfx.noise(.04, .05, 2500); }
         gShow(false); block(false); } }, 500); } });
   { const top = W.body.querySelector('#rt').getContext('2d'); top.save(); top.globalCompositeOperation = 'destination-out'; top.fillRect(BRIDE_BOX.x - 6, BRIDE_BOX.y - 6, BRIDE_BOX.w + 12, BRIDE_BOX.h + 12); top.restore(); }
   sfx.sadchime();
@@ -1774,7 +1941,7 @@ async function L7() {
 const CHIP_LINES = { meteo: [`Meteo. Pioggia. Ancora tre giorni. Poi smette. Poi non importa.`, 'blank'], serenita: [`Ci cerca. Siamo qui. Siamo sempre stati qui.`, 'happy'], luca: [`Luca. Sta bene, Luca. Glielo dico io come sta.`, 'blank'], aiuto: [`«Aiuto». Non c'è bisogno di aiuto. Va tutto bene. Va tutto bene.`, 'angry'] };
 async function L8() {
   setLesson(8); closeAll(); allow = [];
-  await doTask({ goal: 'Apra Internet', say: `Internet. Una finestra su tutto il mondo. Da questa finestra, però, entra anche il freddo.`, only: ['#ic_web'], done: 'open:web', again: `Il mappamondo.` });
+  await doTask({ app: 'web', goal: 'Apra Internet', say: `Internet. Una finestra su tutto il mondo. Da questa finestra, però, entra anche il freddo.`, only: ['#ic_web'], done: 'open:web', again: `Il mappamondo.` });
   let chip = null;
   await doTask({ goal: 'Scelga cosa cercare', say: `Non deve scrivere. Scelga una delle parole qui sotto la barra.`, only: ['.chips button'], done: 'search', again: `Una parola. Solo una.`, on: { search: q => { chip = q; } } });
   const k = { 'meteo': 'meteo', 'Serenità Informatica': 'serenita', 'Luca': 'luca', 'aiuto': 'aiuto' }[chip] || 'meteo';
